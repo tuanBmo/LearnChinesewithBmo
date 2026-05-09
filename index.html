@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HSK Minimal Bento</title>
+    <title>HSK Dark Bento</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" href="style.css">
@@ -11,102 +11,101 @@
 <body>
 
     <main id="menuScreen" class="screen active">
-        <div class="bento-layout">
+        <div class="bento-container">
             
-            <header class="bento-box bento-header">
-                <div class="logo">
-                    <div class="logo-mark">汉</div>
-                    <div class="logo-text">HSK Club.</div>
-                </div>
-                <div class="user-stats">
-                    <span class="stat"><i class='bx bx-flame'></i> 1</span>
-                    <span class="stat"><i class='bx bx-star'></i> 322</span>
-                    <div class="avatar"></div>
-                </div>
-            </header>
-
-            <div class="bento-box bento-hero">
-                <div class="hero-top">
-                    <h2>Thiết lập ván mới</h2>
-                    <p>Chọn lộ trình để bắt đầu ôn tập.</p>
-                </div>
-                
-                <div class="config-section">
-                    <span class="config-label">Level</span>
-                    <div id="levelGrid" class="pill-group"></div>
+            <div class="bento-grid-top">
+                <div class="bento-card">
+                    <h3 class="neon-text">Tiến độ</h3>
+                    <div class="chart-mockup">
+                        <div class="bar h-60"></div><div class="bar h-40"></div><div class="bar h-80 neon-bg"></div>
+                        <div class="bar h-50"></div><div class="bar h-90"></div><div class="bar h-30"></div>
+                    </div>
+                    <div class="stat-footer">
+                        <span>XP: 322</span>
+                        <span>Hôm nay</span>
+                    </div>
                 </div>
 
-                <div class="config-section">
-                    <span class="config-label">Chế độ</span>
-                    <div class="pill-group">
+                <div class="bento-card">
+                    <div class="card-icon-wrapper"><i class='bx bx-category'></i></div>
+                    <h3>Chế độ học</h3>
+                    <p class="muted">Chọn cách bạn muốn ôn tập.</p>
+                    <div class="mode-stack">
                         <button class="mode-btn active" data-mode="NGHĨA">Nghĩa</button>
                         <button class="mode-btn" data-mode="PINYIN">Pinyin</button>
                         <button class="mode-btn" data-mode="CHỮ HÁN">Chữ Hán</button>
                     </div>
                 </div>
 
-                <button id="btnStart" class="btn-primary">Bắt Đầu Trải Nghiệm <i class='bx bx-right-arrow-alt'></i></button>
-            </div>
-
-            <div class="bento-box bento-settings">
-                <h3>Cấu hình</h3>
-                <div class="setting-list">
-                    <label class="toggle-row">
-                        <span>Trộn câu hỏi</span>
-                        <input type="checkbox" id="settingRandom" checked>
-                        <div class="toggle-slider"></div>
-                    </label>
-                    <label class="toggle-row">
-                        <span>Hiện Pinyin</span>
-                        <input type="checkbox" id="settingPinyin" checked>
-                        <div class="toggle-slider"></div>
-                    </label>
-                    <label class="toggle-row">
-                        <span>Hiện Ví dụ</span>
-                        <input type="checkbox" id="settingExample">
-                        <div class="toggle-slider"></div>
-                    </label>
+                <div class="bento-card">
+                    <div class="card-icon-wrapper"><i class='bx bx-slider-alt'></i></div>
+                    <h3>Cấu hình</h3>
+                    <p class="muted">Tùy chỉnh độ khó.</p>
+                    <div class="setting-list">
+                        <label class="toggle-row">
+                            <span>Trộn câu</span>
+                            <input type="checkbox" id="settingRandom" checked>
+                            <div class="toggle-slider"></div>
+                        </label>
+                        <label class="toggle-row">
+                            <span>Pinyin</span>
+                            <input type="checkbox" id="settingPinyin" checked>
+                            <div class="toggle-slider"></div>
+                        </label>
+                        <label class="toggle-row">
+                            <span>Ví dụ</span>
+                            <input type="checkbox" id="settingExample">
+                            <div class="toggle-slider"></div>
+                        </label>
+                    </div>
                 </div>
             </div>
 
-            <div class="bento-box feature feature-1">
-                <i class='bx bx-book-open'></i>
-                <h4>Từ Vựng</h4>
-                <p>11k+ flashcard</p>
+            <div class="bento-grid-mid">
+                <div class="bento-card">
+                    <h3>Hệ sinh thái HSK</h3>
+                    <p class="muted">Kết nối mọi kỹ năng của bạn.</p>
+                    <div class="integration-icons">
+                        <div class="circle-icon" style="background:#1d4ed8;"><i class='bx bx-book-open'></i></div>
+                        <div class="circle-icon" style="background:#b91c1c;"><i class='bx bx-headphone'></i></div>
+                        <div class="circle-icon" style="background:#047857;"><i class='bx bx-pencil'></i></div>
+                        <div class="circle-icon" style="background:#4c1d95;"><i class='bx bx-conversation'></i></div>
+                    </div>
+                </div>
+
+                <div class="bento-card glow-card" style="display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <h3>Sẵn sàng chưa?</h3>
+                        <p class="muted">Bắt đầu hành trình ngay bây giờ.</p>
+                    </div>
+                    <button id="btnStart" class="btn-neon-solid">
+                        VÀO VIỆC <i class='bx bx-right-arrow-alt'></i>
+                    </button>
+                </div>
             </div>
-            <div class="bento-box feature feature-2">
-                <i class='bx bx-headphone'></i>
-                <h4>Luyện Nghe</h4>
-                <p>Shadowing</p>
-            </div>
-            <div class="bento-box feature feature-3">
-                <i class='bx bx-bar-chart-alt-2'></i>
-                <h4>Tiến Độ</h4>
-                <p>Phân tích chi tiết</p>
-            </div>
+
+            <div class="pill-container" id="levelGrid">
+                </div>
 
         </div>
     </main>
 
     <main id="gameScreen" class="screen">
-        <div class="bento-game-layout">
-            
-            <div class="bento-box game-hud">
+        <div class="game-container">
+            <nav class="game-hud">
                 <div id="hpDisplay" class="hp-hearts">❤️❤️❤️❤️❤️</div>
                 <div id="progressText" class="progress-info">0/0</div>
-                <button class="btn-exit" onclick="location.reload()"><i class='bx bx-x'></i> Thoát</button>
-            </div>
+                <button class="btn-exit" onclick="location.reload()"><i class='bx bx-x'></i></button>
+            </nav>
 
-            <div class="bento-box flashcard">
+            <div class="flashcard-dark">
                 <span class="lvl-badge" id="lvlBadge">HSK</span>
                 <div class="main-q" id="mainQuestion">你好</div>
                 <div class="sub-q" id="subQuestion">nǐ hǎo</div>
                 <div class="example-text" id="exampleText"></div>
             </div>
 
-            <div class="answer-grid" id="answerContainer">
-                </div>
-
+            <div class="answer-grid" id="answerContainer"></div>
         </div>
     </main>
 
@@ -114,4 +113,3 @@
     <script src="script.js"></script>
 </body>
 </html>
- 
