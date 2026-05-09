@@ -1,101 +1,149 @@
-:root {
-    --bg-body: #f4f4f5; /* Xám kẽm siêu nhạt */
-    --bg-box: #ffffff;
-    --text-main: #0f172a;
-    --text-muted: #64748b;
-    --border-color: #e2e8f0;
-    --accent: #000000; /* Màu nhấn chính là Đen/Trắng tối giản */
-    --accent-hover: #333333;
-    --radius-xl: 32px; /* Bo góc đặc trưng của Bento */
-    --radius-lg: 20px;
-    --radius-md: 12px;
+// --- CẤU HÌNH & BIẾN TRẠNG THÁI ---
+const levels = ["HSK1", "HSK2", "HSK3", "HSK4", "HSK5", "HSK6", "HSK7", "HSK8", "HSK9"];
+let selectedLevels = [];
+let selectedMode = "NGHĨA";
+let quizData = [];
+let currentIndex = 0;
+let hp = 5;
+let score = 0;
+
+// Khởi tạo các nút Level
+const levelGrid = document.getElementById('levelGrid');
+levels.forEach(lvl => {
+    const btn = document.createElement('button');
+    btn.className = 'lvl-btn';
+    btn.innerText = lvl;
+    btn.onclick = () => {
+        btn.classList.toggle('active');
+        const name = lvl.toLowerCase();
+        if (selectedLevels.includes(name)) {
+            selectedLevels = selectedLevels.filter(l => l !== name);
+        } else {
+            selectedLevels.push(name);
+        }
+    };
+    levelGrid.appendChild(btn);
+});
+
+// Xử lý chọn Mode
+document.querySelectorAll('.mode-btn').forEach(btn => {
+    btn.onclick = () => {
+        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedMode = btn.getAttribute('data-mode');
+    };
+});
+
+// --- LOGIC TẢI DỮ LIỆU ---
+async function fetchCSVData() {
+    quizData = [];
+    for (let lvl of selectedLevels) {
+        try {
+            const response = await fetch(`${lvl}.csv`);
+            if (!response.ok) continue;
+            const csvText = await response.text();
+            
+            const result = Papa.parse(csvText, { skipEmptyLines: true });
+            const rowsWithLevel = result.data.map(row => [...row, lvl.toUpperCase()]);
+            quizData = [...quizData, ...rowsWithLevel];
+        } catch (e) { console.error("Lỗi tải file:", e); }
+    }
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; transition: all 0.2s ease-in-out; }
+// --- LOGIC TRÒ CHƠI ---
+document.getElementById('btnStart').onclick = async () => {
+    if (selectedLevels.length === 0) return alert("Chọn Level đi chiến thần!");
 
-body { background-color: var(--bg-body); color: var(--text-main); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+    const startBtn = document.getElementById('btnStart');
+    startBtn.innerHTML = "Đang tải dữ liệu... <i class='bx bx-loader-alt bx-spin'></i>";
 
-/* Ẩn hiện màn hình */
-.screen { display: none; width: 100%; max-width: 1000px; animation: fadeIn 0.4s ease; }
-.screen.active { display: block; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    await fetchCSVData();
+    if (quizData.length === 0) {
+        startBtn.innerHTML = "Bắt Đầu Trải Nghiệm <i class='bx bx-right-arrow-alt'></i>";
+        return alert("Không tìm thấy dữ liệu CSV!");
+    }
 
-/* === BENTO BOX CHUNG === */
-.bento-box {
-    background: var(--bg-box);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-xl);
-    padding: 30px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02); /* Đổ bóng cực mỏng */
+    if (document.getElementById('settingRandom').checked) {
+        quizData.sort(() => Math.random() - 0.5);
+    }
+
+    // Chuyển màn hình (Bento Minimal giữ nguyên nền sáng)
+    document.getElementById('menuScreen').classList.remove('active');
+    document.getElementById('gameScreen').classList.add('active');
+    
+    showQuestion();
+};
+
+function showQuestion() {
+    if (currentIndex >= quizData.length || hp <= 0) {
+        alert(hp <= 0 ? "Thử lại lần sau nhé! 😅" : "Chúc mừng Bậc Thầy Hán Ngữ! 🎉");
+        location.reload();
+        return;
+    }
+
+    const currentWord = quizData[currentIndex];
+    const [hanzi, pinyin, meaning, type, example, lvl] = currentWord;
+
+    document.getElementById('lvlBadge').innerText = lvl;
+    document.getElementById('progressText').innerText = `${score} / ${quizData.length}`;
+
+    const mainQ = document.getElementById('mainQuestion');
+    const subQ = document.getElementById('subQuestion');
+    const exT = document.getElementById('exampleText');
+
+    let correctAnswer = "";
+
+    if (selectedMode === "NGHĨA") {
+        mainQ.innerText = hanzi;
+        subQ.innerText = document.getElementById('settingPinyin').checked ? pinyin : "****";
+        correctAnswer = meaning;
+    } else if (selectedMode === "PINYIN") {
+        mainQ.innerText = hanzi;
+        subQ.innerText = meaning;
+        correctAnswer = pinyin;
+    } else { 
+        mainQ.innerText = meaning;
+        mainQ.style.fontSize = "3.5rem"; // Cỡ chữ nhỏ lại cho phần nghĩa
+        subQ.innerText = document.getElementById('settingPinyin').checked ? pinyin : "****";
+        correctAnswer = hanzi;
+    }
+
+    exT.innerText = document.getElementById('settingExample').checked ? (example || "") : "";
+
+    renderAnswers(correctAnswer);
 }
 
-/* === BỐ CỤC DASHBOARD === */
-.bento-layout {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    grid-auto-rows: minmax(100px, auto);
-    gap: 20px;
+function renderAnswers(correct) {
+    const container = document.getElementById('answerContainer');
+    container.innerHTML = "";
+
+    const colIndex = selectedMode === "NGHĨA" ? 2 : (selectedMode === "PINYIN" ? 1 : 0);
+    const pool = [...new Set(quizData.map(r => r[colIndex]))];
+    
+    let choices = [correct];
+    while (choices.length < 4 && pool.length > 4) {
+        let rand = pool[Math.floor(Math.random() * pool.length)];
+        if (!choices.includes(rand)) choices.push(rand);
+    }
+    choices.sort(() => Math.random() - 0.5);
+
+    choices.forEach(text => {
+        const btn = document.createElement('button');
+        btn.className = "ans-btn";
+        btn.innerText = text;
+        btn.onclick = () => {
+            if (text === correct) {
+                score++; currentIndex++;
+                showQuestion();
+            } else {
+                hp--;
+                alert(`Sai mất rồi! Đáp án đúng là: ${correct}`);
+                document.getElementById('hpDisplay').innerText = "❤️".repeat(Math.max(0, hp));
+                const item = quizData.splice(currentIndex, 1)[0];
+                quizData.push(item);
+                showQuestion();
+            }
+        };
+        container.appendChild(btn);
+    });
 }
-
-/* Các vị trí Grid */
-.bento-header { grid-column: span 4; display: flex; justify-content: space-between; align-items: center; padding: 20px 30px; border-radius: 100px; }
-.bento-hero { grid-column: span 3; grid-row: span 2; display: flex; flex-direction: column; justify-content: space-between; }
-.bento-settings { grid-column: span 1; grid-row: span 2; display: flex; flex-direction: column; gap: 20px;}
-.feature { grid-column: span 1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; gap: 8px; padding: 20px;}
-.feature-3 { grid-column: span 2; }
-
-/* Thành phần bên trong Bento */
-.logo { display: flex; align-items: center; gap: 10px; }
-.logo-mark { background: var(--accent); color: white; width: 32px; height: 32px; border-radius: 8px; display: flex; justify-content: center; align-items: center; font-weight: bold; }
-.logo-text { font-weight: 800; font-size: 1.2rem; letter-spacing: -0.5px; }
-
-.user-stats { display: flex; align-items: center; gap: 20px; font-weight: 600; color: var(--text-muted); }
-.avatar { width: 36px; height: 36px; background: #e2e8f0; border-radius: 50%; }
-
-.hero-top h2 { font-size: 2.5rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 5px; }
-.hero-top p { color: var(--text-muted); }
-
-.config-section { margin-top: 20px; }
-.config-label { display: block; font-size: 0.85rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
-
-/* Thuốc tiên (Pills) cho Level & Mode */
-.pill-group { display: flex; flex-wrap: wrap; gap: 10px; }
-.lvl-btn, .mode-btn { background: var(--bg-body); border: 1px solid var(--border-color); color: var(--text-muted); padding: 12px 24px; border-radius: 100px; font-weight: 600; cursor: pointer; font-size: 0.95rem; }
-.lvl-btn:hover, .mode-btn:hover { border-color: var(--text-muted); }
-.lvl-btn.active, .mode-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
-
-/* Nút Start bự */
-.btn-primary { background: var(--accent); color: white; border: none; padding: 20px; border-radius: var(--radius-lg); font-size: 1.1rem; font-weight: 700; width: 100%; margin-top: 30px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; }
-.btn-primary:hover { background: var(--accent-hover); transform: translateY(-2px); }
-
-/* Minimal Toggles */
-.setting-list { display: flex; flex-direction: column; gap: 15px; }
-.toggle-row { display: flex; justify-content: space-between; align-items: center; font-weight: 600; font-size: 0.9rem; cursor: pointer; }
-.toggle-row input { display: none; }
-.toggle-slider { width: 44px; height: 24px; background: #e2e8f0; border-radius: 20px; position: relative; }
-.toggle-slider::after { content: ''; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; background: white; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; }
-.toggle-row input:checked + .toggle-slider { background: var(--accent); }
-.toggle-row input:checked + .toggle-slider::after { transform: translateX(20px); }
-
-/* Features Icon */
-.feature i { font-size: 2rem; color: var(--accent); margin-bottom: 10px; }
-.feature h4 { font-weight: 700; }
-.feature p { font-size: 0.8rem; color: var(--text-muted); }
-
-/* === BỐ CỤC GAME SCREEN === */
-.bento-game-layout { display: flex; flex-direction: column; gap: 20px; max-width: 800px; margin: 0 auto; }
-.game-hud { display: flex; justify-content: space-between; align-items: center; padding: 20px 30px; border-radius: 100px; }
-.hp-hearts { font-size: 1.2rem; letter-spacing: 2px; }
-.progress-info { font-weight: 700; color: var(--text-muted); }
-.btn-exit { background: #f1f5f9; border: none; padding: 10px 20px; border-radius: 100px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 5px; }
-.btn-exit:hover { background: #fee2e2; color: #ef4444; }
-
-.flashcard { text-align: center; padding: 80px 40px; position: relative; }
-.lvl-badge { position: absolute; top: 25px; right: 25px; background: var(--bg-body); font-size: 0.8rem; font-weight: 700; padding: 6px 12px; border-radius: 8px; color: var(--text-muted); }
-.main-q { font-size: 5.5rem; font-weight: 800; letter-spacing: -2px; color: var(--text-main); line-height: 1.1; }
-.sub-q { font-size: 1.5rem; color: var(--text-muted); margin-top: 15px; font-weight: 500; }
-.example-text { margin-top: 30px; color: #10b981; font-style: italic; font-weight: 500;}
-
-.answer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-.ans-btn { background: var(--bg-box); border: 1px solid var(--border-color); padding: 25px; border-radius: var(--radius-lg); font-size: 1.2rem; font-weight: 600; cursor: pointer; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02); }
-.ans-btn:hover { border-color: var(--accent); transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05); }
