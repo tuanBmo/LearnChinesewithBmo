@@ -1,128 +1,40 @@
-:root {
-    /* Tone nền Sáng, Tối giản */
-    --bg-main: #F5F5F7;
-    --bg-card: #FFFFFF;
-    
-    /* Text */
-    --text-primary: #1D1D1F;
-    --text-secondary: #86868B;
-    
-    /* Accent Pastels */
-    --accent-purple: #EBEBFF;
-    --accent-purple-text: #5E5CE6;
-    --accent-blue: #E0F2FE;
-    --accent-blue-text: #007AFF;
-    --accent-pink: #FCE7F3;
-    --accent-pink-text: #FF2D55;
-    --accent-orange: #FFF0D1;
-    --accent-orange-text: #FF9F0A;
-    
-    /* UI Parameters */
-    --border-radius: 32px;
-    --shadow-soft: 0 4px 30px rgba(0, 0, 0, 0.03);
-    --shadow-hover: 0 10px 40px rgba(94, 92, 230, 0.08);
+/* --- CẬP NHẬT VIEW ROUTING --- */
+.view-section { display: none; animation: fadeIn 0.3s ease-in-out; }
+.view-section.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* --- PILL BUTTONS (CHỌN LEVEL/MODE) --- */
+.pill-group { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+.pill-btn, .mode-btn { 
+    background: var(--bg-main); border: 1px solid #E5E7EB; color: var(--text-secondary); 
+    padding: 10px 20px; border-radius: 100px; font-weight: 600; cursor: pointer; transition: 0.2s; 
+}
+.pill-btn:hover, .mode-btn:hover { background: #F3F4F6; }
+.pill-btn.active, .mode-btn.active { 
+    background: var(--accent-purple); color: var(--accent-purple-text); border-color: var(--accent-purple-text); 
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; transition: all 0.3s ease; }
-
-body { background-color: var(--bg-main); color: var(--text-primary); display: flex; height: 100vh; overflow: hidden; }
-
-/* === SIDEBAR === */
-.sidebar { width: 260px; background: var(--bg-card); padding: 30px 20px; display: flex; flex-direction: column; border-right: 1px solid rgba(0,0,0,0.05); }
-.logo { display: flex; align-items: center; gap: 12px; margin-bottom: 40px; padding-left: 10px; }
-.logo-mark { background: var(--accent-purple-text); color: white; width: 36px; height: 36px; border-radius: 10px; display: flex; justify-content: center; align-items: center; font-weight: 800; font-size: 1.2rem; }
-.logo span { font-weight: 700; font-size: 1.2rem; }
-
-.nav-links { display: flex; flex-direction: column; gap: 5px; }
-.nav-links a { text-decoration: none; color: var(--text-secondary); padding: 12px 15px; border-radius: 12px; font-weight: 500; display: flex; align-items: center; gap: 12px; }
-.nav-links a:hover { background: var(--bg-main); color: var(--text-primary); }
-.nav-links a.active { background: var(--accent-purple); color: var(--accent-purple-text); font-weight: 600; }
-.nav-links i { font-size: 1.2rem; }
-.nav-title { font-size: 0.75rem; color: #B0B0B5; font-weight: 700; margin: 20px 0 5px 15px; letter-spacing: 1px; }
-
-/* === MAIN CONTENT === */
-.main-content { flex: 1; padding: 30px 40px; overflow-y: auto; }
-
-/* Top Bar */
-.top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-.search-bar { background: var(--bg-card); padding: 12px 20px; border-radius: 20px; display: flex; align-items: center; gap: 10px; width: 400px; box-shadow: var(--shadow-soft); }
-.search-bar input { border: none; outline: none; background: transparent; width: 100%; font-size: 0.95rem; color: var(--text-primary); }
-.user-profile { display: flex; align-items: center; gap: 15px; }
-.streak-badge { background: #FFF4E5; color: #FF9F0A; padding: 8px 15px; border-radius: 20px; font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; gap: 5px; }
-.avatar img { width: 40px; height: 40px; border-radius: 50%; }
-
-/* === BENTO GRID === */
-.bento-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    grid-template-rows: auto auto;
-    gap: 25px;
+/* --- FILE CÁ NHÂN LIST --- */
+.file-list-container { display: flex; flex-direction: column; gap: 10px; }
+.file-item { 
+    display: flex; justify-content: space-between; align-items: center; 
+    padding: 15px; background: var(--bg-main); border-radius: 16px; border: 1px solid #E5E7EB;
 }
+.file-item h4 { color: var(--text-primary); display: flex; align-items: center; gap: 8px; }
+.btn-delete { background: #FEE2E2; color: #EF4444; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; }
 
-/* Các Card Chung */
-.bento-card {
-    background: var(--bg-card);
-    border-radius: var(--border-radius);
-    padding: 25px;
-    box-shadow: var(--shadow-soft);
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    position: relative;
-    overflow: hidden;
+/* --- GAME OVERLAY --- */
+.game-overlay { 
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+    background: rgba(245, 245, 247, 0.95); backdrop-filter: blur(10px); 
+    z-index: 1000; display: flex; justify-content: center; align-items: center; 
 }
-.bento-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); }
-
-/* Vị trí trên Grid */
-.word-of-day { grid-column: span 2; grid-row: span 2; background: linear-gradient(145deg, #ffffff, #F8F8FF); }
-.streak-card { grid-column: span 1; grid-row: span 1; text-align: center; }
-.progress-card { grid-column: span 1; grid-row: span 1; text-align: center; }
-.flashcard-card { grid-column: span 2; grid-row: span 1; }
-.listening-card { grid-column: span 2; grid-row: span 1; display: flex; flex-direction: row !important; align-items: center; gap: 20px; }
-.favorite-card { grid-column: span 1; grid-row: span 1; }
-.quiz-card { grid-column: span 1; grid-row: span 1; background: var(--accent-blue); }
-
-/* Thành phần nhỏ */
-.card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-.tag { font-size: 0.75rem; font-weight: 700; padding: 6px 12px; border-radius: 12px; }
-.purple-tag { background: var(--accent-purple); color: var(--accent-purple-text); }
-.orange-tag { background: var(--accent-orange); color: var(--accent-orange-text); }
-.blue-tag { background: var(--accent-blue); color: var(--accent-blue-text); }
-.pink-tag { background: var(--accent-pink); color: var(--accent-pink-text); }
-.yellow-tag { background: #FEF9C3; color: #CA8A04; }
-
-/* Word of the Day */
-.word-display { text-align: center; margin: 20px 0; }
-.hanzi { font-size: 6rem; font-weight: 800; color: var(--text-primary); line-height: 1.1; margin-bottom: 10px; }
-.pinyin { font-size: 1.5rem; color: var(--text-secondary); margin-bottom: 5px; }
-.meaning { font-size: 1.2rem; font-weight: 500; color: var(--accent-purple-text); }
-.btn-primary { background: var(--accent-purple-text); color: white; border: none; padding: 15px; border-radius: 16px; font-weight: 600; font-size: 1rem; cursor: pointer; }
-.btn-primary:hover { opacity: 0.9; transform: scale(1.02); }
-
-/* Streak & Progress */
-.streak-icon { font-size: 3rem; color: #FF9F0A; margin-bottom: 10px; }
-.streak-content h2 { font-size: 2.5rem; color: var(--text-primary); }
-.circular-progress { width: 80px; height: 80px; border-radius: 50%; background: conic-gradient(var(--accent-blue-text) 68%, #F0F0F0 0deg); display: flex; justify-content: center; align-items: center; margin: 0 auto 10px; }
-.progress-value { background: white; width: 64px; height: 64px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: 700; font-size: 1.1rem; }
-
-/* Flashcards Stack */
-.deck-stack { position: relative; height: 80px; margin-top: 20px; }
-.card-layer { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); background: white; border-radius: 16px; border: 1px solid #F0F0F0; box-shadow: 0 -2px 10px rgba(0,0,0,0.02); display: flex; justify-content: center; align-items: center; font-weight: 600; }
-.layer-1 { width: 100%; height: 60px; z-index: 3; color: var(--accent-purple-text); }
-.layer-2 { width: 90%; height: 70px; z-index: 2; opacity: 0.6; }
-.layer-3 { width: 80%; height: 80px; z-index: 1; opacity: 0.3; }
-
-/* Listening */
-.card-icon-large { width: 60px; height: 60px; background: var(--accent-pink); color: var(--accent-pink-text); border-radius: 20px; display: flex; justify-content: center; align-items: center; font-size: 1.8rem; }
-.play-btn { margin-left: auto; width: 50px; height: 50px; border-radius: 50%; background: var(--text-primary); color: white; border: none; font-size: 1.5rem; display: flex; justify-content: center; align-items: center; cursor: pointer; }
-
-/* Favorites List */
-.word-list { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
-.word-list li { background: var(--bg-main); padding: 10px 15px; border-radius: 12px; font-size: 0.9rem; color: var(--text-secondary); }
-.word-list .h { font-size: 1.1rem; color: var(--text-primary); font-weight: 600; margin-right: 5px; }
-
-/* Quiz */
-.btn-secondary { margin-top: 15px; background: white; color: var(--accent-blue-text); border: none; padding: 10px 20px; border-radius: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 5px; }
-.quiz-illustration { font-size: 3.5rem; position: absolute; right: 10px; bottom: 10px; opacity: 0.8; }
-.muted { color: var(--text-secondary); font-size: 0.85rem; margin-top: 5px; }
- 
+.game-container { width: 800px; max-width: 95%; height: 600px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); }
+.game-hud { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+.btn-exit { background: #F1F5F9; border: none; padding: 8px 16px; border-radius: 20px; font-weight: bold; cursor: pointer; color: var(--text-secondary); }
+.flashcard-area { text-align: center; padding: 40px; background: var(--bg-main); border-radius: 24px; position: relative; margin-bottom: 30px; }
+.main-q { font-size: 5rem; font-weight: 800; color: var(--text-primary); margin-bottom: 10px; }
+.sub-q { font-size: 1.5rem; color: var(--text-secondary); }
+.answer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+.ans-btn { background: var(--bg-main); border: 2px solid transparent; padding: 20px; border-radius: 16px; font-size: 1.1rem; font-weight: 600; cursor: pointer; color: var(--text-primary); }
+.ans-btn:hover { border-color: var(--accent-purple-text); background: var(--accent-purple); }
