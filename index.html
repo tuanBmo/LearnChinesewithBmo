@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HSK Mastery - Minimal Bento</title>
+    <title>HSK Trainer - Mastery App</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" href="style.css">
@@ -13,16 +13,17 @@
     <aside class="sidebar">
         <div class="logo">
             <div class="logo-mark">汉</div>
-            <span>HSK Club</span>
-        </div>
+            <span>HSK Trainer</span> </div>
         <nav class="nav-links">
-            <a href="#" class="active"><i class='bx bx-grid-alt'></i> Dashboard</a>
-            <a href="#"><i class='bx bx-book-open'></i> Từ mới</a>
-            <a href="#"><i class='bx bx-carousel'></i> Flashcards</a>
-            <a href="#"><i class='bx bx-headphone'></i> Luyện nghe</a>
-            <a href="#"><i class='bx bx-layer'></i> HSK Levels</a>
+            <p class="nav-title">HỌC TẬP</p>
+            <a href="#" data-target="dashboard-view" class="active"><i class='bx bx-grid-alt'></i> Tổng quan</a>
+            <a href="#" data-target="practice-view"><i class='bx bx-dumbbell'></i> Luyện tập</a>
+            
+            <p class="nav-title">DỮ LIỆU CỦA BẠN</p>
+            <a href="#" data-target="vocab-view"><i class='bx bx-book-open'></i> Từ vựng HSK</a>
+            <a href="#" data-target="personal-view"><i class='bx bx-folder'></i> File cá nhân</a>
+            
             <p class="nav-title">CÁ NHÂN</p>
-            <a href="#"><i class='bx bx-bar-chart-alt-2'></i> Tiến độ</a>
             <a href="#"><i class='bx bxs-flame' style="color: #FF9F0A;"></i> Streak</a>
             <a href="#"><i class='bx bx-cog'></i> Cài đặt</a>
         </nav>
@@ -40,87 +41,100 @@
             </div>
         </header>
 
-        <div class="bento-grid">
-            
-            <div class="bento-card word-of-day">
-                <div class="card-header">
-                    <span class="tag purple-tag">Từ mới hôm nay</span>
-                    <i class='bx bx-bookmark-plus icon-btn'></i>
-                </div>
-                <div class="word-display">
-                    <h1 class="hanzi">努力</h1>
-                    <p class="pinyin">nǔ lì</p>
-                    <p class="meaning">nỗ lực, cố gắng</p>
-                </div>
-                <button class="btn-primary">Học ngay</button>
-            </div>
-
-            <div class="bento-card streak-card">
-                <div class="card-header"><span class="tag orange-tag">Daily Streak</span></div>
-                <div class="streak-content">
-                    <i class='bx bxs-hot streak-icon'></i>
-                    <h2>14</h2>
-                    <p>Ngày liên tiếp</p>
-                </div>
-            </div>
-
-            <div class="bento-card progress-card">
-                <div class="card-header"><span class="tag blue-tag">Tiến độ HSK 3</span></div>
-                <div class="progress-content">
-                    <div class="circular-progress">
-                        <span class="progress-value">68%</span>
+        <div id="dashboard-view" class="view-section active">
+            <div class="bento-grid">
+                <div class="bento-card word-of-day">
+                    <div class="card-header">
+                        <span class="tag purple-tag">Từ mới hôm nay</span>
                     </div>
-                    <p>408 / 600 từ vựng</p>
+                    <div class="word-display">
+                        <h1 class="hanzi">努力</h1>
+                        <p class="pinyin">nǔ lì</p>
+                        <p class="meaning">nỗ lực, cố gắng</p>
+                    </div>
+                    <button class="btn-primary" onclick="switchTab('practice-view')">Vào học ngay</button>
+                </div>
+
+                <div class="bento-card streak-card">
+                    <div class="card-header"><span class="tag orange-tag">Daily Streak</span></div>
+                    <div class="streak-content">
+                        <i class='bx bxs-hot streak-icon'></i>
+                        <h2>14</h2><p>Ngày liên tiếp</p>
+                    </div>
+                </div>
+
+                <div class="bento-card progress-card">
+                    <div class="card-header"><span class="tag blue-tag">Tiến độ HSK 3</span></div>
+                    <div class="progress-content">
+                        <div class="circular-progress"><span class="progress-value">68%</span></div>
+                        <p>408 / 600 từ vựng</p>
+                    </div>
                 </div>
             </div>
-
-            <div class="bento-card flashcard-card">
-                <div class="card-header">
-                    <span class="tag pink-tag">Flashcards ôn tập</span>
-                    <i class='bx bx-carousel'></i>
-                </div>
-                <div class="deck-info">
-                    <h3>Giao tiếp văn phòng</h3>
-                    <p class="muted">Còn 24 thẻ đến hạn ôn (SRS)</p>
-                </div>
-                <div class="deck-stack">
-                    <div class="card-layer layer-3"></div>
-                    <div class="card-layer layer-2"></div>
-                    <div class="card-layer layer-1">Ôn tập SRS</div>
-                </div>
-            </div>
-
-            <div class="bento-card listening-card">
-                <div class="card-icon-large"><i class='bx bx-headphone'></i></div>
-                <div>
-                    <h3>Luyện nghe thụ động</h3>
-                    <p class="muted">Podcast HSK 3 - Tập 4</p>
-                </div>
-                <button class="play-btn"><i class='bx bx-play'></i></button>
-            </div>
-
-            <div class="bento-card favorite-card">
-                <div class="card-header"><span class="tag yellow-tag">Từ Yêu Thích</span></div>
-                <ul class="word-list">
-                    <li><span class="h">喜欢</span> - xǐ huān</li>
-                    <li><span class="h">漂亮</span> - piào liang</li>
-                    <li><span class="h">公司</span> - gōng sī</li>
-                </ul>
-            </div>
-
-            <div class="bento-card quiz-card">
-                <div class="quiz-content">
-                    <h3>Mini Quiz</h3>
-                    <p>Kiểm tra nhanh 10 câu trắc nghiệm HSK</p>
-                    <button class="btn-secondary">Bắt đầu <i class='bx bx-right-arrow-alt'></i></button>
-                </div>
-                <div class="quiz-illustration">🎯</div>
-            </div>
-
         </div>
+
+        <div id="practice-view" class="view-section">
+            <div class="bento-card" style="margin-bottom: 20px;">
+                <h2>Thiết lập bài học</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 15px;">Chọn nguồn dữ liệu để bắt đầu luyện tập flashcard/quiz.</p>
+                
+                <h4 style="margin-top: 15px;">1. Chọn Level HSK</h4>
+                <div id="levelGrid" class="pill-group">
+                    </div>
+
+                <h4 style="margin-top: 20px;">2. Hoặc chọn File cá nhân</h4>
+                <div id="personalSelectGrid" class="pill-group">
+                    </div>
+
+                <h4 style="margin-top: 20px;">3. Chế độ chơi</h4>
+                <div class="pill-group">
+                    <button class="mode-btn active" data-mode="NGHĨA">Nghĩa</button>
+                    <button class="mode-btn" data-mode="PINYIN">Pinyin</button>
+                    <button class="mode-btn" data-mode="CHỮ HÁN">Chữ Hán</button>
+                </div>
+
+                <button id="btnStart" class="btn-primary" style="margin-top: 25px; width: 200px;">BẮT ĐẦU <i class='bx bx-play'></i></button>
+            </div>
+        </div>
+
+        <div id="personal-view" class="view-section">
+            <div class="bento-card">
+                <div class="card-header">
+                    <h2>Quản lý File Cá Nhân</h2>
+                    <label class="btn-primary" style="cursor: pointer; padding: 10px 20px;">
+                        <i class='bx bx-upload'></i> Tải lên CSV
+                        <input type="file" id="fileUpload" accept=".csv" style="display: none;">
+                    </label>
+                </div>
+                <p style="color: var(--text-secondary); margin-bottom: 20px;">Bạn có thể tải lên các file .csv tự tạo (Cột 1: Chữ Hán, Cột 2: Pinyin, Cột 3: Nghĩa) để học.</p>
+                
+                <div id="personalFilesList" class="file-list-container">
+                    </div>
+            </div>
+        </div>
+
+        <div id="gameScreen" class="game-overlay" style="display: none;">
+            <div class="game-container bento-card">
+                <nav class="game-hud">
+                    <div id="hpDisplay" style="font-size: 1.5rem; letter-spacing: 2px;">❤️❤️❤️❤️❤️</div>
+                    <div id="progressText" style="font-weight: bold; color: var(--text-secondary);">0/0</div>
+                    <button class="btn-exit" onclick="endGame()"><i class='bx bx-x'></i> Dừng</button>
+                </nav>
+
+                <div class="flashcard-area">
+                    <span class="tag blue-tag" id="lvlBadge" style="position: absolute; top: 20px; right: 20px;">HSK</span>
+                    <h1 class="main-q" id="mainQuestion">你好</h1>
+                    <p class="sub-q" id="subQuestion">nǐ hǎo</p>
+                </div>
+
+                <div class="answer-grid" id="answerContainer">
+                    </div>
+            </div>
+        </div>
+
     </main>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
- 
