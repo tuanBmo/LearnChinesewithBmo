@@ -1,25 +1,6 @@
-// --- QUẢN LÝ ĐIỀU HƯỚNG TABS (SPA ROUTING) ---
-const navLinks = document.querySelectorAll('.nav-links a[data-target]');
-const views = document.querySelectorAll('.view-section');
-
-function switchTab(targetId) {
-    views.forEach(v => v.classList.remove('active'));
-    document.getElementById(targetId).classList.add('active');
-    
-    navLinks.forEach(l => {
-        if(l.getAttribute('data-target') === targetId) l.classList.add('active');
-        else l.classList.remove('active');
-    });
-}
-
-navLinks.forEach(link => {
-    link.addEventListener('click', (e) => {
-        e.preventDefault();
-        switchTab(link.getAttribute('data-target'));
-    });
-});
-
-// --- BIẾN TRẠNG THÁI GAME ---
+// ==========================================
+// 1. BIẾN TRẠNG THÁI VÀ DỮ LIỆU LOCAL
+// ==========================================
 const levels = ["HSK1", "HSK2", "HSK3", "HSK4", "HSK5", "HSK6"];
 let selectedLevels = [];
 let selectedPersonalFiles = [];
@@ -27,10 +8,96 @@ let selectedMode = "NGHĨA";
 let quizData = [];
 let currentIndex = 0;
 let hp = 5;
-let score = 0;
-let personalFiles = JSON.parse(localStorage.getItem('hsk_personal_files') || '{}');
 
-// --- RENDER GIAO DIỆN CHỌN BÀI HỌC ---
+// Biến cho tính năng Review & Score
+let missedWords = []; 
+let isReviewMode = false;
+let userLevelScores = JSON.parse(localStorage.getItem('hsk_user_scores')) || {};
+let personalFiles = JSON.parse(localStorage.getItem('hsk_personal_files') || '{}');
+let currentUser = localStorage.getItem('hsk_current_user');
+
+// ==========================================
+// 2. LOGIC AUTH & USER PROFILE
+// ==========================================
+function checkAuth() {
+    if (!currentUser) {
+        document.getElementById('authModal').style.display = 'flex';
+    } else {
+        document.getElementById('authModal').style.display = 'none';
+        document.getElementById('greetName').innerText = currentUser;
+        updateProfileUI();
+        renderLevelScores();
+    }
+}
+
+document.getElementById('btnLogin').onclick = () => {
+    const username = document.getElementById('usernameInput').value.trim();
+    if (username.length >= 3) {
+        currentUser = username;
+        localStorage.setItem('hsk_current_user', currentUser);
+        checkAuth();
+    } else {
+        alert("Tên hiển thị phải có ít nhất 3 ký tự!");
+    }
+};
+
+function updateProfileUI() {
+    const totalScore = Object.values(userLevelScores).reduce((a, b) => a + b, 0);
+    const userProfileDiv = document.getElementById('userProfileBar');
+    if(userProfileDiv) {
+        userProfileDiv.innerHTML = `
+            <div class="streak-badge"><i class='bx bxs-star' style="color: #F59E0B;"></i> ${totalScore} điểm</div>
+            <div class="avatar"><img src="https://ui-avatars.com/api/?name=${currentUser}&background=5E5CE6&color=fff" alt="User"></div>
+        `;
+    }
+}
+
+function renderLevelScores() {
+    const list = document.getElementById('levelStatsList');
+    if(!list) return;
+    list.innerHTML = "";
+    
+    const allPlayedLevels = Object.keys(userLevelScores).sort();
+    
+    if(allPlayedLevels.length === 0) {
+        list.innerHTML = `<p style="color: var(--text-secondary); text-align: center; padding: 20px;">Bạn chưa có điểm số nào. Hãy thiết lập ván mới để bắt đầu lấy điểm nhé!</p>`;
+        return;
+    }
+
+    allPlayedLevels.forEach(lvl => {
+        const item = document.createElement('div');
+        item.className = 'stat-row';
+        item.innerHTML = `
+            <div class="stat-lvl-name"><i class='bx bx-layer' style="color: var(--accent-purple-text);"></i> ${lvl}</div>
+            <div class="stat-score">+${userLevelScores[lvl]} XP</div>
+        `;
+        list.appendChild(item);
+    });
+}
+
+// ==========================================
+// 3. ĐIỀU HƯỚNG TABS (SPA ROUTING)
+// ==========================================
+function switchTab(targetId) {
+    document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
+    document.getElementById(targetId).classList.add('active');
+    
+    document.querySelectorAll('.nav-links a[data-target]').forEach(l => {
+        if(l.getAttribute('data-target') === targetId) l.classList.add('active');
+        else l.classList.remove('active');
+    });
+}
+
+document.querySelectorAll('.nav-links a[data-target]').forEach(link => {
+    link.addEventListener('click', (e) => {
+        e.preventDefault();
+        switchTab(link.getAttribute('data-target'));
+    });
+});
+
+// ==========================================
+// 4. RENDER GIAO DIỆN SETUP BÀI HỌC
+// ==========================================
 const levelGrid = document.getElementById('levelGrid');
 levels.forEach(lvl => {
     const btn = document.createElement('button');
@@ -45,7 +112,6 @@ levels.forEach(lvl => {
     levelGrid.appendChild(btn);
 });
 
-// Xử lý nút Mode
 document.querySelectorAll('.mode-btn').forEach(btn => {
     btn.onclick = () => {
         document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
@@ -54,7 +120,9 @@ document.querySelectorAll('.mode-btn').forEach(btn => {
     };
 });
 
-// --- QUẢN LÝ FILE CÁ NHÂN ---
+// ==========================================
+// 5. QUẢN LÝ FILE CÁ NHÂN (CSV UPLOAD)
+// ==========================================
 document.getElementById('fileUpload').addEventListener('change', function(e) {
     const file = e.target.files[0];
     if (!file) return;
@@ -74,17 +142,22 @@ function renderPersonalFiles() {
     const selectGrid = document.getElementById('personalSelectGrid');
     list.innerHTML = ''; selectGrid.innerHTML = '';
 
+    if (Object.keys(personalFiles).length === 0) {
+        selectGrid.innerHTML = `<p style="color: var(--text-secondary); font-size: 0.9rem;">(Chưa có file nào. Hãy tải lên ở mục File Cá Nhân)</p>`;
+    }
+
     Object.keys(personalFiles).forEach(name => {
-        // Render ở tab File Cá Nhân
+        // Tab quản lý
         const item = document.createElement('div');
         item.className = 'file-item';
-        item.innerHTML = `<h4><i class='bx bx-file'></i> ${name}.csv</h4>
+        item.innerHTML = `<h4><i class='bx bx-file' style="color: var(--accent-blue-text);"></i> ${name}.csv</h4>
                           <button class="btn-delete" onclick="deleteFile('${name}')">Xóa</button>`;
         list.appendChild(item);
 
-        // Render nút chọn ở tab Luyện Tập
+        // Tab Setup Luyện tập
         const btn = document.createElement('button');
         btn.className = 'pill-btn';
+        if (selectedPersonalFiles.includes(name)) btn.classList.add('active');
         btn.innerHTML = `<i class='bx bx-folder'></i> ${name}`;
         btn.onclick = () => {
             btn.classList.toggle('active');
@@ -103,9 +176,11 @@ window.deleteFile = function(name) {
         renderPersonalFiles();
     }
 }
-renderPersonalFiles(); // Khởi tạo lần đầu
+renderPersonalFiles();
 
-// --- LOGIC VÀO GAME ---
+// ==========================================
+// 6. LOGIC GAME & TÍNH ĐIỂM
+// ==========================================
 document.getElementById('btnStart').onclick = async () => {
     if (selectedLevels.length === 0 && selectedPersonalFiles.length === 0) 
         return alert("Vui lòng chọn ít nhất 1 Level HSK hoặc 1 File Cá Nhân để luyện tập!");
@@ -122,10 +197,10 @@ document.getElementById('btnStart').onclick = async () => {
                 const parsed = Papa.parse(text, { skipEmptyLines: true });
                 quizData = [...quizData, ...parsed.data.map(r => [...r, lvl.toUpperCase()])];
             }
-        } catch (e) { console.log(e); }
+        } catch (e) { console.log("Lỗi tải file:", e); }
     }
 
-    // Load file Cá nhân từ LocalStorage
+    // Load file Cá nhân
     for (let name of selectedPersonalFiles) {
         const text = personalFiles[name];
         const parsed = Papa.parse(text, { skipEmptyLines: true });
@@ -133,55 +208,59 @@ document.getElementById('btnStart').onclick = async () => {
     }
 
     if (quizData.length === 0) {
-        document.getElementById('btnStart').innerHTML = "BẮT ĐẦU <i class='bx bx-play'></i>";
-        return alert("Không đọc được dữ liệu, hãy kiểm tra lại file CSV.");
+        document.getElementById('btnStart').innerHTML = "BẮT ĐẦU LUYỆN TẬP <i class='bx bx-play'></i>";
+        return alert("Dữ liệu trống, vui lòng kiểm tra lại nội dung file CSV.");
     }
 
-    // Random câu hỏi
+    // Reset chỉ số trước khi chơi
     quizData.sort(() => Math.random() - 0.5);
-
-    // Kích hoạt Game UI
-    document.getElementById('btnStart').innerHTML = "BẮT ĐẦU <i class='bx bx-play'></i>";
+    hp = 5; 
+    currentIndex = 0;
+    missedWords = [];
+    isReviewMode = false;
+    
+    document.getElementById('hpDisplay').innerText = "❤️❤️❤️❤️❤️";
+    document.getElementById('btnStart').innerHTML = "BẮT ĐẦU LUYỆN TẬP <i class='bx bx-play'></i>";
     document.getElementById('gameScreen').style.display = 'flex';
-    hp = 5; score = 0; currentIndex = 0;
     
     showQuestion();
 };
 
-function endGame() {
-    document.getElementById('gameScreen').style.display = 'none';
-}
-
-// Hàm showQuestion và renderAnswers TƯƠNG TỰ BẢN CŨ CỦA BẠN
 function showQuestion() {
     if (currentIndex >= quizData.length || hp <= 0) {
-        alert(hp <= 0 ? "Hết tim rồi, học lại nha! 💔" : "Tuyệt vời! Bạn đã hoàn thành bài tập! 🎉");
-        endGame();
+        if (missedWords.length > 0 && hp > 0) {
+            // Có lỗi sai -> Bật chế độ Review
+            document.getElementById('missedCount').innerText = missedWords.length;
+            document.getElementById('reviewModal').style.display = 'flex';
+        } else {
+            alert(hp <= 0 ? "Hết tim rồi, nghỉ ngơi xíu nhé! 💔" : "Tuyệt vời! Bạn đã hoàn thành trọn vẹn bài học! 🎉");
+            endGame();
+        }
         return;
     }
 
     const currentWord = quizData[currentIndex];
     const [hanzi, pinyin, meaning, type, example, lvl] = currentWord;
 
-    document.getElementById('lvlBadge').innerText = lvl;
-    document.getElementById('progressText').innerText = `${score} / ${quizData.length}`;
+    document.getElementById('lvlBadge').innerText = isReviewMode ? "ÔN TẬP LỖI SAI" : lvl;
+    document.getElementById('progressText').innerText = `${currentIndex}/${quizData.length}`;
 
     const mainQ = document.getElementById('mainQuestion');
     const subQ = document.getElementById('subQuestion');
     let correctAnswer = "";
 
     if (selectedMode === "NGHĨA") {
-        mainQ.innerText = hanzi; subQ.innerText = pinyin; correctAnswer = meaning;
+        mainQ.innerText = hanzi; mainQ.style.fontSize = "6rem"; subQ.innerText = pinyin; correctAnswer = meaning;
     } else if (selectedMode === "PINYIN") {
-        mainQ.innerText = hanzi; subQ.innerText = meaning; correctAnswer = pinyin;
+        mainQ.innerText = hanzi; mainQ.style.fontSize = "6rem"; subQ.innerText = meaning; correctAnswer = pinyin;
     } else { 
         mainQ.innerText = meaning; mainQ.style.fontSize = "3rem"; subQ.innerText = pinyin; correctAnswer = hanzi;
     }
 
-    renderAnswers(correctAnswer);
+    renderAnswers(correctAnswer, lvl);
 }
 
-function renderAnswers(correct) {
+function renderAnswers(correct, currentLevel) {
     const container = document.getElementById('answerContainer');
     container.innerHTML = "";
     const colIndex = selectedMode === "NGHĨA" ? 2 : (selectedMode === "PINYIN" ? 1 : 0);
@@ -199,15 +278,56 @@ function renderAnswers(correct) {
         btn.className = "ans-btn"; btn.innerText = text;
         btn.onclick = () => {
             if (text === correct) {
-                score++; currentIndex++; showQuestion();
+                // ĐÚNG -> Cộng điểm vào Level (chỉ cộng nếu không phải Review)
+                if(!isReviewMode) {
+                    userLevelScores[currentLevel] = (userLevelScores[currentLevel] || 0) + 1;
+                    localStorage.setItem('hsk_user_scores', JSON.stringify(userLevelScores));
+                }
+                currentIndex++; 
+                showQuestion();
             } else {
+                // SAI -> Trừ tim, gom vào review
                 hp--;
                 alert(`Sai rồi! Đáp án đúng là: ${correct}`);
                 document.getElementById('hpDisplay').innerText = "❤️".repeat(Math.max(0, hp));
-                quizData.push(quizData.splice(currentIndex, 1)[0]); // Đẩy xuống cuối học lại
+                
+                if(!isReviewMode) {
+                    missedWords.push(quizData[currentIndex]);
+                } else {
+                    quizData.push(quizData[currentIndex]); // Sai lúc ôn thì nhét lại xuống cuối list
+                }
+                
+                currentIndex++;
                 showQuestion();
             }
         };
         container.appendChild(btn);
     });
 }
+
+// ==========================================
+// 7. ÔN TẬP VÀ KẾT THÚC BÀI
+// ==========================================
+window.startReviewMode = function() {
+    document.getElementById('reviewModal').style.display = 'none';
+    quizData = [...missedWords]; 
+    missedWords = []; 
+    currentIndex = 0;
+    isReviewMode = true;
+    
+    hp = 3; // Hồi 3 tim để ôn tập
+    document.getElementById('hpDisplay').innerText = "❤️❤️❤️";
+    
+    showQuestion();
+}
+
+window.endGame = function() {
+    document.getElementById('reviewModal').style.display = 'none';
+    document.getElementById('gameScreen').style.display = 'none';
+    updateProfileUI(); // Update tổng điểm
+    renderLevelScores(); // Update bảng thống kê
+    switchTab('dashboard-view'); // Về lại trang chủ xem thành quả
+}
+
+// Khởi chạy App
+checkAuth();
