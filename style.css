@@ -91,4 +91,3 @@ body { background-color: var(--bg-main); color: var(--text-primary); display: fl
 .answer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 .ans-btn { background: var(--bg-main); border: 2px solid transparent; padding: 25px; border-radius: 20px; font-size: 1.2rem; font-weight: 700; cursor: pointer; color: var(--text-primary); }
 .ans-btn:hover { border-color: var(--accent-purple-text); background: var(--accent-purple); transform: translateY(-3px); }
-  
