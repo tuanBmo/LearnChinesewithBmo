@@ -7,12 +7,14 @@ let currentIndex = 0;
 let hp = 5;
 let score = 0;
 
-// Khởi tạo các nút Level
+// Khởi tạo các thẻ Pill chọn Level ở dưới cùng
 const levelGrid = document.getElementById('levelGrid');
 levels.forEach(lvl => {
     const btn = document.createElement('button');
-    btn.className = 'lvl-btn';
-    btn.innerText = lvl;
+    btn.className = 'bento-pill';
+    // Thêm icon ngôi sao vào trong nút giống ảnh mẫu
+    btn.innerHTML = `<i class='bx bxs-star'></i> ${lvl}`; 
+    
     btn.onclick = () => {
         btn.classList.toggle('active');
         const name = lvl.toLowerCase();
@@ -52,14 +54,14 @@ async function fetchCSVData() {
 
 // --- LOGIC TRÒ CHƠI ---
 document.getElementById('btnStart').onclick = async () => {
-    if (selectedLevels.length === 0) return alert("Chọn Level đi chiến thần!");
+    if (selectedLevels.length === 0) return alert("Vui lòng chọn ít nhất 1 Level ở bên dưới!");
 
     const startBtn = document.getElementById('btnStart');
-    startBtn.innerHTML = "Đang tải dữ liệu... <i class='bx bx-loader-alt bx-spin'></i>";
+    startBtn.innerHTML = "ĐANG TẢI... <i class='bx bx-loader-alt bx-spin'></i>";
 
     await fetchCSVData();
     if (quizData.length === 0) {
-        startBtn.innerHTML = "Bắt Đầu Trải Nghiệm <i class='bx bx-right-arrow-alt'></i>";
+        startBtn.innerHTML = "VÀO VIỆC <i class='bx bx-right-arrow-alt'></i>";
         return alert("Không tìm thấy dữ liệu CSV!");
     }
 
@@ -67,7 +69,7 @@ document.getElementById('btnStart').onclick = async () => {
         quizData.sort(() => Math.random() - 0.5);
     }
 
-    // Chuyển màn hình (Bento Minimal giữ nguyên nền sáng)
+    // Chuyển màn hình
     document.getElementById('menuScreen').classList.remove('active');
     document.getElementById('gameScreen').classList.add('active');
     
@@ -103,7 +105,7 @@ function showQuestion() {
         correctAnswer = pinyin;
     } else { 
         mainQ.innerText = meaning;
-        mainQ.style.fontSize = "3.5rem"; // Cỡ chữ nhỏ lại cho phần nghĩa
+        mainQ.style.fontSize = "3rem"; 
         subQ.innerText = document.getElementById('settingPinyin').checked ? pinyin : "****";
         correctAnswer = hanzi;
     }
