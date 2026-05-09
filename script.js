@@ -17,7 +17,7 @@ let personalFiles = JSON.parse(localStorage.getItem('hsk_personal_files') || '{}
 let currentUser = localStorage.getItem('hsk_current_user');
 
 // ==========================================
-// 2. LOGIC AUTH & USER PROFILE
+// 2. LOGIC AUTH & THỐNG KÊ ĐIỂM SỐ
 // ==========================================
 function checkAuth() {
     if (!currentUser) {
@@ -64,12 +64,30 @@ function renderLevelScores() {
         return;
     }
 
+    // Tiêu chuẩn lượng từ vựng của HSK để tính phần trăm
+    const hskStandardMax = {
+        "HSK1": 150, "HSK2": 150, "HSK3": 300, 
+        "HSK4": 600, "HSK5": 1300, "HSK6": 2500
+    };
+
     allPlayedLevels.forEach(lvl => {
+        const score = userLevelScores[lvl];
+        let maxWords = hskStandardMax[lvl.toUpperCase()] || 100; // File cá nhân mặc định mốc 100
+        if (score > maxWords) maxWords = score; 
+
+        const percent = Math.min(Math.round((score / maxWords) * 100), 100);
+
         const item = document.createElement('div');
         item.className = 'stat-row';
         item.innerHTML = `
-            <div class="stat-lvl-name"><i class='bx bx-layer' style="color: var(--accent-purple-text);"></i> ${lvl}</div>
-            <div class="stat-score">+${userLevelScores[lvl]} XP</div>
+            <div class="stat-info-wrap">
+                <div class="stat-lvl-name"><i class='bx bx-layer' style="color: var(--accent-purple-text);"></i> ${lvl}</div>
+                <div class="stat-score">+${score} XP</div>
+            </div>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" style="width: ${percent}%;"></div>
+            </div>
+            <div class="progress-text">Đã master: ${score} / ${maxWords} từ (${percent}%)</div>
         `;
         list.appendChild(item);
     });
@@ -96,7 +114,7 @@ document.querySelectorAll('.nav-links a[data-target]').forEach(link => {
 });
 
 // ==========================================
-// 4. RENDER GIAO DIỆN SETUP BÀI HỌC
+// 4. SETUP BÀI HỌC VÀ CHỌN CHẾ ĐỘ
 // ==========================================
 const levelGrid = document.getElementById('levelGrid');
 levels.forEach(lvl => {
@@ -188,19 +206,20 @@ document.getElementById('btnStart').onclick = async () => {
     document.getElementById('btnStart').innerHTML = "ĐANG TẢI DỮ LIỆU... <i class='bx bx-loader-alt bx-spin'></i>";
     quizData = [];
 
-    // Load file HSK chuẩn
+    // Tải file HSK chuẩn
     for (let lvl of selectedLevels) {
         try {
             const response = await fetch(`${lvl}.csv`);
             if (response.ok) {
                 const text = await response.text();
                 const parsed = Papa.parse(text, { skipEmptyLines: true });
+                // Thêm tên Level vào cột cuối
                 quizData = [...quizData, ...parsed.data.map(r => [...r, lvl.toUpperCase()])];
             }
         } catch (e) { console.log("Lỗi tải file:", e); }
     }
 
-    // Load file Cá nhân
+    // Tải file Cá nhân
     for (let name of selectedPersonalFiles) {
         const text = personalFiles[name];
         const parsed = Papa.parse(text, { skipEmptyLines: true });
@@ -209,10 +228,10 @@ document.getElementById('btnStart').onclick = async () => {
 
     if (quizData.length === 0) {
         document.getElementById('btnStart').innerHTML = "BẮT ĐẦU LUYỆN TẬP <i class='bx bx-play'></i>";
-        return alert("Dữ liệu trống, vui lòng kiểm tra lại nội dung file CSV.");
+        return alert("Dữ liệu rỗng, vui lòng kiểm tra lại nội dung file CSV.");
     }
 
-    // Reset chỉ số trước khi chơi
+    // Xáo trộn & Reset thông số
     quizData.sort(() => Math.random() - 0.5);
     hp = 5; 
     currentIndex = 0;
@@ -229,7 +248,6 @@ document.getElementById('btnStart').onclick = async () => {
 function showQuestion() {
     if (currentIndex >= quizData.length || hp <= 0) {
         if (missedWords.length > 0 && hp > 0) {
-            // Có lỗi sai -> Bật chế độ Review
             document.getElementById('missedCount').innerText = missedWords.length;
             document.getElementById('reviewModal').style.display = 'flex';
         } else {
@@ -240,9 +258,14 @@ function showQuestion() {
     }
 
     const currentWord = quizData[currentIndex];
-    const [hanzi, pinyin, meaning, type, example, lvl] = currentWord;
+    
+    // Lấy dữ liệu an toàn dựa trên độ dài mảng thực tế của file CSV
+    const hanzi = currentWord[0];
+    const pinyin = currentWord[1];
+    const meaning = currentWord[2];
+    const lvl = currentWord[currentWord.length - 1]; // FIX LỖI UNDEFINED CẤP ĐỘ
 
-    document.getElementById('lvlBadge').innerText = isReviewMode ? "ÔN TẬP LỖI SAI" : lvl;
+    document.getElementById('lvlBadge').innerText = isReviewMode ? "ÔN TẬP LỖI SAI" : lvl.toUpperCase();
     document.getElementById('progressText').innerText = `${currentIndex}/${quizData.length}`;
 
     const mainQ = document.getElementById('mainQuestion');
@@ -257,7 +280,7 @@ function showQuestion() {
         mainQ.innerText = meaning; mainQ.style.fontSize = "3rem"; subQ.innerText = pinyin; correctAnswer = hanzi;
     }
 
-    renderAnswers(correctAnswer, lvl);
+    renderAnswers(correctAnswer, lvl.toUpperCase());
 }
 
 function renderAnswers(correct, currentLevel) {
@@ -278,7 +301,7 @@ function renderAnswers(correct, currentLevel) {
         btn.className = "ans-btn"; btn.innerText = text;
         btn.onclick = () => {
             if (text === correct) {
-                // ĐÚNG -> Cộng điểm vào Level (chỉ cộng nếu không phải Review)
+                // ĐÚNG -> Cộng điểm
                 if(!isReviewMode) {
                     userLevelScores[currentLevel] = (userLevelScores[currentLevel] || 0) + 1;
                     localStorage.setItem('hsk_user_scores', JSON.stringify(userLevelScores));
@@ -286,7 +309,7 @@ function renderAnswers(correct, currentLevel) {
                 currentIndex++; 
                 showQuestion();
             } else {
-                // SAI -> Trừ tim, gom vào review
+                // SAI -> Trừ tim, gom vào hàng đợi
                 hp--;
                 alert(`Sai rồi! Đáp án đúng là: ${correct}`);
                 document.getElementById('hpDisplay').innerText = "❤️".repeat(Math.max(0, hp));
@@ -294,7 +317,7 @@ function renderAnswers(correct, currentLevel) {
                 if(!isReviewMode) {
                     missedWords.push(quizData[currentIndex]);
                 } else {
-                    quizData.push(quizData[currentIndex]); // Sai lúc ôn thì nhét lại xuống cuối list
+                    quizData.push(quizData[currentIndex]);
                 }
                 
                 currentIndex++;
@@ -315,7 +338,7 @@ window.startReviewMode = function() {
     currentIndex = 0;
     isReviewMode = true;
     
-    hp = 3; // Hồi 3 tim để ôn tập
+    hp = 3; // Hồi 3 tim ôn tập
     document.getElementById('hpDisplay').innerText = "❤️❤️❤️";
     
     showQuestion();
@@ -324,10 +347,10 @@ window.startReviewMode = function() {
 window.endGame = function() {
     document.getElementById('reviewModal').style.display = 'none';
     document.getElementById('gameScreen').style.display = 'none';
-    updateProfileUI(); // Update tổng điểm
-    renderLevelScores(); // Update bảng thống kê
-    switchTab('dashboard-view'); // Về lại trang chủ xem thành quả
+    updateProfileUI(); 
+    renderLevelScores(); 
+    switchTab('dashboard-view'); 
 }
 
-// Khởi chạy App
+// Boot up
 checkAuth();
