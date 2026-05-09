@@ -1,149 +1,102 @@
-// --- CẤU HÌNH & BIẾN TRẠNG THÁI ---
-const levels = ["HSK1", "HSK2", "HSK3", "HSK4", "HSK5", "HSK6", "HSK7", "HSK8", "HSK9"];
-let selectedLevels = [];
-let selectedMode = "NGHĨA";
-let quizData = [];
-let currentIndex = 0;
-let hp = 5;
-let score = 0;
-
-// Khởi tạo các nút Level
-const levelGrid = document.getElementById('levelGrid');
-levels.forEach(lvl => {
-    const btn = document.createElement('button');
-    btn.className = 'lvl-btn';
-    btn.innerText = lvl;
-    btn.onclick = () => {
-        btn.classList.toggle('active');
-        const name = lvl.toLowerCase();
-        if (selectedLevels.includes(name)) {
-            selectedLevels = selectedLevels.filter(l => l !== name);
-        } else {
-            selectedLevels.push(name);
-        }
-    };
-    levelGrid.appendChild(btn);
-});
-
-// Xử lý chọn Mode
-document.querySelectorAll('.mode-btn').forEach(btn => {
-    btn.onclick = () => {
-        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        selectedMode = btn.getAttribute('data-mode');
-    };
-});
-
-// --- LOGIC TẢI DỮ LIỆU ---
-async function fetchCSVData() {
-    quizData = [];
-    for (let lvl of selectedLevels) {
-        try {
-            const response = await fetch(`${lvl}.csv`);
-            if (!response.ok) continue;
-            const csvText = await response.text();
-            
-            const result = Papa.parse(csvText, { skipEmptyLines: true });
-            const rowsWithLevel = result.data.map(row => [...row, lvl.toUpperCase()]);
-            quizData = [...quizData, ...rowsWithLevel];
-        } catch (e) { console.error("Lỗi tải file:", e); }
-    }
+:root {
+    --bg-base: #09090b; /* Đen sâu */
+    --bg-card: #141416; /* Xám đen */
+    --card-border: #27272a;
+    --neon: #d9f950; /* Vàng chanh Neon (volt) */
+    --text-main: #f4f4f5;
+    --text-muted: #a1a1aa;
+    --radius-lg: 24px;
+    --radius-md: 16px;
+    --radius-sm: 8px;
 }
 
-// --- LOGIC TRÒ CHƠI ---
-document.getElementById('btnStart').onclick = async () => {
-    if (selectedLevels.length === 0) return alert("Chọn Level đi chiến thần!");
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; transition: all 0.2s ease; }
 
-    const startBtn = document.getElementById('btnStart');
-    startBtn.innerHTML = "Đang tải dữ liệu... <i class='bx bx-loader-alt bx-spin'></i>";
+body { background-color: var(--bg-base); color: var(--text-main); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
 
-    await fetchCSVData();
-    if (quizData.length === 0) {
-        startBtn.innerHTML = "Bắt Đầu Trải Nghiệm <i class='bx bx-right-arrow-alt'></i>";
-        return alert("Không tìm thấy dữ liệu CSV!");
-    }
+/* Trạng thái màn hình */
+.screen { display: none; width: 100%; max-width: 900px; animation: fadeUp 0.4s ease; }
+.screen.active { display: block; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-    if (document.getElementById('settingRandom').checked) {
-        quizData.sort(() => Math.random() - 0.5);
-    }
+/* === BỐ CỤC LƯỚI BENTO === */
+.bento-container { display: flex; flex-direction: column; gap: 20px; }
 
-    // Chuyển màn hình (Bento Minimal giữ nguyên nền sáng)
-    document.getElementById('menuScreen').classList.remove('active');
-    document.getElementById('gameScreen').classList.add('active');
-    
-    showQuestion();
-};
+.bento-grid-top { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.bento-grid-mid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
 
-function showQuestion() {
-    if (currentIndex >= quizData.length || hp <= 0) {
-        alert(hp <= 0 ? "Thử lại lần sau nhé! 😅" : "Chúc mừng Bậc Thầy Hán Ngữ! 🎉");
-        location.reload();
-        return;
-    }
-
-    const currentWord = quizData[currentIndex];
-    const [hanzi, pinyin, meaning, type, example, lvl] = currentWord;
-
-    document.getElementById('lvlBadge').innerText = lvl;
-    document.getElementById('progressText').innerText = `${score} / ${quizData.length}`;
-
-    const mainQ = document.getElementById('mainQuestion');
-    const subQ = document.getElementById('subQuestion');
-    const exT = document.getElementById('exampleText');
-
-    let correctAnswer = "";
-
-    if (selectedMode === "NGHĨA") {
-        mainQ.innerText = hanzi;
-        subQ.innerText = document.getElementById('settingPinyin').checked ? pinyin : "****";
-        correctAnswer = meaning;
-    } else if (selectedMode === "PINYIN") {
-        mainQ.innerText = hanzi;
-        subQ.innerText = meaning;
-        correctAnswer = pinyin;
-    } else { 
-        mainQ.innerText = meaning;
-        mainQ.style.fontSize = "3.5rem"; // Cỡ chữ nhỏ lại cho phần nghĩa
-        subQ.innerText = document.getElementById('settingPinyin').checked ? pinyin : "****";
-        correctAnswer = hanzi;
-    }
-
-    exT.innerText = document.getElementById('settingExample').checked ? (example || "") : "";
-
-    renderAnswers(correctAnswer);
+/* === BENTO CARD === */
+.bento-card {
+    background: var(--bg-card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-lg);
+    padding: 25px;
+    position: relative;
+    overflow: hidden;
 }
 
-function renderAnswers(correct) {
-    const container = document.getElementById('answerContainer');
-    container.innerHTML = "";
+.bento-card h3 { font-size: 1.2rem; font-weight: 600; margin-bottom: 8px; }
+.bento-card p.muted { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px; }
 
-    const colIndex = selectedMode === "NGHĨA" ? 2 : (selectedMode === "PINYIN" ? 1 : 0);
-    const pool = [...new Set(quizData.map(r => r[colIndex]))];
-    
-    let choices = [correct];
-    while (choices.length < 4 && pool.length > 4) {
-        let rand = pool[Math.floor(Math.random() * pool.length)];
-        if (!choices.includes(rand)) choices.push(rand);
-    }
-    choices.sort(() => Math.random() - 0.5);
+.neon-text { color: var(--neon); font-weight: 700 !important; }
 
-    choices.forEach(text => {
-        const btn = document.createElement('button');
-        btn.className = "ans-btn";
-        btn.innerText = text;
-        btn.onclick = () => {
-            if (text === correct) {
-                score++; currentIndex++;
-                showQuestion();
-            } else {
-                hp--;
-                alert(`Sai mất rồi! Đáp án đúng là: ${correct}`);
-                document.getElementById('hpDisplay').innerText = "❤️".repeat(Math.max(0, hp));
-                const item = quizData.splice(currentIndex, 1)[0];
-                quizData.push(item);
-                showQuestion();
-            }
-        };
-        container.appendChild(btn);
-    });
-}
+/* Icon trang trí trong thẻ */
+.card-icon-wrapper { background: rgba(255,255,255,0.05); width: fit-content; padding: 8px; border-radius: var(--radius-sm); margin-bottom: 15px; border: 1px solid var(--card-border); }
+.card-icon-wrapper i { font-size: 1.2rem; color: var(--neon); }
+
+/* --- Thẻ 1: Đồ thị ảo --- */
+.chart-mockup { display: flex; align-items: flex-end; gap: 8px; height: 100px; margin: 20px 0; border-bottom: 1px dashed var(--card-border); padding-bottom: 10px; }
+.bar { flex: 1; background: #27272a; border-radius: 4px; }
+.bar.neon-bg { background: var(--neon); box-shadow: 0 0 15px rgba(217, 249, 80, 0.3); }
+.h-30 { height: 30%; } .h-40 { height: 40%; } .h-50 { height: 50%; } .h-60 { height: 60%; } .h-80 { height: 80%; } .h-90 { height: 90%; }
+.stat-footer { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); }
+
+/* --- Thẻ 2: Chế độ --- */
+.mode-stack { display: flex; flex-direction: column; gap: 8px; }
+.mode-btn { background: rgba(255,255,255,0.03); border: 1px solid var(--card-border); color: var(--text-muted); padding: 10px; border-radius: var(--radius-md); font-weight: 600; cursor: pointer; text-align: left; }
+.mode-btn:hover { background: rgba(255,255,255,0.08); }
+.mode-btn.active { background: rgba(217, 249, 80, 0.1); border-color: var(--neon); color: var(--neon); }
+
+/* --- Thẻ 3: Toggles --- */
+.setting-list { display: flex; flex-direction: column; gap: 15px; }
+.toggle-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; font-weight: 500; cursor: pointer; color: var(--text-main); }
+.toggle-row input { display: none; }
+.toggle-slider { width: 40px; height: 22px; background: #27272a; border-radius: 20px; position: relative; border: 1px solid #3f3f46; }
+.toggle-slider::after { content: ''; position: absolute; top: 1px; left: 2px; width: 18px; height: 18px; background: var(--text-muted); border-radius: 50%; transition: 0.3s; }
+.toggle-row input:checked + .toggle-slider { background: rgba(217, 249, 80, 0.2); border-color: var(--neon); }
+.toggle-row input:checked + .toggle-slider::after { transform: translateX(16px); background: var(--neon); box-shadow: 0 0 10px var(--neon); }
+
+/* --- Thẻ 4: Icon group --- */
+.integration-icons { display: flex; gap: -10px; margin-top: 10px; }
+.circle-icon { width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; border: 2px solid var(--bg-card); color: white; margin-right: -10px; z-index: 1; }
+
+/* --- Thẻ 5: Glow Card & Nút Start --- */
+.glow-card { background: radial-gradient(circle at right, rgba(217, 249, 80, 0.05), transparent 60%), var(--bg-card); }
+.btn-neon-solid { background: var(--neon); color: black; border: none; padding: 15px; border-radius: var(--radius-md); font-weight: 800; font-size: 1.1rem; width: 100%; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; box-shadow: 0 0 20px rgba(217, 249, 80, 0.2); }
+.btn-neon-solid:hover { transform: scale(1.02); box-shadow: 0 0 30px rgba(217, 249, 80, 0.4); }
+
+/* === PILLS BÊN DƯỚI (LEVELS) === */
+.pill-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 10px; }
+.bento-pill { background: transparent; border: 1px solid var(--card-border); color: var(--text-muted); padding: 8px 16px; border-radius: 100px; font-size: 0.85rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+.bento-pill i { color: #52525b; font-size: 1rem; }
+.bento-pill:hover { border-color: #52525b; color: var(--text-main); }
+.bento-pill.active { border-color: var(--neon); color: var(--text-main); background: rgba(255,255,255,0.03); }
+.bento-pill.active i { color: var(--neon); }
+
+/* === GIAO DIỆN GAME SCREEN === */
+.game-container { background: var(--bg-card); border: 1px solid var(--card-border); border-radius: var(--radius-lg); padding: 30px; display: flex; flex-direction: column; gap: 20px; }
+.game-hud { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); padding: 10px 20px; border-radius: var(--radius-md); }
+.hp-hearts { font-size: 1.2rem; }
+.progress-info { font-weight: 600; color: var(--text-muted); }
+.btn-exit { background: transparent; border: 1px solid var(--card-border); color: var(--text-muted); width: 36px; height: 36px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; font-size: 1.2rem; }
+.btn-exit:hover { background: rgba(255,0,0,0.1); color: #ef4444; border-color: #ef4444; }
+
+.flashcard-dark { text-align: center; padding: 60px 20px; background: rgba(0,0,0,0.2); border: 1px solid var(--card-border); border-radius: var(--radius-lg); position: relative; }
+.lvl-badge { position: absolute; top: 20px; right: 20px; border: 1px solid var(--neon); color: var(--neon); font-size: 0.7rem; font-weight: 700; padding: 4px 10px; border-radius: 100px; background: rgba(217, 249, 80, 0.05); }
+.main-q { font-size: 5rem; font-weight: 800; color: var(--text-main); line-height: 1.1; }
+.sub-q { font-size: 1.5rem; color: var(--text-muted); margin-top: 15px; }
+.example-text { margin-top: 25px; color: var(--neon); font-style: italic; font-size: 0.9rem; }
+
+.answer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+.ans-btn { background: rgba(0,0,0,0.2); border: 1px solid var(--card-border); color: var(--text-main); padding: 20px; border-radius: var(--radius-md); font-size: 1.1rem; font-weight: 600; cursor: pointer; }
+.ans-btn:hover { border-color: var(--neon); box-shadow: 0 0 15px rgba(217, 249, 80, 0.1); background: rgba(217, 249, 80, 0.02); }
