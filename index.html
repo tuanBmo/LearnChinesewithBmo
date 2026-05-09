@@ -19,7 +19,7 @@
             <h2 style="text-align: center; margin-bottom: 5px;">Hành trình của bạn</h2>
             <p style="text-align: center; color: var(--text-secondary); margin-bottom: 25px;">Nhập tên để hệ thống lưu trữ tiến độ học tập trên thiết bị này.</p>
             
-            <input type="text" id="usernameInput" class="auth-input" placeholder="Tên hiển thị (VD: Tuấn)..." required>
+            <input type="text" id="usernameInput" class="auth-input" value="Phan Anh Tuấn" placeholder="Tên hiển thị..." required>
             <button class="btn-primary" id="btnLogin" style="width: 100%; margin-top: 15px;">Vào học ngay</button>
         </div>
     </div>
@@ -28,7 +28,7 @@
         <div class="bento-card auth-box" style="text-align: center;">
             <i class='bx bx-refresh' style="font-size: 4rem; color: #FF9F0A; margin-bottom: 10px;"></i>
             <h2>Hoàn thành bài học!</h2>
-            <p style="color: var(--text-secondary); margin: 10px 0 20px;">Bạn có <strong id="missedCount" style="color: #EF4444; font-size: 1.2rem;">0</strong> câu trả lời sai. Bạn có muốn gom chúng lại để ôn tập ngay bây giờ không?</p>
+            <p style="color: var(--text-secondary); margin: 10px 0 20px;">Bạn có <strong id="missedCount" style="color: #EF4444; font-size: 1.2rem;">0</strong> câu trả lời sai. Bạn có muốn gom chúng lại để ôn tập ngay không?</p>
             
             <div style="display: flex; gap: 10px;">
                 <button class="btn-secondary" style="flex: 1; justify-content: center;" onclick="endGame()">Bỏ qua</button>
@@ -102,7 +102,7 @@
                     <div class="card-header">
                         <h2 style="font-size: 1.3rem;"><i class='bx bx-bar-chart-square' style="color: var(--accent-purple-text);"></i> Điểm số Mastery theo Level</h2>
                     </div>
-                    <p style="color: var(--text-secondary); margin-bottom: 20px;">Mỗi câu trả lời đúng lần đầu sẽ được +1 điểm. Hãy theo dõi sự tiến bộ của bạn.</p>
+                    <p style="color: var(--text-secondary); margin-bottom: 20px;">Mỗi câu trả lời đúng lần đầu sẽ được +1 điểm. Theo dõi lượng từ vựng bạn đã "nắm trùm".</p>
                     
                     <div class="level-stats-container" id="levelStatsList">
                         </div>
@@ -115,10 +115,10 @@
                 <div class="card-header"><span class="tag blue-tag">Setup ván mới</span></div>
                 <h2 style="margin: 10px 0 20px;">Cấu hình bài học</h2>
                 
-                <h4>1. Chọn Level HSK</h4>
+                <h4>1. Chọn Level HSK chuẩn</h4>
                 <div id="levelGrid" class="pill-group"></div>
 
-                <h4 style="margin-top: 25px;">2. Hoặc File cá nhân</h4>
+                <h4 style="margin-top: 25px;">2. Hoặc File cá nhân của bạn</h4>
                 <div id="personalSelectGrid" class="pill-group">
                     <p style="color: var(--text-secondary); font-size: 0.9rem;">(Chưa có file nào. Hãy tải lên ở mục File Cá Nhân)</p>
                 </div>
@@ -130,7 +130,7 @@
                     <button class="mode-btn" data-mode="CHỮ HÁN">Chữ Hán (Mặt chữ)</button>
                 </div>
 
-                <button id="btnStart" class="btn-primary" style="margin-top: 40px; width: 100%; font-size: 1.2rem; padding: 20px;">BẮT ĐẦU LUYỆN TẬP <i class='bx bx-play'></i></button>
+                <button id="btnStart" class="btn-primary" style="margin-top: 40px; width: 100%; font-size: 1.2rem; padding: 20px; justify-content: center;">BẮT ĐẦU LUYỆN TẬP <i class='bx bx-play'></i></button>
             </div>
         </div>
 
@@ -144,7 +144,7 @@
                     </label>
                 </div>
                 <div style="background: #F9FAFB; padding: 15px; border-radius: 12px; margin-bottom: 25px; border: 1px dashed #D1D5DB;">
-                    <p style="color: var(--text-secondary); font-size: 0.9rem;"><strong>Hướng dẫn:</strong> Upload file .csv tự tạo để học các chủ đề chuyên ngành. File cần có cấu trúc 3 cột không tiêu đề: <em>Cột 1: Chữ Hán, Cột 2: Pinyin, Cột 3: Nghĩa</em>.</p>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem;"><strong>Hướng dẫn:</strong> Upload file .csv tự tạo để học. File cần có cấu trúc 3 cột không tiêu đề: <em>Cột 1: Chữ Hán, Cột 2: Pinyin, Cột 3: Nghĩa</em>.</p>
                 </div>
                 
                 <div id="personalFilesList" class="file-list-container">
