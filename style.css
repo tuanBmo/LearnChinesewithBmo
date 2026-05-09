@@ -125,3 +125,4 @@ body { background-color: var(--bg-main); color: var(--text-primary); display: fl
 .btn-secondary { margin-top: 15px; background: white; color: var(--accent-blue-text); border: none; padding: 10px 20px; border-radius: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 5px; }
 .quiz-illustration { font-size: 3.5rem; position: absolute; right: 10px; bottom: 10px; opacity: 0.8; }
 .muted { color: var(--text-secondary); font-size: 0.85rem; margin-top: 5px; }
+ 
