@@ -51,8 +51,14 @@
                 <p class="sub-q" id="subQuestion">nǐ hǎo</p>
             </div>
 
-            <div class="answer-grid" id="answerContainer">
-                </div>
+            <div class="answer-grid" id="answerContainer"></div>
+
+            <div id="typingContainer" style="display: none; text-align: center;">
+                <input type="text" id="pinyinInput" placeholder="Nhập pinyin (không cần dấu)..." autocomplete="off">
+                <button id="btnSubmitPinyin" class="btn-primary" style="margin-top: 20px; font-size: 1.1rem; padding: 15px 40px; border-radius: 20px;">
+                    Kiểm tra <i class='bx bx-check'></i>
+                </button>
+            </div>
         </div>
     </div>
 
@@ -81,16 +87,13 @@
                 <i class='bx bx-search'></i>
                 <input type="text" placeholder="Tìm kiếm từ vựng, ngữ pháp...">
             </div>
-            <div class="user-profile" id="userProfileBar">
-                </div>
+            <div class="user-profile" id="userProfileBar"></div>
         </header>
 
         <div id="dashboard-view" class="view-section active">
             <div class="bento-grid">
                 <div class="bento-card word-of-day" style="grid-column: span 4; background: linear-gradient(145deg, #ffffff, #F8F8FF);">
-                    <div class="card-header">
-                        <span class="tag purple-tag">Dashboard</span>
-                    </div>
+                    <div class="card-header"><span class="tag purple-tag">Dashboard</span></div>
                     <div style="padding: 20px 0;">
                         <h1 style="font-size: 2.5rem; margin-bottom: 10px;">Chào <span id="greetName" style="color: var(--accent-purple-text);">bạn</span>!</h1>
                         <p style="color: var(--text-secondary); font-size: 1.1rem;">Sẵn sàng để tiếp tục hành trình chinh phục tiếng Trung hôm nay chưa?</p>
@@ -99,13 +102,9 @@
                 </div>
 
                 <div class="bento-card" style="grid-column: span 4;">
-                    <div class="card-header">
-                        <h2 style="font-size: 1.3rem;"><i class='bx bx-bar-chart-square' style="color: var(--accent-purple-text);"></i> Điểm số Mastery theo Level</h2>
-                    </div>
+                    <div class="card-header"><h2 style="font-size: 1.3rem;"><i class='bx bx-bar-chart-square' style="color: var(--accent-purple-text);"></i> Điểm số Mastery theo Level</h2></div>
                     <p style="color: var(--text-secondary); margin-bottom: 20px;">Mỗi câu trả lời đúng lần đầu sẽ được +1 điểm. Theo dõi lượng từ vựng bạn đã "nắm trùm".</p>
-                    
-                    <div class="level-stats-container" id="levelStatsList">
-                        </div>
+                    <div class="level-stats-container" id="levelStatsList"></div>
                 </div>
             </div>
         </div>
@@ -128,6 +127,7 @@
                     <button class="mode-btn active" data-mode="NGHĨA">Nghĩa (Dịch)</button>
                     <button class="mode-btn" data-mode="PINYIN">Pinyin (Phát âm)</button>
                     <button class="mode-btn" data-mode="CHỮ HÁN">Chữ Hán (Mặt chữ)</button>
+                    <button class="mode-btn" data-mode="GÕ PINYIN">Gõ Pinyin (Typing)</button>
                 </div>
 
                 <button id="btnStart" class="btn-primary" style="margin-top: 40px; width: 100%; font-size: 1.2rem; padding: 20px; justify-content: center;">BẮT ĐẦU LUYỆN TẬP <i class='bx bx-play'></i></button>
@@ -146,9 +146,7 @@
                 <div style="background: #F9FAFB; padding: 15px; border-radius: 12px; margin-bottom: 25px; border: 1px dashed #D1D5DB;">
                     <p style="color: var(--text-secondary); font-size: 0.9rem;"><strong>Hướng dẫn:</strong> Upload file .csv tự tạo để học. File cần có cấu trúc 3 cột không tiêu đề: <em>Cột 1: Chữ Hán, Cột 2: Pinyin, Cột 3: Nghĩa</em>.</p>
                 </div>
-                
-                <div id="personalFilesList" class="file-list-container">
-                    </div>
+                <div id="personalFilesList" class="file-list-container"></div>
             </div>
         </div>
     </main>
@@ -157,4 +155,3 @@
     <script src="script.js"></script>
 </body>
 </html>
- 
