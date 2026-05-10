@@ -31,12 +31,13 @@ function checkAuth() {
 
 document.getElementById('btnLogin').onclick = () => {
     const username = document.getElementById('usernameInput').value.trim();
-    if (username.length >= 3) {
+    if (username.length >= 2) {
         currentUser = username;
         localStorage.setItem('hsk_current_user', currentUser);
         checkAuth();
+        shootConfetti(); // Bắn pháo hoa chào mừng
     } else {
-        alert("Tên hiển thị phải có ít nhất 3 ký tự!");
+        alert("Tên hiển thị phải có ít nhất 2 ký tự!");
     }
 };
 
@@ -45,8 +46,8 @@ function updateProfileUI() {
     const userProfileDiv = document.getElementById('userProfileBar');
     if(userProfileDiv) {
         userProfileDiv.innerHTML = `
-            <div class="streak-badge"><i class='bx bxs-star' style="color: #F59E0B;"></i> ${totalScore} XP</div>
-            <div class="avatar"><img src="https://ui-avatars.com/api/?name=${currentUser}&background=5E5CE6&color=fff" alt="User"></div>
+            <div class="streak-badge"><i class='bx bxs-star' style="color: #F59E0B; font-size:1.2rem;"></i> ${totalScore} XP</div>
+            <div class="avatar"><img src="https://ui-avatars.com/api/?name=${currentUser}&background=4F46E5&color=fff&bold=true" alt="User"></div>
         `;
     }
 }
@@ -58,7 +59,7 @@ function renderLevelScores() {
     
     const allPlayedLevels = Object.keys(userLevelScores).sort();
     if(allPlayedLevels.length === 0) {
-        list.innerHTML = `<p style="color: var(--text-secondary); text-align: center; padding: 20px;">Bạn chưa có điểm số nào. Hãy thiết lập ván mới để bắt đầu lấy điểm nhé!</p>`;
+        list.innerHTML = `<p class="muted" style="text-align: center; padding: 20px;">Bạn chưa có điểm số nào. Hãy thiết lập ván mới để bắt đầu lấy điểm nhé!</p>`;
         return;
     }
 
@@ -75,13 +76,13 @@ function renderLevelScores() {
         item.className = 'stat-row';
         item.innerHTML = `
             <div class="stat-info-wrap">
-                <div class="stat-lvl-name"><i class='bx bx-layer' style="color: var(--accent-purple-text);"></i> ${lvl}</div>
+                <div class="stat-lvl-name"><i class='bx bx-medal' style="color: var(--accent-yellow-text); font-size: 1.5rem;"></i> ${lvl}</div>
                 <div class="stat-score">+${score} XP</div>
             </div>
             <div class="progress-bar-bg">
                 <div class="progress-bar-fill" style="width: ${percent}%;"></div>
             </div>
-            <div class="progress-text">Đã master: ${score} / ${maxWords} từ (${percent}%)</div>
+            <div class="muted" style="text-align: right; font-weight: 700;">Đã master: ${score} / ${maxWords} từ (${percent}%)</div>
         `;
         list.appendChild(item);
     });
@@ -133,7 +134,7 @@ document.querySelectorAll('.mode-btn').forEach(btn => {
 });
 
 // ==========================================
-// 5. QUẢN LÝ FILE CÁ NHÂN (CSV UPLOAD)
+// 5. QUẢN LÝ FILE CÁ NHÂN
 // ==========================================
 document.getElementById('fileUpload').addEventListener('change', function(e) {
     const file = e.target.files[0];
@@ -155,13 +156,13 @@ function renderPersonalFiles() {
     list.innerHTML = ''; selectGrid.innerHTML = '';
 
     if (Object.keys(personalFiles).length === 0) {
-        selectGrid.innerHTML = `<p style="color: var(--text-secondary); font-size: 0.9rem;">(Chưa có file nào. Hãy tải lên ở mục File Cá Nhân)</p>`;
+        selectGrid.innerHTML = `<p class="muted">(Chưa có file nào. Hãy tải lên ở mục File Cá Nhân)</p>`;
     }
 
     Object.keys(personalFiles).forEach(name => {
         const item = document.createElement('div');
         item.className = 'file-item';
-        item.innerHTML = `<h4><i class='bx bx-file' style="color: var(--accent-blue-text);"></i> ${name}.csv</h4>
+        item.innerHTML = `<h4><i class='bx bx-file' style="color: var(--accent-sky-text); font-size:1.5rem;"></i> ${name}.csv</h4>
                           <button class="btn-delete" onclick="deleteFile('${name}')">Xóa</button>`;
         list.appendChild(item);
 
@@ -191,22 +192,26 @@ renderPersonalFiles();
 // ==========================================
 // 6. LOGIC GAME & KIỂM TRA ĐÁP ÁN
 // ==========================================
-// Hàm chuẩn hóa Pinyin: Xóa dấu thanh điệu và khoảng trắng
 function normalizePinyin(str) {
-    return str.normalize('NFD')
-              .replace(/[\u0300-\u036f]/g, "") 
-              .replace(/\s+/g, "")
-              .toLowerCase();
+    return str.normalize('NFD').replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "").toLowerCase();
+}
+
+function updateGameProgress() {
+    const percent = Math.round((currentIndex / quizData.length) * 100);
+    document.getElementById('gameProgress').style.width = `${percent}%`;
+}
+
+function shootConfetti() {
+    confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#4F46E5', '#DB2777', '#10B981', '#F59E0B'] });
 }
 
 document.getElementById('btnStart').onclick = async () => {
     if (selectedLevels.length === 0 && selectedPersonalFiles.length === 0) 
         return alert("Vui lòng chọn ít nhất 1 Level HSK hoặc 1 File Cá Nhân để luyện tập!");
 
-    document.getElementById('btnStart').innerHTML = "ĐANG TẢI DỮ LIỆU... <i class='bx bx-loader-alt bx-spin'></i>";
+    document.getElementById('btnStart').innerHTML = "ĐANG TẢI... <i class='bx bx-loader-alt bx-spin'></i>";
     quizData = [];
 
-    // Tải file HSK
     for (let lvl of selectedLevels) {
         try {
             const response = await fetch(`${lvl}.csv`);
@@ -215,10 +220,9 @@ document.getElementById('btnStart').onclick = async () => {
                 const parsed = Papa.parse(text, { skipEmptyLines: true });
                 quizData = [...quizData, ...parsed.data.map(r => [...r, lvl.toUpperCase()])];
             }
-        } catch (e) { console.log("Lỗi tải file:", e); }
+        } catch (e) { console.log(e); }
     }
 
-    // Tải file Cá nhân
     for (let name of selectedPersonalFiles) {
         const text = personalFiles[name];
         const parsed = Papa.parse(text, { skipEmptyLines: true });
@@ -226,7 +230,7 @@ document.getElementById('btnStart').onclick = async () => {
     }
 
     if (quizData.length === 0) {
-        document.getElementById('btnStart').innerHTML = "BẮT ĐẦU LUYỆN TẬP <i class='bx bx-play'></i>";
+        document.getElementById('btnStart').innerHTML = "BẮT ĐẦU CHIẾN <i class='bx bx-play'></i>";
         return alert("Dữ liệu rỗng, vui lòng kiểm tra lại nội dung file CSV.");
     }
 
@@ -237,20 +241,25 @@ document.getElementById('btnStart').onclick = async () => {
     isReviewMode = false;
     
     document.getElementById('hpDisplay').innerText = "❤️❤️❤️❤️❤️";
-    document.getElementById('btnStart').innerHTML = "BẮT ĐẦU LUYỆN TẬP <i class='bx bx-play'></i>";
-    document.getElementById('gameScreen').style.display = 'flex';
+    document.getElementById('btnStart').innerHTML = "BẮT ĐẦU CHIẾN <i class='bx bx-play'></i>";
+    document.getElementById('gameScreen').style.display = 'block'; // Block, không phải flex vì layout mới
     
     showQuestion();
 };
 
 function showQuestion() {
+    updateGameProgress();
+
     if (currentIndex >= quizData.length || hp <= 0) {
         if (missedWords.length > 0 && hp > 0) {
             document.getElementById('missedCount').innerText = missedWords.length;
             document.getElementById('reviewModal').style.display = 'flex';
         } else {
-            alert(hp <= 0 ? "Hết tim rồi, nghỉ ngơi xíu nhé! 💔" : "Tuyệt vời! Bạn đã hoàn thành trọn vẹn bài học! 🎉");
-            endGame();
+            if(hp > 0) shootConfetti();
+            setTimeout(() => {
+                alert(hp <= 0 ? "Hết tim rồi, nghỉ ngơi xíu nhé! 💔" : "Tuyệt vời! Bạn đã hoàn thành bài học! 🎉");
+                endGame();
+            }, 500);
         }
         return;
     }
@@ -259,11 +268,10 @@ function showQuestion() {
     const hanzi = currentWord[0];
     const pinyin = currentWord[1];
     const meaning = currentWord[2];
-    const lvl = currentWord[currentWord.length - 1]; // Lấy giá trị Level cuối cùng an toàn
+    const lvl = currentWord[currentWord.length - 1]; 
 
     document.getElementById('lvlBadge').innerText = isReviewMode ? "ÔN TẬP LỖI SAI" : lvl.toUpperCase();
-    document.getElementById('progressText').innerText = `${currentIndex}/${quizData.length}`;
-
+    
     const mainQ = document.getElementById('mainQuestion');
     const subQ = document.getElementById('subQuestion');
     const answerContainer = document.getElementById('answerContainer');
@@ -272,11 +280,11 @@ function showQuestion() {
 
     let correctAnswer = "";
 
-    // XỬ LÝ CHẾ ĐỘ GÕ PINYIN
+    // CHẾ ĐỘ GÕ PINYIN
     if (selectedMode === "GÕ PINYIN") {
         mainQ.innerText = hanzi; 
-        mainQ.style.fontSize = "6rem"; 
-        subQ.innerText = meaning; // Hiện nghĩa gợi ý
+        mainQ.style.fontSize = "7.5rem"; 
+        subQ.innerText = meaning; 
         
         answerContainer.style.display = 'none';
         typingContainer.style.display = 'block';
@@ -285,23 +293,23 @@ function showQuestion() {
         setTimeout(() => pinyinInput.focus(), 100); 
         
     } else {
-        // XỬ LÝ CÁC CHẾ ĐỘ TRẮC NGHIỆM
+        // CHẾ ĐỘ TRẮC NGHIỆM
         typingContainer.style.display = 'none';
         answerContainer.style.display = 'grid';
 
         if (selectedMode === "NGHĨA") {
-            mainQ.innerText = hanzi; mainQ.style.fontSize = "6rem"; subQ.innerText = pinyin; correctAnswer = meaning;
+            mainQ.innerText = hanzi; mainQ.style.fontSize = "7.5rem"; subQ.innerText = pinyin; correctAnswer = meaning;
         } else if (selectedMode === "PINYIN") {
-            mainQ.innerText = hanzi; mainQ.style.fontSize = "6rem"; subQ.innerText = meaning; correctAnswer = pinyin;
+            mainQ.innerText = hanzi; mainQ.style.fontSize = "7.5rem"; subQ.innerText = meaning; correctAnswer = pinyin;
         } else { 
-            mainQ.innerText = meaning; mainQ.style.fontSize = "3rem"; subQ.innerText = pinyin; correctAnswer = hanzi;
+            mainQ.innerText = meaning; mainQ.style.fontSize = "4rem"; subQ.innerText = pinyin; correctAnswer = hanzi;
         }
 
         renderAnswers(correctAnswer, lvl.toUpperCase());
     }
 }
 
-// LOGIC CHẤM ĐIỂM CHẾ ĐỘ GÕ PINYIN
+// LOGIC GÕ PINYIN
 function checkTypingAnswer() {
     const userInput = document.getElementById('pinyinInput').value;
     if (!userInput.trim()) return; 
@@ -311,7 +319,6 @@ function checkTypingAnswer() {
     const currentLevel = currentWord[currentWord.length - 1].toUpperCase();
 
     if (normalizePinyin(userInput) === normalizePinyin(correctPinyin)) {
-        // ĐÚNG
         if(!isReviewMode) {
             userLevelScores[currentLevel] = (userLevelScores[currentLevel] || 0) + 1;
             localStorage.setItem('hsk_user_scores', JSON.stringify(userLevelScores));
@@ -319,93 +326,7 @@ function checkTypingAnswer() {
         currentIndex++;
         showQuestion();
     } else {
-        // SAI
         hp--;
         alert(`Sai rồi! Đáp án đúng là: ${correctPinyin}`);
         document.getElementById('hpDisplay').innerText = "❤️".repeat(Math.max(0, hp));
-        if(!isReviewMode) missedWords.push(quizData[currentIndex]);
-        else quizData.push(quizData[currentIndex]);
-        
-        currentIndex++;
-        showQuestion();
-    }
-}
-
-// Gắn sự kiện cho nút Kiểm tra và phím Enter
-document.getElementById('btnSubmitPinyin').addEventListener('click', checkTypingAnswer);
-document.getElementById('pinyinInput').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') {
-        e.preventDefault();
-        checkTypingAnswer();
-    }
-});
-
-// LOGIC CHẤM ĐIỂM TRẮC NGHIỆM
-function renderAnswers(correct, currentLevel) {
-    const container = document.getElementById('answerContainer');
-    container.innerHTML = "";
-    const colIndex = selectedMode === "NGHĨA" ? 2 : (selectedMode === "PINYIN" ? 1 : 0);
-    const pool = [...new Set(quizData.map(r => r[colIndex]))];
-    
-    let choices = [correct];
-    while (choices.length < 4 && pool.length > 4) {
-        let rand = pool[Math.floor(Math.random() * pool.length)];
-        if (!choices.includes(rand)) choices.push(rand);
-    }
-    choices.sort(() => Math.random() - 0.5);
-
-    choices.forEach(text => {
-        const btn = document.createElement('button');
-        btn.className = "ans-btn"; btn.innerText = text;
-        btn.onclick = () => {
-            if (text === correct) {
-                // ĐÚNG
-                if(!isReviewMode) {
-                    userLevelScores[currentLevel] = (userLevelScores[currentLevel] || 0) + 1;
-                    localStorage.setItem('hsk_user_scores', JSON.stringify(userLevelScores));
-                }
-                currentIndex++; 
-                showQuestion();
-            } else {
-                // SAI
-                hp--;
-                alert(`Sai rồi! Đáp án đúng là: ${correct}`);
-                document.getElementById('hpDisplay').innerText = "❤️".repeat(Math.max(0, hp));
-                
-                if(!isReviewMode) missedWords.push(quizData[currentIndex]);
-                else quizData.push(quizData[currentIndex]);
-                
-                currentIndex++;
-                showQuestion();
-            }
-        };
-        container.appendChild(btn);
-    });
-}
-
-// ==========================================
-// 7. ÔN TẬP VÀ KẾT THÚC BÀI
-// ==========================================
-window.startReviewMode = function() {
-    document.getElementById('reviewModal').style.display = 'none';
-    quizData = [...missedWords]; 
-    missedWords = []; 
-    currentIndex = 0;
-    isReviewMode = true;
-    
-    hp = 3; 
-    document.getElementById('hpDisplay').innerText = "❤️❤️❤️";
-    
-    showQuestion();
-}
-
-window.endGame = function() {
-    document.getElementById('reviewModal').style.display = 'none';
-    document.getElementById('gameScreen').style.display = 'none';
-    updateProfileUI(); 
-    renderLevelScores(); 
-    switchTab('dashboard-view'); 
-}
-
-// Boot up
-checkAuth();
+        if(!
