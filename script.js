@@ -8,53 +8,38 @@ let selectedMode = "NGHĨA";
 let quizData = [];
 let currentIndex = 0;
 let hp = 5;
+
 let missedWords = []; 
 let isReviewMode = false;
-
-// Hàm đọc dữ liệu an toàn (tránh lỗi crash ứng dụng nếu dữ liệu cũ bị hỏng)
-function getSafeData(key, defaultVal) {
-    try { return JSON.parse(localStorage.getItem(key)) || defaultVal; } 
-    catch(e) { return defaultVal; }
-}
-
-let userLevelScores = getSafeData('hsk_user_scores', {});
-let personalFiles = getSafeData('hsk_personal_files', {});
+let userLevelScores = JSON.parse(localStorage.getItem('hsk_user_scores')) || {};
+let personalFiles = JSON.parse(localStorage.getItem('hsk_personal_files') || '{}');
 let currentUser = localStorage.getItem('hsk_current_user');
 
 // ==========================================
 // 2. LOGIC AUTH & THỐNG KÊ ĐIỂM SỐ
 // ==========================================
 function checkAuth() {
-    const authModal = document.getElementById('authModal');
     if (!currentUser) {
-        if (authModal) authModal.style.display = 'flex';
+        document.getElementById('authModal').style.display = 'flex';
     } else {
-        if (authModal) authModal.style.display = 'none';
-        
-        // Kiểm tra an toàn trước khi điền tên (Tránh lỗi làm liệt nút)
-        const greetName = document.getElementById('greetName');
-        if (greetName) greetName.innerText = currentUser;
-        
+        document.getElementById('authModal').style.display = 'none';
+        document.getElementById('greetName').innerText = currentUser;
         updateProfileUI();
         renderLevelScores();
     }
 }
 
-// Xử lý nút bấm Đăng nhập an toàn
-const btnLogin = document.getElementById('btnLogin');
-if (btnLogin) {
-    btnLogin.onclick = () => {
-        const username = document.getElementById('usernameInput').value.trim();
-        if (username.length >= 2) {
-            currentUser = username;
-            localStorage.setItem('hsk_current_user', currentUser);
-            checkAuth();
-            shootConfetti(); // Bắn pháo hoa
-        } else {
-            alert("Tên hiển thị phải có ít nhất 2 ký tự!");
-        }
-    };
-}
+document.getElementById('btnLogin').onclick = () => {
+    const username = document.getElementById('usernameInput').value.trim();
+    if (username.length >= 2) {
+        currentUser = username;
+        localStorage.setItem('hsk_current_user', currentUser);
+        checkAuth();
+        shootConfetti(); // Bắn pháo hoa chào mừng
+    } else {
+        alert("Tên hiển thị phải có ít nhất 2 ký tự!");
+    }
+};
 
 function updateProfileUI() {
     const totalScore = Object.values(userLevelScores).reduce((a, b) => a + b, 0);
@@ -62,7 +47,7 @@ function updateProfileUI() {
     if(userProfileDiv) {
         userProfileDiv.innerHTML = `
             <div class="streak-badge"><i class='bx bxs-star' style="color: #F59E0B; font-size:1.2rem;"></i> ${totalScore} XP</div>
-            <div class="avatar"><img src="https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser)}&background=4F46E5&color=fff&bold=true" alt="User"></div>
+            <div class="avatar"><img src="https://ui-avatars.com/api/?name=${currentUser}&background=4F46E5&color=fff&bold=true" alt="User"></div>
         `;
     }
 }
@@ -108,8 +93,7 @@ function renderLevelScores() {
 // ==========================================
 function switchTab(targetId) {
     document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
-    const target = document.getElementById(targetId);
-    if(target) target.classList.add('active');
+    document.getElementById(targetId).classList.add('active');
     
     document.querySelectorAll('.nav-links a[data-target]').forEach(l => {
         if(l.getAttribute('data-target') === targetId) l.classList.add('active');
@@ -128,20 +112,18 @@ document.querySelectorAll('.nav-links a[data-target]').forEach(link => {
 // 4. SETUP BÀI HỌC VÀ CHỌN CHẾ ĐỘ
 // ==========================================
 const levelGrid = document.getElementById('levelGrid');
-if (levelGrid) {
-    levels.forEach(lvl => {
-        const btn = document.createElement('button');
-        btn.className = 'pill-btn';
-        btn.innerText = lvl;
-        btn.onclick = () => {
-            btn.classList.toggle('active');
-            const name = lvl.toLowerCase();
-            if (selectedLevels.includes(name)) selectedLevels = selectedLevels.filter(l => l !== name);
-            else selectedLevels.push(name);
-        };
-        levelGrid.appendChild(btn);
-    });
-}
+levels.forEach(lvl => {
+    const btn = document.createElement('button');
+    btn.className = 'pill-btn';
+    btn.innerText = lvl;
+    btn.onclick = () => {
+        btn.classList.toggle('active');
+        const name = lvl.toLowerCase();
+        if (selectedLevels.includes(name)) selectedLevels = selectedLevels.filter(l => l !== name);
+        else selectedLevels.push(name);
+    };
+    levelGrid.appendChild(btn);
+});
 
 document.querySelectorAll('.mode-btn').forEach(btn => {
     btn.onclick = () => {
@@ -154,28 +136,23 @@ document.querySelectorAll('.mode-btn').forEach(btn => {
 // ==========================================
 // 5. QUẢN LÝ FILE CÁ NHÂN
 // ==========================================
-const fileUpload = document.getElementById('fileUpload');
-if (fileUpload) {
-    fileUpload.addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const name = file.name.replace('.csv', '');
-            personalFiles[name] = e.target.result;
-            localStorage.setItem('hsk_personal_files', JSON.stringify(personalFiles));
-            alert("Đã tải lên file: " + name);
-            renderPersonalFiles();
-        };
-        reader.readAsText(file);
-    });
-}
+document.getElementById('fileUpload').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const name = file.name.replace('.csv', '');
+        personalFiles[name] = e.target.result;
+        localStorage.setItem('hsk_personal_files', JSON.stringify(personalFiles));
+        alert("Đã tải lên file: " + name);
+        renderPersonalFiles();
+    };
+    reader.readAsText(file);
+});
 
 function renderPersonalFiles() {
     const list = document.getElementById('personalFilesList');
     const selectGrid = document.getElementById('personalSelectGrid');
-    if(!list || !selectGrid) return;
-
     list.innerHTML = ''; selectGrid.innerHTML = '';
 
     if (Object.keys(personalFiles).length === 0) {
@@ -220,66 +197,55 @@ function normalizePinyin(str) {
 }
 
 function updateGameProgress() {
-    const progressFill = document.getElementById('gameProgress');
-    if (progressFill && quizData.length > 0) {
-        const percent = Math.round((currentIndex / quizData.length) * 100);
-        progressFill.style.width = `${percent}%`;
-    }
+    const percent = Math.round((currentIndex / quizData.length) * 100);
+    document.getElementById('gameProgress').style.width = `${percent}%`;
 }
 
-// Bắn pháo hoa (Bọc try/catch để chống crash nếu lỗi mạng)
 function shootConfetti() {
-    try {
-        if (typeof confetti === 'function') {
-            confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#4F46E5', '#DB2777', '#10B981', '#F59E0B'] });
-        }
-    } catch(e) { console.warn("Lỗi pháo hoa:", e); }
+    confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#4F46E5', '#DB2777', '#10B981', '#F59E0B'] });
 }
 
-const btnStart = document.getElementById('btnStart');
-if (btnStart) {
-    btnStart.onclick = async () => {
-        if (selectedLevels.length === 0 && selectedPersonalFiles.length === 0) 
-            return alert("Vui lòng chọn ít nhất 1 Level HSK hoặc 1 File Cá Nhân để luyện tập!");
+document.getElementById('btnStart').onclick = async () => {
+    if (selectedLevels.length === 0 && selectedPersonalFiles.length === 0) 
+        return alert("Vui lòng chọn ít nhất 1 Level HSK hoặc 1 File Cá Nhân để luyện tập!");
 
-        btnStart.innerHTML = "ĐANG TẢI... <i class='bx bx-loader-alt bx-spin'></i>";
-        quizData = [];
+    document.getElementById('btnStart').innerHTML = "ĐANG TẢI... <i class='bx bx-loader-alt bx-spin'></i>";
+    quizData = [];
 
-        for (let lvl of selectedLevels) {
-            try {
-                const response = await fetch(`${lvl}.csv`);
-                if (response.ok) {
-                    const text = await response.text();
-                    const parsed = Papa.parse(text, { skipEmptyLines: true });
-                    quizData = [...quizData, ...parsed.data.map(r => [...r, lvl.toUpperCase()])];
-                }
-            } catch (e) { console.log(e); }
-        }
+    for (let lvl of selectedLevels) {
+        try {
+            const response = await fetch(`${lvl}.csv`);
+            if (response.ok) {
+                const text = await response.text();
+                const parsed = Papa.parse(text, { skipEmptyLines: true });
+                quizData = [...quizData, ...parsed.data.map(r => [...r, lvl.toUpperCase()])];
+            }
+        } catch (e) { console.log(e); }
+    }
 
-        for (let name of selectedPersonalFiles) {
-            const text = personalFiles[name];
-            const parsed = Papa.parse(text, { skipEmptyLines: true });
-            quizData = [...quizData, ...parsed.data.map(r => [...r, name])];
-        }
+    for (let name of selectedPersonalFiles) {
+        const text = personalFiles[name];
+        const parsed = Papa.parse(text, { skipEmptyLines: true });
+        quizData = [...quizData, ...parsed.data.map(r => [...r, name])];
+    }
 
-        if (quizData.length === 0) {
-            btnStart.innerHTML = "BẮT ĐẦU CHIẾN <i class='bx bx-play'></i>";
-            return alert("Dữ liệu rỗng, vui lòng kiểm tra lại nội dung file CSV.");
-        }
+    if (quizData.length === 0) {
+        document.getElementById('btnStart').innerHTML = "BẮT ĐẦU CHIẾN <i class='bx bx-play'></i>";
+        return alert("Dữ liệu rỗng, vui lòng kiểm tra lại nội dung file CSV.");
+    }
 
-        quizData.sort(() => Math.random() - 0.5);
-        hp = 5; 
-        currentIndex = 0;
-        missedWords = [];
-        isReviewMode = false;
-        
-        document.getElementById('hpDisplay').innerText = "❤️❤️❤️❤️❤️";
-        btnStart.innerHTML = "BẮT ĐẦU CHIẾN <i class='bx bx-play'></i>";
-        document.getElementById('gameScreen').style.display = 'block'; 
-        
-        showQuestion();
-    };
-}
+    quizData.sort(() => Math.random() - 0.5);
+    hp = 5; 
+    currentIndex = 0;
+    missedWords = [];
+    isReviewMode = false;
+    
+    document.getElementById('hpDisplay').innerText = "❤️❤️❤️❤️❤️";
+    document.getElementById('btnStart').innerHTML = "BẮT ĐẦU CHIẾN <i class='bx bx-play'></i>";
+    document.getElementById('gameScreen').style.display = 'block'; // Block, không phải flex vì layout mới
+    
+    showQuestion();
+};
 
 function showQuestion() {
     updateGameProgress();
@@ -304,7 +270,7 @@ function showQuestion() {
     const meaning = currentWord[2];
     const lvl = currentWord[currentWord.length - 1]; 
 
-    document.getElementById('lvlBadge').innerText = isReviewMode ? "ÔN TẬP" : (lvl || "HSK").toUpperCase();
+    document.getElementById('lvlBadge').innerText = isReviewMode ? "ÔN TẬP LỖI SAI" : lvl.toUpperCase();
     
     const mainQ = document.getElementById('mainQuestion');
     const subQ = document.getElementById('subQuestion');
@@ -314,6 +280,7 @@ function showQuestion() {
 
     let correctAnswer = "";
 
+    // CHẾ ĐỘ GÕ PINYIN
     if (selectedMode === "GÕ PINYIN") {
         mainQ.innerText = hanzi; 
         mainQ.style.fontSize = "7.5rem"; 
@@ -326,6 +293,7 @@ function showQuestion() {
         setTimeout(() => pinyinInput.focus(), 100); 
         
     } else {
+        // CHẾ ĐỘ TRẮC NGHIỆM
         typingContainer.style.display = 'none';
         answerContainer.style.display = 'grid';
 
@@ -337,17 +305,18 @@ function showQuestion() {
             mainQ.innerText = meaning; mainQ.style.fontSize = "4rem"; subQ.innerText = pinyin; correctAnswer = hanzi;
         }
 
-        renderAnswers(correctAnswer, lvl ? lvl.toUpperCase() : "CUSTOM");
+        renderAnswers(correctAnswer, lvl.toUpperCase());
     }
 }
 
+// LOGIC GÕ PINYIN
 function checkTypingAnswer() {
     const userInput = document.getElementById('pinyinInput').value;
     if (!userInput.trim()) return; 
 
     const currentWord = quizData[currentIndex];
     const correctPinyin = currentWord[1];
-    const currentLevel = (currentWord[currentWord.length - 1] || "CUSTOM").toUpperCase();
+    const currentLevel = currentWord[currentWord.length - 1].toUpperCase();
 
     if (normalizePinyin(userInput) === normalizePinyin(correctPinyin)) {
         if(!isReviewMode) {
@@ -368,16 +337,12 @@ function checkTypingAnswer() {
     }
 }
 
-const btnSubmitPinyin = document.getElementById('btnSubmitPinyin');
-if (btnSubmitPinyin) btnSubmitPinyin.addEventListener('click', checkTypingAnswer);
+document.getElementById('btnSubmitPinyin').addEventListener('click', checkTypingAnswer);
+document.getElementById('pinyinInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') { e.preventDefault(); checkTypingAnswer(); }
+});
 
-const pinyinInput = document.getElementById('pinyinInput');
-if (pinyinInput) {
-    pinyinInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') { e.preventDefault(); checkTypingAnswer(); }
-    });
-}
-
+// LOGIC TRẮC NGHIỆM
 function renderAnswers(correct, currentLevel) {
     const container = document.getElementById('answerContainer');
     container.innerHTML = "";
@@ -442,5 +407,5 @@ window.endGame = function() {
     switchTab('dashboard-view'); 
 }
 
-// Chạy khởi tạo
+// Boot up
 checkAuth();
