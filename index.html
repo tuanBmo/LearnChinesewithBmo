@@ -3,50 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HSK Trainer - Mastery App</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <title>HSK Trainer - Playful Mastery</title>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <div id="authModal" class="modal-overlay">
         <div class="bento-card auth-box">
-            <div class="logo" style="justify-content: center; margin-bottom: 20px;">
+            <div class="blob-decor blob-1"></div>
+            <div class="blob-decor blob-2"></div>
+            <div class="logo-center">
                 <div class="logo-mark">汉</div>
-                <span style="font-size: 1.5rem; font-weight: 800; color: #1D1D1F;">HSK Trainer</span>
+                <h2>HSK Trainer</h2>
             </div>
-            <h2 style="text-align: center; margin-bottom: 5px;">Hành trình của bạn</h2>
-            <p style="text-align: center; color: var(--text-secondary); margin-bottom: 25px;">Nhập tên để hệ thống lưu trữ tiến độ học tập trên thiết bị này.</p>
-            
-            <input type="text" id="usernameInput" class="auth-input" value="Phan Anh Tuấn" placeholder="Tên hiển thị..." required>
-            <button class="btn-primary" id="btnLogin" style="width: 100%; margin-top: 15px;">Vào học ngay</button>
+            <p style="text-align: center; color: var(--text-secondary); margin-bottom: 25px; position: relative; z-index: 2;">Nhập biệt danh để bắt đầu hành trình!</p>
+            <input type="text" id="usernameInput" class="auth-input" value="Phan Anh Tuấn" placeholder="Biệt danh của bạn..." required>
+            <button class="btn-primary btn-bouncy" id="btnLogin" style="width: 100%; margin-top: 15px;">Bắt đầu ngay 🚀</button>
         </div>
     </div>
 
     <div id="reviewModal" class="modal-overlay" style="display: none;">
         <div class="bento-card auth-box" style="text-align: center;">
-            <i class='bx bx-refresh' style="font-size: 4rem; color: #FF9F0A; margin-bottom: 10px;"></i>
+            <div style="font-size: 5rem; margin-bottom: 10px;">🎯</div>
             <h2>Hoàn thành bài học!</h2>
-            <p style="color: var(--text-secondary); margin: 10px 0 20px;">Bạn có <strong id="missedCount" style="color: #EF4444; font-size: 1.2rem;">0</strong> câu trả lời sai. Bạn có muốn gom chúng lại để ôn tập ngay không?</p>
-            
-            <div style="display: flex; gap: 10px;">
-                <button class="btn-secondary" style="flex: 1; justify-content: center;" onclick="endGame()">Bỏ qua</button>
-                <button class="btn-primary" style="flex: 1; justify-content: center; background: #FF9F0A;" onclick="startReviewMode()">Ôn tập ngay</button>
+            <p style="color: var(--text-secondary); margin: 10px 0 20px;">Bạn có <strong id="missedCount" style="color: var(--accent-pink-text); font-size: 1.3rem;">0</strong> từ cần ôn lại. Chiến luôn chứ?</p>
+            <div style="display: flex; gap: 15px;">
+                <button class="btn-secondary btn-bouncy" style="flex: 1;" onclick="endGame()">Để sau</button>
+                <button class="btn-primary btn-bouncy" style="flex: 1; background: var(--accent-orange-text); box-shadow: 0 6px 0 #D97706;" onclick="startReviewMode()">Ôn ngay 🔥</button>
             </div>
         </div>
     </div>
 
     <div id="gameScreen" class="game-overlay" style="display: none;">
-        <div class="game-container bento-card">
+        <div class="game-container">
             <nav class="game-hud">
-                <div id="hpDisplay" style="font-size: 1.5rem; letter-spacing: 2px;">❤️❤️❤️❤️❤️</div>
-                <div id="progressText" style="font-weight: bold; color: var(--text-secondary);">0/0</div>
-                <button class="btn-secondary" style="padding: 8px 16px; border-radius: 20px;" onclick="endGame()"><i class='bx bx-x'></i> Dừng</button>
+                <button class="btn-icon" onclick="endGame()"><i class='bx bx-x'></i></button>
+                <div class="progress-bar-game"><div class="progress-fill-game" id="gameProgress"></div></div>
+                <div id="hpDisplay" style="font-size: 1.8rem; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.1));">❤️❤️❤️❤️❤️</div>
             </nav>
 
-            <div class="flashcard-area">
-                <span class="tag blue-tag" id="lvlBadge" style="position: absolute; top: 20px; right: 20px;">HSK</span>
+            <div class="flashcard-area playful-card">
+                <span class="tag sky-tag" id="lvlBadge" style="position: absolute; top: 20px; right: 20px;">HSK</span>
                 <h1 class="main-q" id="mainQuestion">你好</h1>
                 <p class="sub-q" id="subQuestion">nǐ hǎo</p>
             </div>
@@ -54,102 +54,131 @@
             <div class="answer-grid" id="answerContainer"></div>
 
             <div id="typingContainer" style="display: none; text-align: center;">
-                <input type="text" id="pinyinInput" placeholder="Nhập pinyin (không cần dấu)..." autocomplete="off">
-                <button id="btnSubmitPinyin" class="btn-primary" style="margin-top: 20px; font-size: 1.1rem; padding: 15px 40px; border-radius: 20px;">
+                <input type="text" id="pinyinInput" class="playful-input" placeholder="Gõ pinyin vào đây..." autocomplete="off">
+                <button id="btnSubmitPinyin" class="btn-primary btn-bouncy" style="margin-top: 25px; font-size: 1.2rem; padding: 18px 50px;">
                     Kiểm tra <i class='bx bx-check'></i>
                 </button>
             </div>
         </div>
     </div>
 
-    <aside class="sidebar">
-        <div class="logo">
-            <div class="logo-mark">汉</div>
-            <span>HSK Trainer</span>
-        </div>
-        <nav class="nav-links">
-            <p class="nav-title">HỌC TẬP</p>
-            <a href="#" data-target="dashboard-view" class="active"><i class='bx bx-grid-alt'></i> Tổng quan</a>
-            <a href="#" data-target="practice-view"><i class='bx bx-dumbbell'></i> Luyện tập</a>
-            
-            <p class="nav-title">DỮ LIỆU CỦA BẠN</p>
-            <a href="#" data-target="personal-view"><i class='bx bx-folder'></i> File cá nhân</a>
-            
-            <p class="nav-title">CÁ NHÂN</p>
-            <a href="#"><i class='bx bxs-flame' style="color: #FF9F0A;"></i> Streak</a>
-            <a href="#"><i class='bx bx-cog'></i> Cài đặt</a>
-        </nav>
-    </aside>
-
-    <main class="main-content">
-        <header class="top-bar">
-            <div class="search-bar">
-                <i class='bx bx-search'></i>
-                <input type="text" placeholder="Tìm kiếm từ vựng, ngữ pháp...">
+    <div class="app-layout">
+        <aside class="sidebar">
+            <div class="logo">
+                <div class="logo-mark">汉</div>
+                <span>HSK Trainer</span>
             </div>
-            <div class="user-profile" id="userProfileBar"></div>
-        </header>
-
-        <div id="dashboard-view" class="view-section active">
-            <div class="bento-grid">
-                <div class="bento-card word-of-day" style="grid-column: span 4; background: linear-gradient(145deg, #ffffff, #F8F8FF);">
-                    <div class="card-header"><span class="tag purple-tag">Dashboard</span></div>
-                    <div style="padding: 20px 0;">
-                        <h1 style="font-size: 2.5rem; margin-bottom: 10px;">Chào <span id="greetName" style="color: var(--accent-purple-text);">bạn</span>!</h1>
-                        <p style="color: var(--text-secondary); font-size: 1.1rem;">Sẵn sàng để tiếp tục hành trình chinh phục tiếng Trung hôm nay chưa?</p>
-                    </div>
-                    <button class="btn-primary" onclick="switchTab('practice-view')" style="width: max-content;">Vào luyện tập ngay <i class='bx bx-right-arrow-alt'></i></button>
-                </div>
-
-                <div class="bento-card" style="grid-column: span 4;">
-                    <div class="card-header"><h2 style="font-size: 1.3rem;"><i class='bx bx-bar-chart-square' style="color: var(--accent-purple-text);"></i> Điểm số Mastery theo Level</h2></div>
-                    <p style="color: var(--text-secondary); margin-bottom: 20px;">Mỗi câu trả lời đúng lần đầu sẽ được +1 điểm. Theo dõi lượng từ vựng bạn đã "nắm trùm".</p>
-                    <div class="level-stats-container" id="levelStatsList"></div>
-                </div>
-            </div>
-        </div>
-
-        <div id="practice-view" class="view-section">
-            <div class="bento-card">
-                <div class="card-header"><span class="tag blue-tag">Setup ván mới</span></div>
-                <h2 style="margin: 10px 0 20px;">Cấu hình bài học</h2>
+            <nav class="nav-links">
+                <p class="nav-title">HỌC TẬP</p>
+                <a href="#" data-target="dashboard-view" class="active"><i class='bx bx-home-smile'></i> Home</a>
+                <a href="#" data-target="practice-view"><i class='bx bx-joystick'></i> Luyện tập</a>
+                <a href="#"><i class='bx bx-book-heart'></i> Từ mới</a>
+                <a href="#"><i class='bx bx-headphone'></i> Luyện nghe</a>
                 
-                <h4>1. Chọn Level HSK chuẩn</h4>
-                <div id="levelGrid" class="pill-group"></div>
+                <p class="nav-title">CỦA BẠN</p>
+                <a href="#" data-target="personal-view"><i class='bx bx-folder-open'></i> File cá nhân</a>
+                <a href="#"><i class='bx bx-medal'></i> Thành tích</a>
+                <a href="#"><i class='bx bxs-flame' style="color: #F97316;"></i> Streak</a>
+            </nav>
+        </aside>
 
-                <h4 style="margin-top: 25px;">2. Hoặc File cá nhân của bạn</h4>
-                <div id="personalSelectGrid" class="pill-group">
-                    <p style="color: var(--text-secondary); font-size: 0.9rem;">(Chưa có file nào. Hãy tải lên ở mục File Cá Nhân)</p>
+        <main class="main-content">
+            <header class="top-bar">
+                <div class="search-bar">
+                    <i class='bx bx-search'></i>
+                    <input type="text" placeholder="Tìm kiếm từ vựng...">
                 </div>
+                <div class="user-profile" id="userProfileBar"></div>
+            </header>
 
-                <h4 style="margin-top: 25px;">3. Chế độ câu hỏi</h4>
-                <div class="pill-group">
-                    <button class="mode-btn active" data-mode="NGHĨA">Nghĩa (Dịch)</button>
-                    <button class="mode-btn" data-mode="PINYIN">Pinyin (Phát âm)</button>
-                    <button class="mode-btn" data-mode="CHỮ HÁN">Chữ Hán (Mặt chữ)</button>
-                    <button class="mode-btn" data-mode="GÕ PINYIN">Gõ Pinyin (Typing)</button>
+            <div id="dashboard-view" class="view-section active">
+                <div class="bento-grid">
+                    <div class="bento-card hero-card floating-anim">
+                        <div class="card-header"><span class="tag white-tag">Từ hôm nay ✨</span></div>
+                        <div class="hero-content">
+                            <h1 class="hanzi-huge">努力</h1>
+                            <p class="pinyin-large">nǔ lì</p>
+                            <p class="meaning-text">nỗ lực, cố gắng</p>
+                        </div>
+                        <button class="btn-primary btn-bouncy" onclick="switchTab('practice-view')">Học ngay <i class='bx bx-right-arrow-alt'></i></button>
+                        <div class="decor-circle"></div>
+                    </div>
+
+                    <div class="bento-card streak-card hover-lift">
+                        <div class="card-header"><span class="tag orange-tag">Daily Streak</span></div>
+                        <div style="text-align: center; margin-top: 10px;">
+                            <i class='bx bxs-hot' style="font-size: 4rem; color: #F97316; filter: drop-shadow(0 4px 10px rgba(249,115,22,0.3));"></i>
+                            <h2 style="font-size: 2rem;">14</h2>
+                            <p class="muted">Ngày liên tiếp</p>
+                        </div>
+                    </div>
+
+                    <div class="bento-card mint-card hover-lift">
+                        <div class="card-header"><span class="tag green-tag">HSK 3 Progress</span></div>
+                        <div class="circular-progress-wrapper">
+                            <div class="circular-progress"><span class="progress-value">68%</span></div>
+                            <p style="font-weight: 700; color: #065F46;">408 / 600 từ</p>
+                        </div>
+                    </div>
+
+                    <div class="bento-card mastery-card" style="grid-column: span 2;">
+                        <div class="card-header"><h3 style="font-size: 1.2rem;"><i class='bx bx-medal' style="color: var(--accent-purple-text);"></i> Level Mastery</h3></div>
+                        <div class="level-stats-container" id="levelStatsList"></div>
+                    </div>
+
+                    <div class="bento-card blue-card hover-lift" style="grid-column: span 2; display: flex; align-items: center; justify-content: space-between;">
+                        <div>
+                            <h3 style="font-size: 1.4rem; color: #0369A1; margin-bottom: 5px;">Mini Game 🎮</h3>
+                            <p style="color: #0284C7; font-weight: 500;">Ghép thẻ từ vựng nhận XP</p>
+                        </div>
+                        <button class="btn-secondary btn-bouncy" style="background: white; color: #0284C7;">Chơi ngay</button>
+                    </div>
                 </div>
-
-                <button id="btnStart" class="btn-primary" style="margin-top: 40px; width: 100%; font-size: 1.2rem; padding: 20px; justify-content: center;">BẮT ĐẦU LUYỆN TẬP <i class='bx bx-play'></i></button>
             </div>
-        </div>
 
-        <div id="personal-view" class="view-section">
-            <div class="bento-card">
-                <div class="card-header" style="margin-bottom: 25px;">
-                    <h2>Quản lý File Cá Nhân</h2>
-                    <label class="btn-primary" style="cursor: pointer; padding: 10px 20px;">
-                        <i class='bx bx-upload'></i> Tải lên CSV
-                        <input type="file" id="fileUpload" accept=".csv" style="display: none;">
-                    </label>
+            <div id="practice-view" class="view-section">
+                <div class="bento-card playful-card" style="max-width: 800px; margin: 0 auto;">
+                    <div style="text-align: center; margin-bottom: 30px;">
+                        <div style="font-size: 4rem; margin-bottom: 10px;">🚀</div>
+                        <h2>Setup ván mới</h2>
+                        <p class="muted">Chọn vũ khí để bắt đầu chiến đấu.</p>
+                    </div>
+                    
+                    <h4 class="section-title">1. Chọn Level HSK</h4>
+                    <div id="levelGrid" class="pill-group"></div>
+
+                    <h4 class="section-title" style="margin-top: 25px;">2. Hoặc File cá nhân</h4>
+                    <div id="personalSelectGrid" class="pill-group"><p class="muted">(Chưa có file nào)</p></div>
+
+                    <h4 class="section-title" style="margin-top: 25px;">3. Chế độ chơi</h4>
+                    <div class="pill-group">
+                        <button class="mode-btn active" data-mode="NGHĨA">🇺🇳 Dịch Nghĩa</button>
+                        <button class="mode-btn" data-mode="PINYIN">🗣️ Phát âm</button>
+                        <button class="mode-btn" data-mode="CHỮ HÁN">✍️ Mặt chữ</button>
+                        <button class="mode-btn" data-mode="GÕ PINYIN">⌨️ Gõ Pinyin</button>
+                    </div>
+
+                    <button id="btnStart" class="btn-primary btn-bouncy" style="margin-top: 40px; width: 100%; font-size: 1.3rem; padding: 22px;">BẮT ĐẦU CHIẾN <i class='bx bx-play'></i></button>
                 </div>
-                <div style="background: #F9FAFB; padding: 15px; border-radius: 12px; margin-bottom: 25px; border: 1px dashed #D1D5DB;">
-                    <p style="color: var(--text-secondary); font-size: 0.9rem;"><strong>Hướng dẫn:</strong> Upload file .csv tự tạo để học. File cần có cấu trúc 3 cột không tiêu đề: <em>Cột 1: Chữ Hán, Cột 2: Pinyin, Cột 3: Nghĩa</em>.</p>
-                </div>
-                <div id="personalFilesList" class="file-list-container"></div>
             </div>
-        </div>
-    </main>
+
+            <div id="personal-view" class="view-section">
+                <div class="bento-card playful-card">
+                    <div class="card-header" style="margin-bottom: 25px;">
+                        <h2><i class='bx bx-folder-open' style="color: var(--accent-purple-text);"></i> Quản lý File Cá Nhân</h2>
+                        <label class="btn-primary btn-bouncy" style="cursor: pointer;">
+                            <i class='bx bx-upload'></i> Tải lên CSV
+                            <input type="file" id="fileUpload" accept=".csv" style="display: none;">
+                        </label>
+                    </div>
+                    <div class="info-box">
+                        <p><strong>💡 Mẹo:</strong> Upload file .csv tự tạo. Cấu trúc 3 cột không tiêu đề: <em>Cột 1: Chữ Hán, Cột 2: Pinyin, Cột 3: Nghĩa</em>.</p>
+                    </div>
+                    <div id="personalFilesList" class="file-list-container"></div>
+                </div>
+            </div>
+        </main>
+    </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <script src="script.js"></script>
