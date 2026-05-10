@@ -159,4 +159,4 @@ body { background-color: var(--bg-body); color: var(--text-primary); display: fl
 
 /* CHẾ ĐỘ TRẮC NGHIỆM */
 .answer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-.ans-btn { background: white; border: 2px solid #E2E8F0; padding
+.ans-btn { background: white; border: 2px solid #E2E8F0; padding 
