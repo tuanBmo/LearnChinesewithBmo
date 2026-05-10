@@ -23,7 +23,6 @@ function checkAuth() {
         document.getElementById('authModal').style.display = 'flex';
     } else {
         document.getElementById('authModal').style.display = 'none';
-        document.getElementById('greetName').innerText = currentUser;
         updateProfileUI();
         renderLevelScores();
     }
