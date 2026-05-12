@@ -499,6 +499,6 @@ window.endGame = function() {
     renderLevelScores(); 
     switchTab('dashboard-view'); 
 }
-
+ 
 // Boot up
 checkAuth();
