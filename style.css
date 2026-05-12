@@ -144,21 +144,25 @@ body { background-color: var(--bg-body); color: var(--text-primary); display: fl
 
 /* --- GAME OVERLAY (Bouncy Duolingo Vibe) --- */
 .game-overlay { 
-    z-index: 1000; 
-    background: rgba(248, 250, 252, 0.95); /* Nền mờ sáng sủa */
-    backdrop-filter: blur(15px);
+    position: fixed; /* Ghim chết trên màn hình */
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%; 
+    z-index: 3000; /* Đưa lên lớp cao nhất để đè mọi thứ */
+    background: #F8FAFC; /* Nền đặc che khuất hoàn toàn menu bên dưới */
+    overflow-y: auto; /* Cho phép cuộn nếu màn hình nhỏ */
 }
 
 .game-container { 
     width: 900px; 
     max-width: 95%; 
-    margin: 0 auto; 
+    margin: 0 auto; /* Căn giữa màn hình */
     display: flex; 
     flex-direction: column; 
-    height: 100vh; 
+    min-height: 100vh; 
     padding: 40px 0;
 }
-
 /* Thanh tiến độ và Máu (HUD) */
 .game-hud { 
     display: flex; 
