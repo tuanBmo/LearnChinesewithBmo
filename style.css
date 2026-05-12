@@ -164,3 +164,4 @@ input:checked + .tg-slider:before { transform: translateX(22px); }
 @keyframes floatAnim { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
 @keyframes popOut { to { transform: scale(0); opacity: 0; } }
 @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-10px); } 40%, 80% { transform: translateX(10px); } }
+ 
