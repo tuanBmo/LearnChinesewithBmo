@@ -21,69 +21,90 @@ let personalFiles = getSafeData('hsk_personal_files', {});
 let currentUser = localStorage.getItem('hsk_current_user');
 let currentStreak = parseInt(localStorage.getItem('hsk_streak_count')) || 0;
 let lastLoginDate = localStorage.getItem('hsk_last_login_date');
-let appSettings = getSafeData('hsk_settings', { hidePinyin: false, shuffle: true, dailyWords: 5 });
+let appSettings = getSafeData('hsk_settings', { hidePinyin: false, shuffle: true });
 
-let dailyWordsPool = []; 
 let matchGameSelected = [];
 let matchedCount = 0;
 
+// Danh sách trích dẫn tạo động lực
+const motivationalQuotes = [
+    { text: "Không sợ chậm, chỉ sợ dừng.", author: "Tục ngữ Trung Quốc" },
+    { text: "Đường đi ngàn dặm bắt đầu từ một bước chân.", author: "Lão Tử" },
+    { text: "Học tập là hạt giống của kiến thức, kiến thức là hạt giống của hạnh phúc.", author: "Khuyết danh" },
+    { text: "Hôm nay đọc sách, ngày mai làm sếp.", author: "HSK Trainer" },
+    { text: "Cứ gõ rồi cửa sẽ mở, cứ học rồi chữ sẽ vào đầu.", author: "Khuyết danh" },
+    { text: "Người kiên nhẫn làm được mọi việc.", author: "Tục ngữ" },
+    { text: "Sự chuẩn bị tốt nhất cho ngày mai là làm tốt nhất việc của ngày hôm nay.", author: "H. Jackson Brown Jr." }
+];
+
 // ==========================================
-// 2. KHỞI TẠO & CÀI ĐẶT
+// HỆ THỐNG ÂM THANH (WEB AUDIO API)
 // ==========================================
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function playSound(type) {
+    if(audioCtx.state === 'suspended') audioCtx.resume();
+    const osc = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    osc.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+    
+    if(type === 'pop') {
+        // Âm thanh khi click bong bóng
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.1);
+        gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+        osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+    } else if (type === 'correct') {
+        // Âm thanh khi ghép đúng (Ting ting)
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+        osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.1); // A5
+        gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+        osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+    } else if (type === 'wrong') {
+        // Âm thanh khi sai (Buzz)
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.2);
+        gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+        osc.start(); osc.stop(audioCtx.currentTime + 0.2);
+    }
+}
+
+// ==========================================
+// 2. KHỞI TẠO CƠ BẢN
+// ==========================================
+function renderDailyQuote() {
+    const today = new Date();
+    // Tạo index cố định theo ngày để mỗi ngày 1 câu
+    const dateIndex = today.getFullYear() + today.getMonth() + today.getDate();
+    const quote = motivationalQuotes[dateIndex % motivationalQuotes.length];
+    
+    const qEl = document.getElementById('dailyQuoteText');
+    const aEl = document.getElementById('dailyQuoteAuthor');
+    if (qEl && aEl) {
+        qEl.innerText = `"${quote.text}"`;
+        aEl.innerText = `- ${quote.author} -`;
+    }
+}
+
 function initSettingsUI() {
     const sPinyin = document.getElementById('setHidePinyin');
     const sShuffle = document.getElementById('setShuffle');
-    const sDaily = document.getElementById('setDailyWords');
-    
     if(sPinyin) sPinyin.checked = appSettings.hidePinyin;
     if(sShuffle) sShuffle.checked = appSettings.shuffle;
-    if(sDaily) sDaily.value = appSettings.dailyWords;
-    
-    const dailyCountDisplay = document.getElementById('dailyWordCountDisplay');
-    if(dailyCountDisplay) dailyCountDisplay.innerText = appSettings.dailyWords;
 }
 
 window.saveSettings = function() {
     appSettings.hidePinyin = document.getElementById('setHidePinyin').checked;
     appSettings.shuffle = document.getElementById('setShuffle').checked;
-    appSettings.dailyWords = parseInt(document.getElementById('setDailyWords').value);
-    
     localStorage.setItem('hsk_settings', JSON.stringify(appSettings));
     alert("Đã lưu cài đặt!");
-    
-    document.getElementById('dailyWordCountDisplay').innerText = appSettings.dailyWords;
-    loadDailyWordsData(); 
 };
-
-async function loadDailyWordsData() {
-    let allWords = [];
-    Object.keys(personalFiles).forEach(name => {
-        const parsed = Papa.parse(personalFiles[name], { skipEmptyLines: true });
-        allWords = [...allWords, ...parsed.data];
-    });
-
-    const fetchPromises = levels.map(async (lvl) => {
-        try {
-            let res = await fetch(`${lvl}.csv`);
-            if (!res.ok) res = await fetch(`${lvl.toLowerCase()}.csv`);
-            if (res.ok) {
-                const text = await res.text();
-                const parsed = Papa.parse(text, { skipEmptyLines: true });
-                return parsed.data;
-            }
-        } catch (e) { return []; }
-        return [];
-    });
-
-    const results = await Promise.all(fetchPromises);
-    results.forEach(data => { allWords = [...allWords, ...data]; });
-
-    allWords = allWords.filter(row => row.length >= 3 && row[0] !== undefined && row[0].trim() !== "");
-    if (allWords.length > 0) {
-        allWords.sort(() => Math.random() - 0.5);
-        dailyWordsPool = allWords.slice(0, appSettings.dailyWords);
-    }
-}
 
 // ==========================================
 // 3. LOGIC AUTH, STREAK & THỐNG KÊ
@@ -138,7 +159,7 @@ function checkAuth() {
     } else {
         if (authModal) authModal.style.display = 'none';
         updateStreak(); updateProfileUI(); renderLevelScores();
-        initSettingsUI(); loadDailyWordsData();
+        initSettingsUI(); renderDailyQuote();
     }
 }
 
@@ -196,7 +217,7 @@ function renderLevelScores() {
 }
 
 // ==========================================
-// 4. ĐIỀU HƯỚNG TABS VÀ CÀI ĐẶT BÀI HỌC
+// 4. ĐIỀU HƯỚNG TABS & QUẢN LÝ FILE
 // ==========================================
 function switchTab(targetId) {
     document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
@@ -234,7 +255,6 @@ document.querySelectorAll('.mode-btn').forEach(btn => {
     };
 });
 
-// File Upload
 const fileUpload = document.getElementById('fileUpload');
 if (fileUpload) {
     fileUpload.addEventListener('change', function(e) {
@@ -289,20 +309,59 @@ window.deleteFile = function(name) {
 renderPersonalFiles();
 
 // ==========================================
-// 5. MINI GAME: GHÉP TỪ HÔM NAY (BONG BÓNG)
+// 5. MINI GAME TÁCH RIÊNG (ÂM THANH + RANDOM FILE)
 // ==========================================
-window.startMatchGame = function() {
-    if(dailyWordsPool.length === 0) return alert("Hệ thống chưa tải xong dữ liệu, đợi 1 chút nhé!");
-    
+let currentMiniGameWordCount = 5;
+
+window.startMatchGame = async function() {
+    // 1. Lấy số lượng từ Dropdown
+    const countSelect = document.getElementById('miniGameWordCount');
+    if(countSelect) currentMiniGameWordCount = parseInt(countSelect.value);
+
+    // 2. Fetch toàn bộ dữ liệu (HSK + Personal)
+    let allWords = [];
+    Object.keys(personalFiles).forEach(name => {
+        const parsed = Papa.parse(personalFiles[name], { skipEmptyLines: true });
+        allWords = [...allWords, ...parsed.data];
+    });
+
+    const fetchPromises = levels.map(async (lvl) => {
+        try {
+            let res = await fetch(`${lvl}.csv`);
+            if (!res.ok) res = await fetch(`${lvl.toLowerCase()}.csv`);
+            if (res.ok) {
+                const text = await res.text();
+                const parsed = Papa.parse(text, { skipEmptyLines: true });
+                return parsed.data;
+            }
+        } catch (e) { return []; }
+        return [];
+    });
+
     document.getElementById('wordMatchGameScreen').style.display = 'block';
-    matchedCount = 0; matchGameSelected = [];
-    document.getElementById('matchProgressText').innerText = `0 / ${appSettings.dailyWords}`;
-    
     const container = document.getElementById('floatingBubblesContainer');
+    container.innerHTML = `<h3 style="color:var(--text-secondary);">Đang tìm kiếm dữ liệu từ vựng... <i class='bx bx-loader-alt bx-spin'></i></h3>`;
+
+    const results = await Promise.all(fetchPromises);
+    results.forEach(data => { allWords = [...allWords, ...data]; });
+
+    allWords = allWords.filter(row => row.length >= 3 && row[0] !== undefined && row[0].trim() !== "");
+    
+    if (allWords.length === 0) {
+        container.innerHTML = `<h3 style="color:var(--accent-pink-text);">Lỗi: Kho dữ liệu trống! Vui lòng đảm bảo bạn có file CSV.</h3>`;
+        return;
+    }
+
+    // Trộn và cắt đúng số lượng
+    allWords.sort(() => Math.random() - 0.5);
+    let wordsForGame = allWords.slice(0, currentMiniGameWordCount);
+
+    matchedCount = 0; matchGameSelected = [];
+    document.getElementById('matchProgressText').innerText = `0 / ${currentMiniGameWordCount}`;
     container.innerHTML = "";
 
     let allBubbles = [];
-    dailyWordsPool.forEach((word, idx) => {
+    wordsForGame.forEach((word, idx) => {
         allBubbles.push({ id: idx, type: 'hanzi', text: word[0] });
         allBubbles.push({ id: idx, type: 'pinyin', text: word[1] });
         allBubbles.push({ id: idx, type: 'meaning', text: word[2] });
@@ -323,6 +382,8 @@ window.startMatchGame = function() {
 
 function handleBubbleClick(bubble) {
     if (bubble.classList.contains('correct') || bubble.classList.contains('wrong')) return;
+    playSound('pop'); // Âm thanh pop khi bấm
+
     const bType = bubble.dataset.type;
     const bId = bubble.dataset.id;
 
@@ -347,18 +408,20 @@ function handleBubbleClick(bubble) {
         const id3 = matchGameSelected[2].dataset.id;
 
         if (id1 === id2 && id2 === id3) {
+            playSound('correct'); // Âm thanh Ting
             matchGameSelected.forEach(n => { n.classList.remove('selected'); n.classList.add('correct'); });
             matchedCount++;
-            document.getElementById('matchProgressText').innerText = `${matchedCount} / ${appSettings.dailyWords}`;
+            document.getElementById('matchProgressText').innerText = `${matchedCount} / ${currentMiniGameWordCount}`;
             
             setTimeout(() => {
                 document.querySelectorAll('.match-bubble.correct').forEach(el => el.remove());
-                if (matchedCount === appSettings.dailyWords) {
+                if (matchedCount === currentMiniGameWordCount) {
                     shootConfetti();
-                    setTimeout(() => { alert("Wow! Bạn đã hoàn thành Nhiệm vụ ghép từ hôm nay! +50 XP"); closeMatchGame(); }, 1000);
+                    setTimeout(() => { alert("Wow! Bạn đã hoàn thành Nhiệm vụ ghép từ! +50 XP"); closeMatchGame(); }, 1000);
                 }
             }, 500);
         } else {
+            playSound('wrong'); // Âm thanh Buzz
             matchGameSelected.forEach(n => { n.classList.remove('selected'); n.classList.add('wrong'); });
             setTimeout(() => {
                 document.querySelectorAll('.match-bubble.wrong').forEach(n => { n.classList.remove('wrong'); n.classList.remove('selected'); });
@@ -369,6 +432,7 @@ function handleBubbleClick(bubble) {
 }
 
 window.closeMatchGame = function() { document.getElementById('wordMatchGameScreen').style.display = 'none'; }
+
 
 // ==========================================
 // 6. LOGIC GAME LUYỆN TẬP CHÍNH CÓ NÚT "CON MẮT"
@@ -399,9 +463,10 @@ if (btnStart) {
 
         for (let lvl of selectedLevels) {
             try {
-                const response = await fetch(`${lvl}.csv`);
-                if (response.ok) {
-                    const text = await response.text();
+                let res = await fetch(`${lvl}.csv`);
+                if (!res.ok) res = await fetch(`${lvl.toLowerCase()}.csv`);
+                if (res.ok) {
+                    const text = await res.text();
                     const parsed = Papa.parse(text, { skipEmptyLines: true });
                     quizData = [...quizData, ...parsed.data.map(r => [...r, lvl.toUpperCase()])];
                 }
@@ -469,6 +534,7 @@ function showQuestion() {
         
         answerContainer.style.display = 'none'; typingContainer.style.display = 'block';
         pinyinInput.value = ''; setTimeout(() => pinyinInput.focus(), 100); 
+        
     } else {
         typingContainer.style.display = 'none'; answerContainer.style.display = 'grid';
 
@@ -483,13 +549,13 @@ function showQuestion() {
         renderAnswers(correctAnswer, lvl ? lvl.toUpperCase() : "CUSTOM");
     }
 
-    // XỬ LÝ CON MẮT ẨN PINYIN THEO CÀI ĐẶT
+    // CON MẮT ẨN PINYIN
     if (appSettings.hidePinyin && selectedMode !== "PINYIN" && selectedMode !== "GÕ PINYIN") {
         subQ.innerText = "****"; 
         btnReveal.style.display = 'flex';
         btnReveal.onclick = () => {
             subQ.innerText = hiddenText;
-            btnReveal.style.display = 'none'; // Ấn nút xong thì ẩn đi
+            btnReveal.style.display = 'none';
         };
     } else {
         subQ.innerText = hiddenText;
@@ -510,9 +576,11 @@ function checkTypingAnswer() {
             userLevelScores[currentLevel] = (userLevelScores[currentLevel] || 0) + 1;
             localStorage.setItem('hsk_user_scores', JSON.stringify(userLevelScores));
         }
+        playSound('correct');
         currentIndex++; showQuestion();
     } else {
-        hp--; alert(`Sai rồi! Đáp án đúng là: ${correctPinyin}`);
+        hp--; playSound('wrong');
+        alert(`Sai rồi! Đáp án đúng là: ${correctPinyin}`);
         document.getElementById('hpDisplay').innerText = "❤️".repeat(Math.max(0, hp));
         if(!isReviewMode) missedWords.push(quizData[currentIndex]); else quizData.push(quizData[currentIndex]);
         currentIndex++; showQuestion();
@@ -546,9 +614,11 @@ function renderAnswers(correct, currentLevel) {
                     userLevelScores[currentLevel] = (userLevelScores[currentLevel] || 0) + 1;
                     localStorage.setItem('hsk_user_scores', JSON.stringify(userLevelScores));
                 }
+                playSound('correct');
                 currentIndex++; showQuestion();
             } else {
-                hp--; alert(`Sai rồi! Đáp án đúng là: ${correct}`);
+                hp--; playSound('wrong');
+                alert(`Sai rồi! Đáp án đúng là: ${correct}`);
                 document.getElementById('hpDisplay').innerText = "❤️".repeat(Math.max(0, hp));
                 if(!isReviewMode) missedWords.push(quizData[currentIndex]); else quizData.push(quizData[currentIndex]);
                 currentIndex++; showQuestion();
@@ -576,4 +646,3 @@ window.endGame = function() {
 
 // Chạy khởi tạo
 checkAuth();
- 
