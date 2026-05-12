@@ -48,7 +48,13 @@
             <div class="flashcard-area playful-card">
                 <span class="tag sky-tag" id="lvlBadge" style="position: absolute; top: 25px; right: 30px;">HSK</span>
                 <h1 class="main-q" id="mainQuestion">你好</h1>
-                <p class="sub-q" id="subQuestion">nǐ hǎo</p>
+                
+                <div class="sub-q-container">
+                    <p class="sub-q" id="subQuestion">nǐ hǎo</p>
+                    <button id="btnRevealPinyin" class="btn-reveal" title="Hiện Pinyin" style="display: none;">
+                        <i class='bx bx-show'></i>
+                    </button>
+                </div>
             </div>
 
             <div class="answer-grid" id="answerContainer"></div>
@@ -71,8 +77,7 @@
             </nav>
             <p style="text-align: center; color: var(--text-secondary); font-weight: 600; margin-bottom: 20px;">Chọn đúng 1 Chữ Hán + 1 Pinyin + 1 Nghĩa để ghép thành từ hoàn chỉnh!</p>
             
-            <div id="floatingBubblesContainer" class="floating-bubbles-area">
-                </div>
+            <div id="floatingBubblesContainer" class="floating-bubbles-area"></div>
         </div>
     </div>
 
@@ -178,7 +183,7 @@
                         <div class="setting-item-box">
                             <div>
                                 <h4 style="font-size: 1.1rem; margin-bottom: 5px;">👁️ Ẩn Pinyin trợ giúp</h4>
-                                <p class="muted" style="font-size: 0.85rem;">Giấu dòng Pinyin nhỏ khi làm trắc nghiệm Chữ Hán/Dịch Nghĩa.</p>
+                                <p class="muted" style="font-size: 0.85rem;">Giấu dòng Pinyin nhỏ bằng nút "Con mắt" khi làm trắc nghiệm.</p>
                             </div>
                             <label class="tg-switch">
                                 <input type="checkbox" id="setHidePinyin">
@@ -200,7 +205,7 @@
                         <div class="setting-item-box">
                             <div>
                                 <h4 style="font-size: 1.1rem; margin-bottom: 5px;">📦 Số từ Mini Game</h4>
-                                <p class="muted" style="font-size: 0.85rem;">Số lượng từ vựng xuất hiện trong mục "Từ hôm nay".</p>
+                                <p class="muted" style="font-size: 0.85rem;">Số lượng từ vựng xuất hiện trong mục "Nhiệm vụ hôm nay".</p>
                             </div>
                             <select id="setDailyWords" class="playful-select">
                                 <option value="3">3 từ</option>
@@ -237,4 +242,3 @@
     <script src="script.js"></script>
 </body>
 </html>
- 
