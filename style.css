@@ -203,3 +203,4 @@ input:checked + .tg-slider:before { transform: translateX(22px); }
     .hero-card, .streak-card, .mint-card, .mastery-card { grid-column: span 1 !important; grid-row: auto !important; }
     .search-results-container { top: 120px; max-height: 300px; }
 }
+ 
