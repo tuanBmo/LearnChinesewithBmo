@@ -11,7 +11,6 @@ let hp = 5;
 let missedWords = []; 
 let isReviewMode = false;
 
-// Đọc Data Local an toàn
 function getSafeData(key, defaultVal) {
     try { return JSON.parse(localStorage.getItem(key)) || defaultVal; } 
     catch(e) { return defaultVal; }
@@ -22,13 +21,10 @@ let personalFiles = getSafeData('hsk_personal_files', {});
 let currentUser = localStorage.getItem('hsk_current_user');
 let currentStreak = parseInt(localStorage.getItem('hsk_streak_count')) || 0;
 let lastLoginDate = localStorage.getItem('hsk_last_login_date');
-
-// --- CÀI ĐẶT ---
 let appSettings = getSafeData('hsk_settings', { hidePinyin: false, shuffle: true, dailyWords: 5 });
 
-// --- TỪ HÔM NAY (MINI GAME) ---
 let dailyWordsPool = []; 
-let matchGameSelected = []; // Lưu các bóng đang chọn
+let matchGameSelected = [];
 let matchedCount = 0;
 
 // ==========================================
@@ -43,7 +39,6 @@ function initSettingsUI() {
     if(sShuffle) sShuffle.checked = appSettings.shuffle;
     if(sDaily) sDaily.value = appSettings.dailyWords;
     
-    // Cập nhật thẻ Hero
     const dailyCountDisplay = document.getElementById('dailyWordCountDisplay');
     if(dailyCountDisplay) dailyCountDisplay.innerText = appSettings.dailyWords;
 }
@@ -57,23 +52,37 @@ window.saveSettings = function() {
     alert("Đã lưu cài đặt!");
     
     document.getElementById('dailyWordCountDisplay').innerText = appSettings.dailyWords;
-    loadDailyWordsData(); // Tải lại bộ từ mới theo số lượng mới
+    loadDailyWordsData(); 
 };
 
-// Tự động tải 1 lượng từ ngầm định (ví dụ HSK1) để làm "Từ hôm nay"
 async function loadDailyWordsData() {
-    try {
-        const response = await fetch(`HSK1.csv`);
-        if (response.ok) {
-            const text = await response.text();
-            const parsed = Papa.parse(text, { skipEmptyLines: true });
-            
-            // Lấy ngẫu nhiên N từ theo Cài đặt
-            let allWords = parsed.data;
-            allWords.sort(() => Math.random() - 0.5);
-            dailyWordsPool = allWords.slice(0, appSettings.dailyWords);
-        }
-    } catch (e) { console.log("Không tải được data mặc định."); }
+    let allWords = [];
+    Object.keys(personalFiles).forEach(name => {
+        const parsed = Papa.parse(personalFiles[name], { skipEmptyLines: true });
+        allWords = [...allWords, ...parsed.data];
+    });
+
+    const fetchPromises = levels.map(async (lvl) => {
+        try {
+            let res = await fetch(`${lvl}.csv`);
+            if (!res.ok) res = await fetch(`${lvl.toLowerCase()}.csv`);
+            if (res.ok) {
+                const text = await res.text();
+                const parsed = Papa.parse(text, { skipEmptyLines: true });
+                return parsed.data;
+            }
+        } catch (e) { return []; }
+        return [];
+    });
+
+    const results = await Promise.all(fetchPromises);
+    results.forEach(data => { allWords = [...allWords, ...data]; });
+
+    allWords = allWords.filter(row => row.length >= 3 && row[0] !== undefined && row[0].trim() !== "");
+    if (allWords.length > 0) {
+        allWords.sort(() => Math.random() - 0.5);
+        dailyWordsPool = allWords.slice(0, appSettings.dailyWords);
+    }
 }
 
 // ==========================================
@@ -128,11 +137,8 @@ function checkAuth() {
         if (authModal) authModal.style.display = 'flex';
     } else {
         if (authModal) authModal.style.display = 'none';
-        updateStreak(); 
-        updateProfileUI();
-        renderLevelScores();
-        initSettingsUI();
-        loadDailyWordsData();
+        updateStreak(); updateProfileUI(); renderLevelScores();
+        initSettingsUI(); loadDailyWordsData();
     }
 }
 
@@ -143,8 +149,7 @@ if (btnLogin) {
         if (username.length >= 2) {
             currentUser = username;
             localStorage.setItem('hsk_current_user', currentUser);
-            checkAuth();
-            shootConfetti(); 
+            checkAuth(); shootConfetti(); 
         } else { alert("Tên hiển thị phải có ít nhất 2 ký tự!"); }
     };
 }
@@ -290,14 +295,12 @@ window.startMatchGame = function() {
     if(dailyWordsPool.length === 0) return alert("Hệ thống chưa tải xong dữ liệu, đợi 1 chút nhé!");
     
     document.getElementById('wordMatchGameScreen').style.display = 'block';
-    matchedCount = 0;
-    matchGameSelected = [];
+    matchedCount = 0; matchGameSelected = [];
     document.getElementById('matchProgressText').innerText = `0 / ${appSettings.dailyWords}`;
     
     const container = document.getElementById('floatingBubblesContainer');
     container.innerHTML = "";
 
-    // Tạo mảng trộn lẫn 3 yếu tố của N từ
     let allBubbles = [];
     dailyWordsPool.forEach((word, idx) => {
         allBubbles.push({ id: idx, type: 'hanzi', text: word[0] });
@@ -305,18 +308,14 @@ window.startMatchGame = function() {
         allBubbles.push({ id: idx, type: 'meaning', text: word[2] });
     });
     
-    allBubbles.sort(() => Math.random() - 0.5); // Xáo trộn
+    allBubbles.sort(() => Math.random() - 0.5); 
 
     allBubbles.forEach((b, i) => {
         const bubble = document.createElement('div');
         bubble.className = `match-bubble ${b.type}`;
         bubble.innerText = b.text;
-        bubble.dataset.id = b.id;
-        bubble.dataset.type = b.type;
-        
-        // Random Animation Delay để bay lệch nhịp
+        bubble.dataset.id = b.id; bubble.dataset.type = b.type;
         bubble.style.animationDelay = `${Math.random() * 2}s`;
-        
         bubble.onclick = () => handleBubbleClick(bubble);
         container.appendChild(bubble);
     });
@@ -324,66 +323,55 @@ window.startMatchGame = function() {
 
 function handleBubbleClick(bubble) {
     if (bubble.classList.contains('correct') || bubble.classList.contains('wrong')) return;
-
     const bType = bubble.dataset.type;
     const bId = bubble.dataset.id;
 
-    // Nếu bấm lại bubble đang chọn -> Bỏ chọn
     if (bubble.classList.contains('selected')) {
         bubble.classList.remove('selected');
         matchGameSelected = matchGameSelected.filter(node => node !== bubble);
         return;
     }
 
-    // Nếu đã chọn type này rồi (ví dụ đã chọn 1 Pinyin, giờ bấm Pinyin khác) -> Hủy cái cũ, nhận cái mới
     const existingTypeNode = matchGameSelected.find(n => n.dataset.type === bType);
     if (existingTypeNode) {
         existingTypeNode.classList.remove('selected');
         matchGameSelected = matchGameSelected.filter(n => n !== existingTypeNode);
     }
 
-    // Thêm bubble mới vào selection
     bubble.classList.add('selected');
     matchGameSelected.push(bubble);
 
-    // Kiểm tra nếu đã chọn đủ 3 yếu tố
     if (matchGameSelected.length === 3) {
         const id1 = matchGameSelected[0].dataset.id;
         const id2 = matchGameSelected[1].dataset.id;
         const id3 = matchGameSelected[2].dataset.id;
 
         if (id1 === id2 && id2 === id3) {
-            // GHÉP ĐÚNG
             matchGameSelected.forEach(n => { n.classList.remove('selected'); n.classList.add('correct'); });
             matchedCount++;
             document.getElementById('matchProgressText').innerText = `${matchedCount} / ${appSettings.dailyWords}`;
             
-            // Xóa phần tử đúng sau 0.5s
             setTimeout(() => {
                 document.querySelectorAll('.match-bubble.correct').forEach(el => el.remove());
-                // Kiểm tra Win Game
                 if (matchedCount === appSettings.dailyWords) {
                     shootConfetti();
                     setTimeout(() => { alert("Wow! Bạn đã hoàn thành Nhiệm vụ ghép từ hôm nay! +50 XP"); closeMatchGame(); }, 1000);
                 }
             }, 500);
         } else {
-            // GHÉP SAI
             matchGameSelected.forEach(n => { n.classList.remove('selected'); n.classList.add('wrong'); });
             setTimeout(() => {
                 document.querySelectorAll('.match-bubble.wrong').forEach(n => { n.classList.remove('wrong'); n.classList.remove('selected'); });
             }, 400);
         }
-        matchGameSelected = []; // Reset lựa chọn
+        matchGameSelected = [];
     }
 }
 
-window.closeMatchGame = function() {
-    document.getElementById('wordMatchGameScreen').style.display = 'none';
-}
+window.closeMatchGame = function() { document.getElementById('wordMatchGameScreen').style.display = 'none'; }
 
 // ==========================================
-// 6. LOGIC GAME LUYỆN TẬP CHÍNH
+// 6. LOGIC GAME LUYỆN TẬP CHÍNH CÓ NÚT "CON MẮT"
 // ==========================================
 function normalizePinyin(str) { return str.normalize('NFD').replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "").toLowerCase(); }
 
@@ -430,7 +418,6 @@ if (btnStart) {
             return alert("Dữ liệu rỗng, vui lòng kiểm tra lại nội dung file CSV.");
         }
 
-        // TÍNH NĂNG CÀI ĐẶT: XÁO TRỘN CÂU
         if(appSettings.shuffle) { quizData.sort(() => Math.random() - 0.5); }
         
         hp = 5; currentIndex = 0; missedWords = []; isReviewMode = false;
@@ -471,31 +458,42 @@ function showQuestion() {
     const answerContainer = document.getElementById('answerContainer');
     const typingContainer = document.getElementById('typingContainer');
     const pinyinInput = document.getElementById('pinyinInput');
+    const btnReveal = document.getElementById('btnRevealPinyin');
 
     let correctAnswer = "";
+    let hiddenText = "";
 
     if (selectedMode === "GÕ PINYIN") {
-        mainQ.innerText = hanzi; mainQ.style.fontSize = "8rem"; 
-        subQ.innerText = meaning; 
+        mainQ.innerText = hanzi; mainQ.style.fontSize = "7.5rem"; 
+        hiddenText = meaning; 
+        
         answerContainer.style.display = 'none'; typingContainer.style.display = 'block';
         pinyinInput.value = ''; setTimeout(() => pinyinInput.focus(), 100); 
     } else {
         typingContainer.style.display = 'none'; answerContainer.style.display = 'grid';
 
         if (selectedMode === "NGHĨA") {
-            mainQ.innerText = hanzi; mainQ.style.fontSize = "8rem"; subQ.innerText = pinyin; correctAnswer = meaning;
+            mainQ.innerText = hanzi; mainQ.style.fontSize = "7.5rem"; hiddenText = pinyin; correctAnswer = meaning;
         } else if (selectedMode === "PINYIN") {
-            mainQ.innerText = hanzi; mainQ.style.fontSize = "8rem"; subQ.innerText = meaning; correctAnswer = pinyin;
+            mainQ.innerText = hanzi; mainQ.style.fontSize = "7.5rem"; hiddenText = meaning; correctAnswer = pinyin;
         } else { 
-            mainQ.innerText = meaning; mainQ.style.fontSize = "4rem"; subQ.innerText = pinyin; correctAnswer = hanzi;
-        }
-
-        // TÍNH NĂNG CÀI ĐẶT: ẨN PINYIN
-        if(appSettings.hidePinyin && selectedMode !== "PINYIN") {
-            subQ.innerText = "****"; 
+            mainQ.innerText = meaning; mainQ.style.fontSize = "4rem"; hiddenText = pinyin; correctAnswer = hanzi;
         }
 
         renderAnswers(correctAnswer, lvl ? lvl.toUpperCase() : "CUSTOM");
+    }
+
+    // XỬ LÝ CON MẮT ẨN PINYIN THEO CÀI ĐẶT
+    if (appSettings.hidePinyin && selectedMode !== "PINYIN" && selectedMode !== "GÕ PINYIN") {
+        subQ.innerText = "****"; 
+        btnReveal.style.display = 'flex';
+        btnReveal.onclick = () => {
+            subQ.innerText = hiddenText;
+            btnReveal.style.display = 'none'; // Ấn nút xong thì ẩn đi
+        };
+    } else {
+        subQ.innerText = hiddenText;
+        btnReveal.style.display = 'none';
     }
 }
 
@@ -578,4 +576,3 @@ window.endGame = function() {
 
 // Chạy khởi tạo
 checkAuth();
- 
