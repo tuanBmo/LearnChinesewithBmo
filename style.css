@@ -164,5 +164,101 @@ input:checked + .tg-slider:before { transform: translateX(22px); }
 @keyframes floatAnim { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
 @keyframes popOut { to { transform: scale(0); opacity: 0; } }
 @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-10px); } 40%, 80% { transform: translateX(10px); } }
- 
+ /* ==========================================
+   📱 RESPONSIVE - GIAO DIỆN ĐIỆN THOẠI
+   ========================================== */
+@media (max-width: 768px) {
+    /* Layout tổng thể */
+    .app-layout { 
+        flex-direction: column; 
+        padding: 10px; 
+        padding-bottom: 100px; /* Chừa chỗ cho thanh Bottom Nav */
+        gap: 15px; 
+        height: 100vh;
+        overflow-y: auto;
+    }
+    body { overflow: hidden; }
+    .main-content { padding: 5px; overflow-y: visible; }
+
+    /* Top Bar & Search */
+    .top-bar { flex-direction: column-reverse; gap: 15px; margin-bottom: 20px; }
+    .search-bar { width: 100%; }
+    .user-profile { width: 100%; justify-content: space-between; }
+
+    /* Biến Sidebar thành Bottom Nav (Thanh đáy) */
+    .sidebar { 
+        position: fixed; 
+        bottom: 0; left: 0; 
+        width: 100%; height: 85px; 
+        padding: 10px 5px; 
+        border-radius: 24px 24px 0 0; 
+        flex-direction: row; 
+        justify-content: center; 
+        align-items: center; 
+        box-shadow: 0 -10px 30px rgba(0,0,0,0.08); 
+    }
+    .sidebar .logo, .sidebar .nav-title { display: none; /* Ẩn logo và tiêu đề phụ */ }
+    
+    .nav-links { flex-direction: row; width: 100%; justify-content: space-between; gap: 0; }
+    /* Chỉ giữ lại các nút có data-target (hoạt động), ẩn các nút trang trí */
+    .nav-links a:not([data-target]) { display: none; }
+    .nav-links a { 
+        flex-direction: column; 
+        justify-content: center; 
+        padding: 8px 5px; 
+        font-size: 0.65rem; 
+        gap: 4px; 
+        width: 19%; 
+        text-align: center;
+    }
+    .nav-links a i { font-size: 1.6rem; margin: 0; }
+
+    /* Bento Grid gom thành 1 cột */
+    .bento-grid { grid-template-columns: 1fr; gap: 15px; }
+    .bento-card { padding: 25px 20px; border-radius: 28px; }
+    .hero-card, .streak-card, .mint-card, .mastery-card { 
+        grid-column: span 1 !important; 
+        grid-row: auto !important; 
+    }
+    
+    /* Chỉnh chữ Thẻ Hero & Trích dẫn nhỏ lại cho vừa đt */
+    #dailyQuoteHanzi { font-size: 2rem !important; }
+    #dailyQuotePinyin { font-size: 1.2rem !important; }
+    #dailyQuoteMeaning { font-size: 1rem !important; }
+    .hanzi-huge { font-size: 4.5rem !important; }
+    .decor-circle { width: 200px; height: 200px; right: -30px; bottom: -50px; }
+
+    /* MÀN HÌNH GAME CHÍNH */
+    .game-container { padding: 20px 15px; justify-content: flex-start; }
+    .game-hud { margin-bottom: 20px; gap: 15px; }
+    .btn-icon { width: 45px; height: 45px; font-size: 1.5rem; border-bottom-width: 4px; }
+    #hpDisplay { font-size: 1.5rem !important; }
+    
+    .flashcard-area { padding: 40px 20px; margin-bottom: 25px; border-radius: 32px; }
+    .main-q { font-size: 5.5rem !important; }
+    .sub-q { font-size: 1.6rem !important; }
+
+    /* Trắc nghiệm xếp thành 1 cột, 4 hàng dọc */
+    .answer-grid { grid-template-columns: 1fr; gap: 12px; }
+    .ans-btn { padding: 15px; font-size: 1.2rem; min-height: 65px; border-radius: 16px; border-bottom-width: 6px; }
+
+    /* Gõ Pinyin */
+    .playful-input { font-size: 1.5rem; padding: 18px; border-radius: 20px; border-bottom-width: 6px; }
+    #btnSubmitPinyin { padding: 15px; font-size: 1.2rem; width: 100%; border-bottom-width: 6px; }
+
+    /* MINI GAME GHÉP TỪ */
+    .floating-bubbles-area { min-height: 40vh; padding: 10px; gap: 12px; }
+    .match-bubble { padding: 12px 20px; border-bottom-width: 4px; }
+    .match-bubble.hanzi { font-size: 2rem; }
+    .match-bubble.pinyin { font-size: 1.2rem; }
+    .match-bubble.meaning { font-size: 1rem; }
+
+    /* Modals & Popups */
+    .auth-box { padding: 30px 20px; }
+    .logo-center h2 { font-size: 1.5rem; }
+    .auth-input { padding: 15px; font-size: 1.1rem; }
+}
+
+/* Fix cuộn mượt mà trên iPhone/iOS */
+* { -webkit-overflow-scrolling: touch; }
  
