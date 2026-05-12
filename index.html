@@ -20,7 +20,7 @@
                 <h2>HSK Trainer</h2>
             </div>
             <p style="text-align: center; color: var(--text-secondary); margin-bottom: 25px; position: relative; z-index: 2;">Nhập biệt danh để bắt đầu hành trình!</p>
-            <input type="text" id="usernameInput" class="auth-input" value="Phan Anh Tuấn" placeholder="Biệt danh của bạn..." required>
+            <input type="text" id="usernameInput" class="auth-input" placeholder="Nhập tên của bạn..." required>
             <button class="btn-primary btn-bouncy" id="btnLogin" style="width: 100%; margin-top: 15px;">Bắt đầu ngay 🚀</button>
         </div>
     </div>
@@ -48,12 +48,9 @@
             <div class="flashcard-area playful-card">
                 <span class="tag sky-tag" id="lvlBadge" style="position: absolute; top: 25px; right: 30px;">HSK</span>
                 <h1 class="main-q" id="mainQuestion">你好</h1>
-                
                 <div class="sub-q-container">
                     <p class="sub-q" id="subQuestion">nǐ hǎo</p>
-                    <button id="btnRevealPinyin" class="btn-reveal" title="Hiện Pinyin" style="display: none;">
-                        <i class='bx bx-show'></i>
-                    </button>
+                    <button id="btnRevealPinyin" class="btn-reveal" title="Hiện Pinyin" style="display: none;"><i class='bx bx-show'></i></button>
                 </div>
             </div>
 
@@ -76,7 +73,6 @@
                 <div id="matchProgressText" style="font-weight: 800; color: var(--text-secondary); font-size: 1.2rem;">0 / 5</div>
             </nav>
             <p style="text-align: center; color: var(--text-secondary); font-weight: 600; margin-bottom: 20px;">Chọn đúng 1 Chữ Hán + 1 Pinyin + 1 Nghĩa để ghép thành từ hoàn chỉnh!</p>
-            
             <div id="floatingBubblesContainer" class="floating-bubbles-area"></div>
         </div>
     </div>
@@ -91,8 +87,7 @@
                 <p class="nav-title">HỌC TẬP</p>
                 <a href="#" data-target="dashboard-view" class="active"><i class='bx bx-home-smile'></i> Home</a>
                 <a href="#" data-target="practice-view"><i class='bx bx-joystick'></i> Luyện tập</a>
-                
-                <p class="nav-title">CỦA BẠN</p>
+                <a href="#" data-target="minigame-view"><i class='bx bx-game'></i> Mini Game</a> <p class="nav-title">CỦA BẠN</p>
                 <a href="#" data-target="personal-view"><i class='bx bx-folder-open'></i> File cá nhân</a>
                 <a href="#" data-target="settings-view"><i class='bx bx-cog'></i> Cài đặt</a>
             </nav>
@@ -110,14 +105,11 @@
             <div id="dashboard-view" class="view-section active">
                 <div class="bento-grid">
                     <div class="bento-card hero-card floating-anim" style="grid-column: span 2; grid-row: span 2;">
-                        <div class="card-header"><span class="tag white-tag">NHIỆM VỤ HÔM NAY ✨</span></div>
-                        <div class="hero-content" style="margin: 20px 0;">
-                            <h1 style="font-size: 3rem; font-weight: 900; line-height: 1.2; margin-bottom: 10px;">Chinh phục <span id="dailyWordCountDisplay" style="color: #FCE7F3;">5</span> từ mới!</h1>
-                            <p class="meaning-text" style="font-size: 1.1rem; background: rgba(255,255,255,0.15);">Tăng tốc độ ghi nhớ qua game ghép từ</p>
+                        <div class="card-header"><span class="tag white-tag">ĐỘNG LỰC HÔM NAY ✨</span></div>
+                        <div class="hero-content" style="margin: auto 0;">
+                            <h1 id="dailyQuoteText" style="font-size: 2.2rem; font-weight: 800; line-height: 1.4; margin-bottom: 15px; text-shadow: 0 4px 10px rgba(0,0,0,0.1);">...</h1>
+                            <p id="dailyQuoteAuthor" class="meaning-text" style="font-size: 1.1rem; background: rgba(255,255,255,0.15); border-radius: 12px; font-weight: 600;">...</p>
                         </div>
-                        <button class="btn-primary btn-bouncy" onclick="startMatchGame()" style="background: white; color: var(--accent-purple-text); box-shadow: 0 6px 0 #E2E8F0;">
-                            Chơi Mini Game <i class='bx bx-game'></i>
-                        </button>
                         <div class="decor-circle"></div>
                     </div>
 
@@ -173,6 +165,28 @@
                 </div>
             </div>
 
+            <div id="minigame-view" class="view-section">
+                <div class="bento-card playful-card" style="max-width: 600px; margin: 0 auto; text-align: center;">
+                    <div style="font-size: 5rem; margin-bottom: 10px;">🧩</div>
+                    <h2 style="font-size: 2rem; color: var(--accent-purple-text);">Mini Game: Ghép Từ</h2>
+                    <p class="muted" style="font-size: 1.1rem; margin-top: 10px;">Luyện phản xạ nhanh tay lẹ mắt. Tìm và ghép đúng 3 yếu tố: Chữ Hán - Pinyin - Nghĩa.</p>
+                    
+                    <div style="margin: 40px 0; background: #F8FAFC; padding: 20px; border-radius: 24px;">
+                        <h4 class="section-title" style="margin-bottom: 15px;">Số lượng từ vựng thách đấu:</h4>
+                        <select id="miniGameWordCount" class="playful-select" style="width: 200px; text-align: center;">
+                            <option value="3">3 từ (Khởi động)</option>
+                            <option value="5" selected>5 từ (Bình thường)</option>
+                            <option value="10">10 từ (Thử thách)</option>
+                            <option value="15">15 từ (Căng não)</option>
+                        </select>
+                    </div>
+
+                    <button class="btn-primary btn-bouncy" onclick="startMatchGame()" style="width: 100%; font-size: 1.3rem; padding: 22px; background: linear-gradient(135deg, #4F46E5, #DB2777); box-shadow: 0 8px 0 #831843;">
+                        BẮT ĐẦU CHƠI NGAY <i class='bx bx-joystick'></i>
+                    </button>
+                </div>
+            </div>
+
             <div id="settings-view" class="view-section">
                 <div class="bento-card playful-card" style="max-width: 600px; margin: 0 auto;">
                     <div class="card-header" style="margin-bottom: 25px;">
@@ -194,25 +208,12 @@
                         <div class="setting-item-box">
                             <div>
                                 <h4 style="font-size: 1.1rem; margin-bottom: 5px;">🔀 Xáo trộn câu hỏi</h4>
-                                <p class="muted" style="font-size: 0.85rem;">Hiển thị câu hỏi không theo thứ tự trong file CSV.</p>
+                                <p class="muted" style="font-size: 0.85rem;">Hiển thị câu hỏi ngẫu nhiên không theo thứ tự trong file.</p>
                             </div>
                             <label class="tg-switch">
                                 <input type="checkbox" id="setShuffle" checked>
                                 <span class="tg-slider"></span>
                             </label>
-                        </div>
-
-                        <div class="setting-item-box">
-                            <div>
-                                <h4 style="font-size: 1.1rem; margin-bottom: 5px;">📦 Số từ Mini Game</h4>
-                                <p class="muted" style="font-size: 0.85rem;">Số lượng từ vựng xuất hiện trong mục "Nhiệm vụ hôm nay".</p>
-                            </div>
-                            <select id="setDailyWords" class="playful-select">
-                                <option value="3">3 từ</option>
-                                <option value="5" selected>5 từ</option>
-                                <option value="10">10 từ</option>
-                                <option value="15">15 từ</option>
-                            </select>
                         </div>
                     </div>
                     <button class="btn-primary btn-bouncy" onclick="saveSettings()" style="width: 100%; margin-top: 20px;">Lưu Cài Đặt</button>
@@ -242,4 +243,3 @@
     <script src="script.js"></script>
 </body>
 </html>
-  
