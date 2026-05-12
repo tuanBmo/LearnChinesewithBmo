@@ -502,3 +502,4 @@ window.endGame = function() {
  
 // Boot up
 checkAuth();
+ 
