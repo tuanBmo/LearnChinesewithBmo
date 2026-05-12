@@ -7,6 +7,7 @@
     --accent-orange: #FFEDD5; --accent-orange-text: #EA580C;
     --accent-yellow: #FEF9C3; --accent-yellow-text: #CA8A04;
     --text-primary: #1E293B; --text-secondary: #64748B;
+    
     --radius-huge: 40px; --radius-lg: 32px; --radius-md: 20px;
     --shadow-soft: 0 12px 40px -10px rgba(0, 0, 0, 0.08);
 }
@@ -103,7 +104,7 @@ input:checked + .tg-slider:before { transform: translateX(22px); }
 .file-item { display: flex; justify-content: space-between; align-items: center; padding: 20px 25px; background: var(--bg-body); border-radius: var(--radius-md); font-weight: 700; font-size: 1.1rem; }
 .btn-delete { background: #FFE4E6; color: #E11D48; border: none; padding: 10px 18px; border-radius: 12px; cursor: pointer; font-weight: 800; }
 
-/* Modals */
+/* Modals & Login */
 .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(248, 250, 252, 0.85); backdrop-filter: blur(15px); z-index: 2000; display: flex; justify-content: center; align-items: center; }
 .auth-box { width: 450px; max-width: 90%; padding: 50px 40px; text-align: center; }
 .blob-decor { position: absolute; border-radius: 50%; filter: blur(40px); z-index: 1; }
@@ -113,8 +114,9 @@ input:checked + .tg-slider:before { transform: translateX(22px); }
 .logo-center .logo-mark { width: 60px; height: 60px; font-size: 2rem; border-radius: 20px; }
 .logo-center h2 { font-size: 2rem; font-weight: 900; }
 .auth-input { width: 100%; padding: 20px; border-radius: 20px; border: 2px solid #E2E8F0; background: var(--bg-body); font-size: 1.2rem; color: var(--text-primary); outline: none; margin-bottom: 20px; text-align: center; font-weight: 700; position: relative; z-index: 2; }
+.auth-input:focus { border-color: var(--accent-purple-text); background: #FFFFFF; box-shadow: 0 0 0 5px var(--accent-purple); }
 
-/* === GAME OVERLAY === */
+/* === GAME OVERLAY (Fixed 100% Screen) === */
 .game-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 3000; background: rgba(248, 250, 252, 0.98); overflow-y: auto; backdrop-filter: blur(15px); }
 .game-container { width: 900px; max-width: 95%; margin: 0 auto; display: flex; flex-direction: column; min-height: 100vh; padding: 40px 0; }
 .game-hud { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; gap: 30px; }
@@ -128,18 +130,20 @@ input:checked + .tg-slider:before { transform: translateX(22px); }
 .flashcard-area { text-align: center; padding: 80px 40px; background: white; border-radius: 40px; position: relative; margin-bottom: 50px; }
 .main-q { font-size: 8rem; font-weight: 900; color: #1E293B; margin-bottom: 10px; line-height: 1; text-shadow: 0 4px 10px rgba(0,0,0,0.05); }
 
-/* CON MẮT & PINYIN GỢI Ý */
+/* NÚT CON MẮT & PINYIN GỢI Ý */
 .sub-q-container { display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 15px; min-height: 45px; }
 .sub-q { font-size: 2.2rem; color: #0EA5E9; font-weight: 800; margin: 0; }
 .btn-reveal { background: rgba(14, 165, 233, 0.15); border: none; color: #0284C7; width: 45px; height: 45px; border-radius: 14px; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 1.8rem; transition: all 0.2s; }
 .btn-reveal:hover { background: rgba(14, 165, 233, 0.3); transform: scale(1.1) translateY(-2px); box-shadow: 0 4px 10px rgba(14, 165, 233, 0.2); }
 .btn-reveal:active { transform: scale(0.95); }
 
+/* Nút Trắc Nghiệm 3D */
 .answer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; width: 100%; margin-top: 10px;}
 .ans-btn { background: #FFFFFF; border: 2px solid #E2E8F0; border-bottom: 8px solid #E2E8F0; padding: 20px 24px; border-radius: 20px; font-size: 1.5rem; font-weight: 800; color: #475569; cursor: pointer; transition: all 0.1s ease; display: flex; justify-content: center; align-items: center; min-height: 85px; }
 .ans-btn:hover { background: #F0F9FF; border: 2px solid #38BDF8; border-bottom: 8px solid #0284C7; color: #0284C7; }
 .ans-btn:active { border-bottom: 2px solid #0284C7; transform: translateY(6px); }
 
+/* Typing Pinyin 3D */
 #typingContainer { width: 100%; margin-top: 10px; }
 .playful-input { width: 100%; max-width: 550px; padding: 25px; border-radius: 28px; border: 2px solid #E2E8F0; border-bottom: 8px solid #E2E8F0; font-size: 2rem; text-align: center; outline: none; background: white; color: #1E293B; font-weight: 800; transition: all 0.2s ease; }
 .playful-input:focus { border-color: #C084FC; border-bottom-color: #9333EA; transform: translateY(-2px); box-shadow: 0 10px 30px rgba(147, 51, 234, 0.1); }
