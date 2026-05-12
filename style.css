@@ -142,21 +142,112 @@ body { background-color: var(--bg-body); color: var(--text-primary); display: fl
 .auth-input { width: 100%; padding: 20px; border-radius: 20px; border: 2px solid #E2E8F0; background: var(--bg-body); font-size: 1.2rem; color: var(--text-primary); outline: none; margin-bottom: 20px; text-align: center; font-weight: 700; position: relative; z-index: 2; }
 .auth-input:focus { border-color: var(--accent-purple-text); background: #FFFFFF; box-shadow: 0 0 0 5px var(--accent-purple); }
 
-/* --- GAME OVERLAY (Duolingo Vibe) --- */
-.game-overlay { z-index: 1000; background: var(--bg-card); }
-.game-container { width: 900px; max-width: 95%; margin: 0 auto; display: flex; flex-direction: column; height: 100vh; padding: 30px 0;}
-.game-hud { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; gap: 30px; }
-.btn-icon { width: 50px; height: 50px; border-radius: 50%; border: 2px solid #E2E8F0; background: transparent; font-size: 1.5rem; color: var(--text-secondary); cursor: pointer; display: flex; justify-content: center; align-items: center; }
-.btn-icon:hover { background: #F1F5F9; color: var(--text-primary); }
+/* --- GAME OVERLAY (Bouncy Duolingo Vibe) --- */
+.game-overlay { 
+    z-index: 1000; 
+    background: rgba(248, 250, 252, 0.95); /* Nền mờ sáng sủa */
+    backdrop-filter: blur(15px);
+}
 
-.progress-bar-game { flex: 1; height: 18px; background: #E2E8F0; border-radius: 100px; overflow: hidden; }
-.progress-fill-game { height: 100%; background: #10B981; border-radius: 100px; width: 0%; transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.game-container { 
+    width: 900px; 
+    max-width: 95%; 
+    margin: 0 auto; 
+    display: flex; 
+    flex-direction: column; 
+    height: 100vh; 
+    padding: 40px 0;
+}
 
-.playful-card { border: 2px solid #E2E8F0; box-shadow: 0 10px 0 #E2E8F0; }
-.flashcard-area { text-align: center; padding: 70px 40px; background: white; border-radius: 32px; position: relative; margin-bottom: 40px; }
-.main-q { font-size: 7.5rem; font-weight: 800; color: var(--text-primary); margin-bottom: 15px; line-height: 1; }
-.sub-q { font-size: 2rem; color: var(--accent-sky-text); font-weight: 700; }
+/* Thanh tiến độ và Máu (HUD) */
+.game-hud { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    margin-bottom: 40px; 
+    gap: 30px; 
+}
+.btn-icon { 
+    width: 55px; height: 55px; border-radius: 50%; 
+    border: 2px solid #E2E8F0; border-bottom: 6px solid #E2E8F0; /* Nút 3D */
+    background: white; font-size: 1.8rem; color: #94A3B8; cursor: pointer; 
+    display: flex; justify-content: center; align-items: center; 
+    transition: all 0.1s;
+}
+.btn-icon:hover { border-color: #CBD5E1; color: #64748B; }
+.btn-icon:active { transform: translateY(4px); border-bottom-width: 2px; }
 
-/* CHẾ ĐỘ TRẮC NGHIỆM */
+.progress-bar-game { flex: 1; height: 24px; background: #E2E8F0; border-radius: 100px; overflow: hidden; }
+.progress-fill-game { height: 100%; background: linear-gradient(90deg, #34D399, #10B981); border-radius: 100px; width: 0%; transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+/* Thẻ Flashcard 3D */
+.playful-card { 
+    border: 2px solid #E2E8F0; 
+    border-bottom: 12px solid #E2E8F0; /* Tạo khối 3D cho thẻ */
+}
+.flashcard-area { 
+    text-align: center; 
+    padding: 80px 40px; 
+    background: white; 
+    border-radius: 40px; 
+    position: relative; 
+    margin-bottom: 50px; 
+}
+.main-q { font-size: 8rem; font-weight: 900; color: #1E293B; margin-bottom: 10px; line-height: 1; text-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+.sub-q { font-size: 2.2rem; color: #0EA5E9; font-weight: 800; }
+
+/* --- CHẾ ĐỘ TRẮC NGHIỆM (Nút Bouncy 3D) --- */
 .answer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-.ans-btn { background: white; border: 2px solid #E2E8F0; padding 
+.ans-btn { 
+    background: white; 
+    border: 2px solid #E2E8F0; 
+    border-bottom: 8px solid #E2E8F0; /* Viền đáy dày tạo khối 3D */
+    padding: 25px 20px; 
+    border-radius: 24px; 
+    font-size: 1.5rem; 
+    font-weight: 800; 
+    cursor: pointer; 
+    color: #475569; 
+    transition: all 0.1s; /* Chuyển động nhanh để cảm giác nhạy bén */
+}
+.ans-btn:hover { 
+    border-color: #38BDF8; 
+    border-bottom-color: #0284C7; 
+    background: #F0F9FF; 
+    color: #0284C7; 
+    transform: translateY(-2px); 
+    border-bottom-width: 10px; 
+}
+.ans-btn:active { 
+    transform: translateY(6px); 
+    border-bottom-width: 2px; /* Ép nút xẹp xuống khi click */
+}
+
+/* --- CHẾ ĐỘ GÕ PINYIN --- */
+#typingContainer { width: 100%; margin-top: 10px; }
+.playful-input { 
+    width: 100%; max-width: 550px; padding: 25px; 
+    border-radius: 28px; 
+    border: 2px solid #E2E8F0; 
+    border-bottom: 8px solid #E2E8F0; /* Khối 3D cho input */
+    font-size: 2rem; text-align: center; outline: none; 
+    background: white; color: #1E293B; font-weight: 800; 
+    transition: all 0.2s ease; 
+}
+.playful-input:focus { 
+    border-color: #C084FC; 
+    border-bottom-color: #9333EA; 
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(147, 51, 234, 0.1);
+}
+.playful-input::placeholder { font-size: 1.5rem; color: #CBD5E1; font-weight: 600; }
+
+/* Sửa lại nút Submit gõ Pinyin cho xịn hơn */
+#btnSubmitPinyin {
+    border-bottom: 8px solid #4338CA; /* Đáy nổi màu đậm */
+    transition: all 0.1s;
+}
+#btnSubmitPinyin:active {
+    transform: translateY(6px);
+    border-bottom-width: 2px;
+}
