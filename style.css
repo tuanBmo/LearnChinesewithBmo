@@ -1,5 +1,4 @@
 :root {
-    /* Playful Pastel Palette */
     --bg-body: #F8FAFC;
     --bg-card: #FFFFFF;
     
@@ -24,20 +23,18 @@
     --text-primary: #1E293B;
     --text-secondary: #64748B;
     
-    /* Playful Shapes */
     --radius-huge: 40px;
     --radius-lg: 32px;
     --radius-md: 20px;
     --shadow-soft: 0 12px 40px -10px rgba(0, 0, 0, 0.08);
-    --shadow-solid: 0 6px 0 rgba(0, 0, 0, 0.1); /* Duolingo style button */
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Quicksand', sans-serif; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
 
 body { background-color: var(--bg-body); color: var(--text-primary); display: flex; height: 100vh; overflow: hidden; }
-.muted { color: var(--text-secondary); font-size: 0.9rem; font-weight: 500;}
+.muted { color: var(--text-secondary); font-size: 0.95rem; font-weight: 600;}
 
-/* === APP LAYOUT & SIDEBAR FLOATING === */
+/* === APP LAYOUT & SIDEBAR === */
 .app-layout { display: flex; width: 100%; height: 100%; padding: 20px; gap: 20px; }
 
 .sidebar {
@@ -57,7 +54,7 @@ body { background-color: var(--bg-body); color: var(--text-primary); display: fl
 .nav-title { font-size: 0.8rem; color: #94A3B8; font-weight: 800; margin: 25px 0 5px 15px; letter-spacing: 1.5px; }
 
 /* === MAIN CONTENT === */
-.main-content { flex: 1; padding: 10px 20px; overflow-y: auto; border-radius: var(--radius-lg); }
+.main-content { flex: 1; padding: 10px 20px; overflow-y: auto; border-radius: var(--radius-lg); position: relative; }
 .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
 .search-bar { background: var(--bg-card); padding: 15px 25px; border-radius: 100px; display: flex; align-items: center; gap: 12px; width: 400px; box-shadow: var(--shadow-soft); }
 .search-bar input { border: none; outline: none; background: transparent; width: 100%; font-size: 1rem; font-weight: 600; font-family: 'Quicksand';}
@@ -66,7 +63,7 @@ body { background-color: var(--bg-body); color: var(--text-primary); display: fl
 .avatar img { width: 48px; height: 48px; border-radius: 16px; box-shadow: var(--shadow-soft); }
 
 /* === VIEWS & BENTO CARDS === */
-.view-section { display: none; animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.view-section { display: none; animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
 .view-section.active { display: block; }
 @keyframes popIn { 0% { opacity: 0; transform: scale(0.95) translateY(10px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
 
@@ -74,8 +71,7 @@ body { background-color: var(--bg-body); color: var(--text-primary); display: fl
 .bento-card { background: var(--bg-card); border-radius: var(--radius-huge); padding: 35px; box-shadow: var(--shadow-soft); position: relative; overflow: hidden; border: 2px solid transparent; }
 .hover-lift:hover { transform: translateY(-8px); box-shadow: 0 20px 40px -10px rgba(0,0,0,0.12); border-color: var(--accent-purple); }
 
-/* Specific Cards */
-.hero-card { grid-column: span 2; grid-row: span 2; background: linear-gradient(135deg, #818cf8, #c084fc); color: white; display: flex; flex-direction: column; justify-content: space-between; }
+.hero-card { background: linear-gradient(135deg, #818cf8, #c084fc); color: white; display: flex; flex-direction: column; justify-content: space-between; }
 .decor-circle { position: absolute; width: 300px; height: 300px; background: rgba(255,255,255,0.1); border-radius: 50%; bottom: -100px; right: -50px; }
 .hero-content { z-index: 2; position: relative; }
 .hanzi-huge { font-size: 7rem; font-weight: 800; line-height: 1; margin-bottom: 5px; text-shadow: 0 10px 20px rgba(0,0,0,0.2); }
@@ -84,7 +80,6 @@ body { background-color: var(--bg-body); color: var(--text-primary); display: fl
 
 .streak-card { background: var(--accent-orange); border-color: #FEEBD7; }
 .mint-card { background: var(--accent-mint); border-color: #D1FAE5; }
-.blue-card { background: var(--accent-sky); border-color: #E0F2FE; }
 .mastery-card { background: white; }
 
 .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; position: relative; z-index: 2; }
@@ -105,31 +100,34 @@ body { background-color: var(--bg-body); color: var(--text-primary); display: fl
 .circular-progress { width: 100px; height: 100px; border-radius: 50%; background: conic-gradient(#10B981 68%, rgba(255,255,255,0.5) 0deg); display: flex; justify-content: center; align-items: center; box-shadow: 0 10px 20px rgba(16, 185, 129, 0.2); }
 .progress-value { background: var(--accent-mint); width: 75px; height: 75px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: 800; font-size: 1.3rem; color: #065F46; }
 
-/* --- THỐNG KÊ ĐIỂM SỐ CÓ BIỂU ĐỒ --- */
-.level-stats-container { display: flex; flex-direction: column; gap: 15px; margin-top: 20px;}
-.stat-row { display: flex; flex-direction: column; padding: 20px 25px; background: var(--bg-body); border-radius: var(--radius-md); border: 2px solid transparent; gap: 12px; }
+/* Level Mastery List */
+.level-stats-container { display: flex; flex-direction: column; gap: 12px; margin-top: 10px;}
+.level-stats-container::-webkit-scrollbar { width: 6px; }
+.level-stats-container::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
+.level-stats-container::-webkit-scrollbar-track { background: transparent; }
+
+.stat-row { display: flex; flex-direction: column; padding: 15px 20px; background: var(--bg-body); border-radius: var(--radius-md); border: 2px solid transparent; gap: 10px; }
 .stat-row:hover { border-color: var(--accent-purple); background: white; box-shadow: var(--shadow-soft); }
 .stat-info-wrap { display: flex; justify-content: space-between; align-items: center; }
-.stat-lvl-name { font-weight: 800; color: var(--text-primary); font-size: 1.2rem; display: flex; align-items: center; gap: 10px; text-transform: uppercase;}
-.stat-score { background: var(--accent-yellow); color: var(--accent-yellow-text); padding: 8px 18px; border-radius: 100px; font-weight: 900; font-size: 1rem; }
+.stat-lvl-name { font-weight: 800; color: var(--text-primary); font-size: 1.1rem; display: flex; align-items: center; gap: 10px; text-transform: uppercase;}
+.stat-score { background: var(--accent-yellow); color: var(--accent-yellow-text); padding: 6px 14px; border-radius: 100px; font-weight: 900; font-size: 0.95rem; }
 
-.progress-bar-bg { width: 100%; height: 14px; background: #E2E8F0; border-radius: 100px; overflow: hidden; position: relative; }
+.progress-bar-bg { width: 100%; height: 12px; background: #E2E8F0; border-radius: 100px; overflow: hidden; position: relative; }
 .progress-bar-fill { height: 100%; background: linear-gradient(90deg, #4F46E5, #DB2777); border-radius: 100px; transition: width 1s cubic-bezier(0.34, 1.56, 0.64, 1); }
 
-/* --- PILL BUTTONS --- */
+/* Setup & Files */
 .section-title { font-size: 1.2rem; color: var(--text-primary); font-weight: 800; }
 .pill-group { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 15px; }
 .pill-btn, .mode-btn { background: var(--bg-body); border: 2px solid #E2E8F0; color: var(--text-secondary); padding: 15px 25px; border-radius: 100px; font-weight: 700; font-size: 1.05rem; cursor: pointer; }
 .pill-btn:hover, .mode-btn:hover { background: #F1F5F9; border-color: #CBD5E1; color: var(--text-primary); transform: translateY(-2px); }
 .pill-btn.active, .mode-btn.active { background: var(--accent-sky); color: var(--accent-sky-text); border-color: var(--accent-sky-text); box-shadow: 0 4px 15px rgba(2, 132, 199, 0.15); transform: translateY(-2px); }
 
-/* --- FILE CÁ NHÂN --- */
 .info-box { background: var(--accent-yellow); color: var(--accent-yellow-text); padding: 20px; border-radius: var(--radius-md); margin-bottom: 25px; font-weight: 600; font-size: 1.05rem; }
 .file-list-container { display: flex; flex-direction: column; gap: 15px; }
 .file-item { display: flex; justify-content: space-between; align-items: center; padding: 20px 25px; background: var(--bg-body); border-radius: var(--radius-md); font-weight: 700; font-size: 1.1rem; }
 .btn-delete { background: #FFE4E6; color: #E11D48; border: none; padding: 10px 18px; border-radius: 12px; cursor: pointer; font-weight: 800; }
 
-/* --- MODALS & OVERLAYS --- */
+/* Modals */
 .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(248, 250, 252, 0.85); backdrop-filter: blur(15px); z-index: 2000; display: flex; justify-content: center; align-items: center; }
 .auth-box { width: 450px; max-width: 90%; padding: 50px 40px; text-align: center; }
 .blob-decor { position: absolute; border-radius: 50%; filter: blur(40px); z-index: 1; }
@@ -138,132 +136,42 @@ body { background-color: var(--bg-body); color: var(--text-primary); display: fl
 .logo-center { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 15px; margin-bottom: 30px; }
 .logo-center .logo-mark { width: 60px; height: 60px; font-size: 2rem; border-radius: 20px; }
 .logo-center h2 { font-size: 2rem; font-weight: 900; }
-
 .auth-input { width: 100%; padding: 20px; border-radius: 20px; border: 2px solid #E2E8F0; background: var(--bg-body); font-size: 1.2rem; color: var(--text-primary); outline: none; margin-bottom: 20px; text-align: center; font-weight: 700; position: relative; z-index: 2; }
 .auth-input:focus { border-color: var(--accent-purple-text); background: #FFFFFF; box-shadow: 0 0 0 5px var(--accent-purple); }
 
-/* --- GAME OVERLAY (Bouncy Duolingo Vibe) --- */
+/* === GAME OVERLAY (Fixed 100% Screen) === */
 .game-overlay { 
-    position: fixed; /* Ghim chết trên màn hình */
-    top: 0; 
-    left: 0; 
-    width: 100%; 
-    height: 100%; 
-    z-index: 3000; /* Đưa lên lớp cao nhất để đè mọi thứ */
-    background: #F8FAFC; /* Nền đặc che khuất hoàn toàn menu bên dưới */
-    overflow-y: auto; /* Cho phép cuộn nếu màn hình nhỏ */
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+    z-index: 3000; background: rgba(248, 250, 252, 0.98); 
+    overflow-y: auto; backdrop-filter: blur(15px);
 }
-
 .game-container { 
-    width: 900px; 
-    max-width: 95%; 
-    margin: 0 auto; /* Căn giữa màn hình */
-    display: flex; 
-    flex-direction: column; 
-    min-height: 100vh; 
-    padding: 40px 0;
+    width: 900px; max-width: 95%; margin: 0 auto; 
+    display: flex; flex-direction: column; min-height: 100vh; padding: 40px 0;
 }
-/* Thanh tiến độ và Máu (HUD) */
-.game-hud { 
-    display: flex; 
-    justify-content: space-between; 
-    align-items: center; 
-    margin-bottom: 40px; 
-    gap: 30px; 
-}
-.btn-icon { 
-    width: 55px; height: 55px; border-radius: 50%; 
-    border: 2px solid #E2E8F0; border-bottom: 6px solid #E2E8F0; /* Nút 3D */
-    background: white; font-size: 1.8rem; color: #94A3B8; cursor: pointer; 
-    display: flex; justify-content: center; align-items: center; 
-    transition: all 0.1s;
-}
+.game-hud { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; gap: 30px; }
+.btn-icon { width: 55px; height: 55px; border-radius: 50%; border: 2px solid #E2E8F0; border-bottom: 6px solid #E2E8F0; background: white; font-size: 1.8rem; color: #94A3B8; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.1s; }
 .btn-icon:hover { border-color: #CBD5E1; color: #64748B; }
 .btn-icon:active { transform: translateY(4px); border-bottom-width: 2px; }
 
 .progress-bar-game { flex: 1; height: 24px; background: #E2E8F0; border-radius: 100px; overflow: hidden; }
 .progress-fill-game { height: 100%; background: linear-gradient(90deg, #34D399, #10B981); border-radius: 100px; width: 0%; transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
 
-/* Thẻ Flashcard 3D */
-.playful-card { 
-    border: 2px solid #E2E8F0; 
-    border-bottom: 12px solid #E2E8F0; /* Tạo khối 3D cho thẻ */
-}
-.flashcard-area { 
-    text-align: center; 
-    padding: 80px 40px; 
-    background: white; 
-    border-radius: 40px; 
-    position: relative; 
-    margin-bottom: 50px; 
-}
+.playful-card { border: 2px solid #E2E8F0; border-bottom: 12px solid #E2E8F0; }
+.flashcard-area { text-align: center; padding: 80px 40px; background: white; border-radius: 40px; position: relative; margin-bottom: 50px; }
 .main-q { font-size: 8rem; font-weight: 900; color: #1E293B; margin-bottom: 10px; line-height: 1; text-shadow: 0 4px 10px rgba(0,0,0,0.05); }
 .sub-q { font-size: 2.2rem; color: #0EA5E9; font-weight: 800; }
 
-/* --- CHẾ ĐỘ TRẮC NGHIỆM (3D Bouncy Buttons) --- */
-.answer-grid { 
-    display: grid; 
-    grid-template-columns: 1fr 1fr; 
-    gap: 16px; /* Khoảng cách giữa các nút */
-    width: 100%;
-    margin-top: 10px;
-}
+/* Trắc nghiệm Buttons 3D */
+.answer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; width: 100%; }
+.ans-btn { background: #FFFFFF; border: 2px solid #E2E8F0; border-bottom: 8px solid #E2E8F0; padding: 20px 24px; border-radius: 20px; font-size: 1.5rem; font-weight: 800; color: #475569; cursor: pointer; transition: all 0.1s ease; display: flex; justify-content: center; align-items: center; min-height: 85px; }
+.ans-btn:hover { background: #F0F9FF; border: 2px solid #38BDF8; border-bottom: 8px solid #0284C7; color: #0284C7; }
+.ans-btn:active { border-bottom: 2px solid #0284C7; transform: translateY(6px); }
 
-.ans-btn { 
-    background: #FFFFFF; 
-    border: 2px solid #E2E8F0; 
-    border-bottom: 8px solid #E2E8F0; /* Tạo khối 3D dày dặn ở đáy */
-    padding: 20px 24px; 
-    border-radius: 20px; /* Bo góc tròn trịa */
-    font-size: 1.5rem; /* Chữ to rõ ràng hơn */
-    font-weight: 800; 
-    color: #475569; 
-    cursor: pointer; 
-    transition: all 0.1s ease; /* Thời gian chuyển động ngắn để tạo độ nảy */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 85px; /* Đảm bảo các nút luôn có độ cao bằng nhau dù chữ ngắn hay dài */
-}
-
-/* Khi đưa chuột vào (Hover) */
-.ans-btn:hover { 
-    background: #F0F9FF; 
-    border: 2px solid #38BDF8; 
-    border-bottom: 8px solid #0284C7; /* Chuyển sang viền xanh nổi bật */
-    color: #0284C7; 
-}
-
-/* Khi click chuột bấm xuống (Active) */
-.ans-btn:active { 
-    border-bottom: 2px solid #0284C7; /* Ép viền đáy mỏng lại */
-    transform: translateY(6px); /* Đẩy toàn bộ nút lún xuống */
-}
-/* --- CHẾ ĐỘ GÕ PINYIN --- */
+/* Gõ Pinyin Input 3D */
 #typingContainer { width: 100%; margin-top: 10px; }
-.playful-input { 
-    width: 100%; max-width: 550px; padding: 25px; 
-    border-radius: 28px; 
-    border: 2px solid #E2E8F0; 
-    border-bottom: 8px solid #E2E8F0; /* Khối 3D cho input */
-    font-size: 2rem; text-align: center; outline: none; 
-    background: white; color: #1E293B; font-weight: 800; 
-    transition: all 0.2s ease; 
-}
-.playful-input:focus { 
-    border-color: #C084FC; 
-    border-bottom-color: #9333EA; 
-    transform: translateY(-2px);
-    box-shadow: 0 10px 30px rgba(147, 51, 234, 0.1);
-}
+.playful-input { width: 100%; max-width: 550px; padding: 25px; border-radius: 28px; border: 2px solid #E2E8F0; border-bottom: 8px solid #E2E8F0; font-size: 2rem; text-align: center; outline: none; background: white; color: #1E293B; font-weight: 800; transition: all 0.2s ease; }
+.playful-input:focus { border-color: #C084FC; border-bottom-color: #9333EA; transform: translateY(-2px); box-shadow: 0 10px 30px rgba(147, 51, 234, 0.1); }
 .playful-input::placeholder { font-size: 1.5rem; color: #CBD5E1; font-weight: 600; }
-
-/* Sửa lại nút Submit gõ Pinyin cho xịn hơn */
-#btnSubmitPinyin {
-    border-bottom: 8px solid #4338CA; /* Đáy nổi màu đậm */
-    transition: all 0.1s;
-}
-#btnSubmitPinyin:active {
-    transform: translateY(6px);
-    border-bottom-width: 2px;
-}
+#btnSubmitPinyin { border-bottom: 8px solid #4338CA; transition: all 0.1s; }
+#btnSubmitPinyin:active { transform: translateY(6px); border-bottom-width: 2px; }
