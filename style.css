@@ -175,3 +175,4 @@ body { background-color: var(--bg-body); color: var(--text-primary); display: fl
 .playful-input::placeholder { font-size: 1.5rem; color: #CBD5E1; font-weight: 600; }
 #btnSubmitPinyin { border-bottom: 8px solid #4338CA; transition: all 0.1s; }
 #btnSubmitPinyin:active { transform: translateY(6px); border-bottom-width: 2px; }
+ 
