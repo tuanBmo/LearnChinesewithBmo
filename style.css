@@ -196,33 +196,45 @@ body { background-color: var(--bg-body); color: var(--text-primary); display: fl
 .main-q { font-size: 8rem; font-weight: 900; color: #1E293B; margin-bottom: 10px; line-height: 1; text-shadow: 0 4px 10px rgba(0,0,0,0.05); }
 .sub-q { font-size: 2.2rem; color: #0EA5E9; font-weight: 800; }
 
-/* --- CHẾ ĐỘ TRẮC NGHIỆM (Nút Bouncy 3D) --- */
-.answer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-.ans-btn { 
-    background: white; 
-    border: 2px solid #E2E8F0; 
-    border-bottom: 8px solid #E2E8F0; /* Viền đáy dày tạo khối 3D */
-    padding: 25px 20px; 
-    border-radius: 24px; 
-    font-size: 1.5rem; 
-    font-weight: 800; 
-    cursor: pointer; 
-    color: #475569; 
-    transition: all 0.1s; /* Chuyển động nhanh để cảm giác nhạy bén */
-}
-.ans-btn:hover { 
-    border-color: #38BDF8; 
-    border-bottom-color: #0284C7; 
-    background: #F0F9FF; 
-    color: #0284C7; 
-    transform: translateY(-2px); 
-    border-bottom-width: 10px; 
-}
-.ans-btn:active { 
-    transform: translateY(6px); 
-    border-bottom-width: 2px; /* Ép nút xẹp xuống khi click */
+/* --- CHẾ ĐỘ TRẮC NGHIỆM (3D Bouncy Buttons) --- */
+.answer-grid { 
+    display: grid; 
+    grid-template-columns: 1fr 1fr; 
+    gap: 16px; /* Khoảng cách giữa các nút */
+    width: 100%;
+    margin-top: 10px;
 }
 
+.ans-btn { 
+    background: #FFFFFF; 
+    border: 2px solid #E2E8F0; 
+    border-bottom: 8px solid #E2E8F0; /* Tạo khối 3D dày dặn ở đáy */
+    padding: 20px 24px; 
+    border-radius: 20px; /* Bo góc tròn trịa */
+    font-size: 1.5rem; /* Chữ to rõ ràng hơn */
+    font-weight: 800; 
+    color: #475569; 
+    cursor: pointer; 
+    transition: all 0.1s ease; /* Thời gian chuyển động ngắn để tạo độ nảy */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 85px; /* Đảm bảo các nút luôn có độ cao bằng nhau dù chữ ngắn hay dài */
+}
+
+/* Khi đưa chuột vào (Hover) */
+.ans-btn:hover { 
+    background: #F0F9FF; 
+    border: 2px solid #38BDF8; 
+    border-bottom: 8px solid #0284C7; /* Chuyển sang viền xanh nổi bật */
+    color: #0284C7; 
+}
+
+/* Khi click chuột bấm xuống (Active) */
+.ans-btn:active { 
+    border-bottom: 2px solid #0284C7; /* Ép viền đáy mỏng lại */
+    transform: translateY(6px); /* Đẩy toàn bộ nút lún xuống */
+}
 /* --- CHẾ ĐỘ GÕ PINYIN --- */
 #typingContainer { width: 100%; margin-top: 10px; }
 .playful-input { 
