@@ -800,3 +800,4 @@ window.endGame = function() {
 
 // Chạy khởi tạo
 checkAuth();
+ 
