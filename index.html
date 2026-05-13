@@ -218,4 +218,35 @@
                             <label class="tg-switch"><input type="checkbox" id="setShuffle" checked><span class="tg-slider"></span></label>
                         </div>
                     </div>
-                    <button class="btn-primary btn-
+                    <button class="btn-primary btn-bouncy" onclick="saveSettings()" style="width: 100%; margin-top: 20px;">Lưu Cài Đặt</button>
+                    
+                    <div style="margin-top: 40px; padding-top: 20px; border-top: 2px dashed #E2E8F0; text-align: center;">
+                        <h4 style="color: #E11D48; margin-bottom: 10px;"><i class='bx bx-error-circle'></i> Danger Zone</h4>
+                        <p class="muted" style="margin-bottom: 15px; font-size: 0.85rem;">Khôi phục cài đặt gốc, xóa mọi tiến độ học.</p>
+                        <button class="btn-primary btn-bouncy" onclick="resetAllData()" style="background: #EF4444; box-shadow: 0 6px 0 #B91C1C; width: 100%;">Xóa Toàn Bộ Dữ Liệu</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="personal-view" class="view-section">
+                <div class="bento-card playful-card">
+                    <div class="card-header" style="margin-bottom: 25px;">
+                        <h2><i class='bx bx-folder-open' style="color: var(--accent-sky-text);"></i> Quản lý File Cá Nhân</h2>
+                        <label class="btn-primary btn-bouncy" style="cursor: pointer;">
+                            <i class='bx bx-upload'></i> Tải lên CSV
+                            <input type="file" id="fileUpload" accept=".csv" style="display: none;">
+                        </label>
+                    </div>
+                    <div class="info-box">
+                        <p><strong>💡 Mẹo:</strong> Upload file .csv tự tạo. Cấu trúc 3 cột không tiêu đề: <em>Cột 1: Chữ Hán, Cột 2: Pinyin, Cột 3: Nghĩa</em>.</p>
+                    </div>
+                    <div id="personalFilesList" class="file-list-container"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
