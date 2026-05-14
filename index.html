@@ -52,6 +52,12 @@
                     <p class="sub-q" id="subQuestion">nǐ hǎo</p>
                     <button id="btnRevealPinyin" class="btn-reveal" title="Hiện Pinyin" style="display: none;"><i class='bx bx-show'></i></button>
                 </div>
+                
+                <div id="sentenceContainer" class="sentence-container" style="display: none;">
+                    <p id="sentenceHanzi" class="sentence-hanzi">...</p>
+                    <p id="sentencePinyin" class="sentence-pinyin">...</p>
+                    <p id="sentenceMeaning" class="sentence-meaning">...</p>
+                </div>
             </div>
 
             <div class="answer-grid" id="answerContainer"></div>
@@ -106,7 +112,6 @@
 
             <div id="dashboard-view" class="view-section active">
                 <div class="bento-grid">
-                    
                     <div class="bento-card hero-card floating-anim" id="dailyQuoteCard" style="grid-column: span 2; grid-row: span 2; display: flex; flex-direction: column; justify-content: center; padding: 35px;">
                         <div class="card-header" style="position: relative; z-index: 2; margin-bottom: 20px;"><span class="tag white-tag">ĐỘNG LỰC HÔM NAY ✨</span></div>
                         <div class="hero-content" style="z-index: 2;">
@@ -175,8 +180,7 @@
                 <div class="bento-card playful-card" style="max-width: 600px; margin: 0 auto; text-align: center;">
                     <div style="font-size: 5rem; margin-bottom: 10px;">🧩</div>
                     <h2 style="font-size: 2.2rem; color: var(--accent-purple-text);">Mini Game: Ghép Từ</h2>
-                    <p class="muted" style="font-size: 1.1rem; margin-top: 10px;">Luyện phản xạ nhanh tay lẹ mắt. Tìm và ghép đúng 3 yếu tố.</p>
-                    
+                    <p class="muted" style="font-size: 1.1rem; margin-top: 10px;">Luyện phản xạ nhanh tay lẹ mắt.</p>
                     <div style="margin: 30px 0; background: #F8FAFC; padding: 25px; border-radius: 24px; text-align: left;">
                         <h4 class="section-title" style="margin-bottom: 15px;">1. Chọn độ khó:</h4>
                         <select id="miniGameDifficulty" class="playful-select" style="width: 100%; margin-bottom: 20px;">
@@ -184,7 +188,6 @@
                             <option value="medium">🟡 Trung Bình (HSK 3 - 4)</option>
                             <option value="hard">🔴 Khó (HSK 5 - 6)</option>
                         </select>
-                        
                         <h4 class="section-title" style="margin-bottom: 15px;">2. Số lượng từ vựng:</h4>
                         <select id="miniGameWordCount" class="playful-select" style="width: 100%;">
                             <option value="3">3 từ (Khởi động)</option>
@@ -192,7 +195,6 @@
                             <option value="10">10 từ (Thử thách)</option>
                         </select>
                     </div>
-
                     <button class="btn-primary btn-bouncy" onclick="startMatchGame()" style="width: 100%; font-size: 1.3rem; padding: 22px; background: linear-gradient(135deg, #4F46E5, #DB2777); box-shadow: 0 8px 0 #831843;">
                         BẮT ĐẦU CHƠI NGAY <i class='bx bx-joystick'></i>
                     </button>
@@ -238,7 +240,8 @@
                         </label>
                     </div>
                     <div class="info-box">
-                        <p><strong>💡 Mẹo:</strong> Upload file .csv tự tạo. Cấu trúc 3 cột không tiêu đề: <em>Cột 1: Chữ Hán, Cột 2: Pinyin, Cột 3: Nghĩa</em>.</p>
+                        <p><strong>💡 Mẹo:</strong> Upload file .csv để khai mở Sentence Mining.<br>
+                        <em>Cột 1: Hán, Cột 2: Pinyin, Cột 3: Nghĩa, Cột 4: Câu Hán, Cột 5: Câu Pinyin, Cột 6: Câu Nghĩa</em>.</p>
                     </div>
                     <div id="personalFilesList" class="file-list-container"></div>
                 </div>
@@ -250,4 +253,3 @@
     <script src="script.js"></script>
 </body>
 </html>
- 
