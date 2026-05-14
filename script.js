@@ -11,13 +11,11 @@ let hp = 5;
 let missedWords = []; 
 let isReviewMode = false;
 
-// Đọc Data Local an toàn
 function getSafeData(key, defaultVal) {
     try { return JSON.parse(localStorage.getItem(key)) || defaultVal; } 
     catch(e) { return defaultVal; }
 }
 
-// CẤU TRÚC LƯU TRỮ UNIQUE TỪ: { "HSK1": ["我", "你"], "MSUTONG": ["电脑"] }
 let hskMasteredWords = getSafeData('hsk_mastered_words_v2', {});
 let hskLevelTotals = getSafeData('hsk_level_totals_v2', {}); 
 
@@ -25,18 +23,16 @@ let personalFiles = getSafeData('hsk_personal_files', {});
 let currentUser = localStorage.getItem('hsk_current_user');
 let appSettings = getSafeData('hsk_settings', { hidePinyin: false, shuffle: true });
 
-// Lịch sử Đăng nhập mảng các ngày: ["2026-5-10", "2026-5-11", "2026-5-12"]
 let loginHistory = getSafeData('hsk_login_history', []);
 let currentStreak = 0;
 
 let matchGameSelected = [];
 let matchedCount = 0;
-let globalDictionary = []; // Chứa tất cả từ vựng để Search
+let globalDictionary = [];
 
 // ==========================================
-// 2. DATA TRÍCH DẪN & HÌNH NỀN TRUYỀN ĐỘNG LỰC
+// 2. DATA TRÍCH DẪN & HÌNH NỀN
 // ==========================================
-// Hình nền Abstract/Phong cảnh truyền cảm hứng
 const motivationalBgImages = [
     "https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=800&auto=format&fit=crop", 
     "https://images.unsplash.com/photo-1528722828814-77b9b83aafb2?q=80&w=800&auto=format&fit=crop", 
@@ -56,7 +52,7 @@ const motivationalQuotes = [
 ];
 
 // ==========================================
-// 3. TẢI TỪ VỰNG GLOBAL & CHỨC NĂNG SEARCH
+// 3. TẢI TỪ VỰNG GLOBAL & SEARCH
 // ==========================================
 async function loadGlobalDictionary() {
     globalDictionary = [];
@@ -77,7 +73,6 @@ async function loadGlobalDictionary() {
             }
         } catch (e) {}
     });
-
     await Promise.all(fetchPromises);
 }
 
@@ -119,7 +114,7 @@ if(searchInput) {
 }
 
 // ==========================================
-// 4. HỆ THỐNG ÂM THANH (WEB AUDIO API)
+// 4. HỆ THỐNG ÂM THANH
 // ==========================================
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 function playSound(type) {
@@ -179,8 +174,7 @@ function processStreakCalendar() {
     while(true) {
         let checkStr = `${checkDate.getFullYear()}-${checkDate.getMonth() + 1}-${checkDate.getDate()}`;
         if(loginHistory.includes(checkStr)) {
-            currentStreak++;
-            checkDate.setDate(checkDate.getDate() - 1); 
+            currentStreak++; checkDate.setDate(checkDate.getDate() - 1); 
         } else { break; }
     }
     
@@ -218,7 +212,6 @@ function processStreakCalendar() {
         let cellDateStr = `${year}-${month + 1}-${i}`;
         if (i === d.getDate()) cell.classList.add('today');
         if (loginHistory.includes(cellDateStr)) cell.classList.add('active');
-        
         grid.appendChild(cell);
     }
     
@@ -233,7 +226,7 @@ function processStreakCalendar() {
 }
 
 // ==========================================
-// 6. THỐNG KÊ UNIQUE TỪ VỰNG & LEVEL MASTERY
+// 6. THỐNG KÊ UNIQUE TỪ VỰNG
 // ==========================================
 function recordCorrectWord(level, hanziWord) {
     if(!isReviewMode) {
@@ -247,13 +240,9 @@ function recordCorrectWord(level, hanziWord) {
 
 function updateGlobalProgress() {
     let totalMastered = 0; let totalTarget = 0;
-    const playedLevels = Object.keys(hskMasteredWords);
-    
-    playedLevels.forEach(lvl => {
-        let masteredInLvl = hskMasteredWords[lvl] ? hskMasteredWords[lvl].length : 0;
-        let totalInLvl = hskLevelTotals[lvl] || 100; 
-        totalMastered += masteredInLvl;
-        totalTarget += totalInLvl;
+    Object.keys(hskMasteredWords).forEach(lvl => {
+        totalMastered += hskMasteredWords[lvl] ? hskMasteredWords[lvl].length : 0;
+        totalTarget += hskLevelTotals[lvl] || 100; 
     });
 
     let percent = totalTarget === 0 ? 0 : Math.min(Math.round((totalMastered / totalTarget) * 100), 100);
@@ -315,7 +304,7 @@ function updateProfileXP() {
 }
 
 // ==========================================
-// 7. KHỞI TẠO APP VÀ CÀI ĐẶT
+// 7. KHỞI TẠO APP
 // ==========================================
 function checkAuth() {
     const authModal = document.getElementById('authModal');
@@ -323,12 +312,8 @@ function checkAuth() {
         if (authModal) authModal.style.display = 'flex';
     } else {
         if (authModal) authModal.style.display = 'none';
-        loadGlobalDictionary(); 
-        processStreakCalendar(); 
-        updateProfileXP(); 
-        renderLevelScores();
-        initSettingsUI(); 
-        renderDailyQuote();
+        loadGlobalDictionary(); processStreakCalendar(); updateProfileXP(); renderLevelScores();
+        initSettingsUI(); renderDailyQuote();
     }
 }
 
@@ -337,8 +322,7 @@ if (btnLogin) {
     btnLogin.onclick = () => {
         const username = document.getElementById('usernameInput').value.trim();
         if (username.length >= 2) {
-            currentUser = username;
-            localStorage.setItem('hsk_current_user', currentUser);
+            currentUser = username; localStorage.setItem('hsk_current_user', currentUser);
             checkAuth(); shootConfetti(); 
         } else { alert("Nhập tên hiển thị (ít nhất 2 ký tự) nhé!"); }
     };
@@ -361,9 +345,7 @@ window.saveSettings = function() {
 window.resetAllData = function() {
     if (confirm("⚠️ CẢNH BÁO: Xóa TOÀN BỘ dữ liệu học tập?")) {
         if (confirm("Không thể khôi phục lại Điểm số, Streak, Tên và File. Tiếp tục?")) {
-            localStorage.clear(); 
-            alert("Đã dọn dẹp bộ nhớ!");
-            window.location.reload();
+            localStorage.clear(); alert("Đã dọn dẹp bộ nhớ!"); window.location.reload();
         }
     }
 }
@@ -376,8 +358,7 @@ function switchTab(targetId) {
     const target = document.getElementById(targetId);
     if(target) target.classList.add('active');
     document.querySelectorAll('.nav-links a[data-target]').forEach(l => {
-        if(l.getAttribute('data-target') === targetId) l.classList.add('active');
-        else l.classList.remove('active');
+        if(l.getAttribute('data-target') === targetId) l.classList.add('active'); else l.classList.remove('active');
     });
 }
 document.querySelectorAll('.nav-links a[data-target]').forEach(link => {
@@ -402,8 +383,7 @@ if (levelGrid) {
 document.querySelectorAll('.mode-btn').forEach(btn => {
     btn.onclick = () => {
         document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        selectedMode = btn.getAttribute('data-mode');
+        btn.classList.add('active'); selectedMode = btn.getAttribute('data-mode');
     };
 });
 
@@ -417,9 +397,7 @@ if (fileUpload) {
             const name = file.name.replace('.csv', '');
             personalFiles[name] = e.target.result;
             localStorage.setItem('hsk_personal_files', JSON.stringify(personalFiles));
-            alert("Đã tải lên file: " + name);
-            renderPersonalFiles();
-            loadGlobalDictionary(); // Load lại data dictionary
+            alert("Đã tải lên file: " + name); renderPersonalFiles(); loadGlobalDictionary(); 
         };
         reader.readAsText(file);
     });
@@ -456,8 +434,7 @@ window.deleteFile = function(name) {
         delete personalFiles[name];
         localStorage.setItem('hsk_personal_files', JSON.stringify(personalFiles));
         selectedPersonalFiles = selectedPersonalFiles.filter(l => l !== name);
-        renderPersonalFiles();
-        loadGlobalDictionary(); 
+        renderPersonalFiles(); loadGlobalDictionary(); 
     }
 }
 renderPersonalFiles();
@@ -468,7 +445,6 @@ renderPersonalFiles();
 window.startMatchGame = async function() {
     const diffSelect = document.getElementById('miniGameDifficulty');
     const countSelect = document.getElementById('miniGameWordCount');
-    
     let difficulty = diffSelect ? diffSelect.value : 'easy';
     let count = countSelect ? parseInt(countSelect.value) : 5;
 
@@ -497,7 +473,6 @@ window.startMatchGame = async function() {
 
     const results = await Promise.all(fetchPromises);
     results.forEach(data => { allWords = [...allWords, ...data]; });
-
     allWords = allWords.filter(row => row.length >= 3 && row[0] !== undefined && row[0].trim() !== "");
     
     if (allWords.length === 0) {
@@ -520,7 +495,6 @@ window.startMatchGame = async function() {
     });
     
     allBubbles.sort(() => Math.random() - 0.5); 
-
     allBubbles.forEach((b, i) => {
         const bubble = document.createElement('div');
         bubble.className = `match-bubble ${b.type}`;
@@ -535,7 +509,6 @@ window.startMatchGame = async function() {
 function handleBubbleClick(bubble, totalCount) {
     if (bubble.classList.contains('correct') || bubble.classList.contains('wrong')) return;
     playSound('pop'); 
-
     const bType = bubble.dataset.type;
 
     if (bubble.classList.contains('selected')) {
@@ -586,7 +559,7 @@ window.closeMatchGame = function() { document.getElementById('wordMatchGameScree
 
 
 // ==========================================
-// 10. LOGIC GAME LUYỆN TẬP CHÍNH
+// 10. LOGIC GAME CHÍNH (CÓ SENTENCE MINING)
 // ==========================================
 function normalizePinyin(str) { return str.normalize('NFD').replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "").toLowerCase(); }
 
@@ -596,6 +569,11 @@ function updateGameProgress() {
         const percent = Math.round((currentIndex / quizData.length) * 100);
         progressFill.style.width = `${percent}%`;
     }
+}
+
+function shootConfetti() {
+    try { if (typeof confetti === 'function') confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#4F46E5', '#DB2777', '#10B981', '#F59E0B'] }); } 
+    catch(e) {}
 }
 
 const btnStart = document.getElementById('btnStart');
@@ -673,9 +651,20 @@ function showQuestion() {
         return;
     }
 
+    // Bóc tách dữ liệu 3 cột cơ bản
     const currentWord = quizData[currentIndex];
-    const hanzi = currentWord[0]; const pinyin = currentWord[1]; const meaning = currentWord[2];
+    const hanzi = currentWord[0] || ""; 
+    const pinyin = currentWord[1] || ""; 
+    const meaning = currentWord[2] || "";
     const lvl = currentWord[currentWord.length - 1]; 
+
+    // Bóc tách dữ liệu 3 cột Sentence Mining (nếu có)
+    let exHanzi = "", exPinyin = "", exMeaning = "";
+    if (currentWord.length >= 7) { 
+        exHanzi = currentWord[3] || "";
+        exPinyin = currentWord[4] || "";
+        exMeaning = currentWord[5] || "";
+    }
 
     document.getElementById('lvlBadge').innerText = isReviewMode ? "ÔN TẬP" : (lvl || "HSK").toUpperCase();
     
@@ -685,6 +674,11 @@ function showQuestion() {
     const typingContainer = document.getElementById('typingContainer');
     const pinyinInput = document.getElementById('pinyinInput');
     const btnReveal = document.getElementById('btnRevealPinyin');
+
+    const sentenceContainer = document.getElementById('sentenceContainer');
+    const sentenceHanziEl = document.getElementById('sentenceHanzi');
+    const sentencePinyinEl = document.getElementById('sentencePinyin');
+    const sentenceMeaningEl = document.getElementById('sentenceMeaning');
 
     let correctAnswer = "";
     let hiddenText = "";
@@ -718,6 +712,30 @@ function showQuestion() {
     } else {
         subQ.innerText = hiddenText;
         btnReveal.style.display = 'none';
+    }
+
+    // RENDER SENTENCE MINING
+    if (exHanzi && sentenceContainer) {
+        sentenceContainer.style.display = 'block';
+        
+        let displaySentenceHanzi = exHanzi;
+        if (selectedMode === "CHỮ HÁN") {
+            // Giấu chữ Hán trong câu nếu đang chơi chế độ tìm Chữ Hán
+            displaySentenceHanzi = exHanzi.split(hanzi).join(`<span class="highlight-word">[___]</span>`);
+        } else {
+            // Bôi đỏ bình thường
+            displaySentenceHanzi = exHanzi.split(hanzi).join(`<span class="highlight-word">${hanzi}</span>`);
+        }
+        
+        sentenceHanziEl.innerHTML = displaySentenceHanzi;
+        sentencePinyinEl.innerText = exPinyin;
+        sentenceMeaningEl.innerText = exMeaning;
+
+        if (appSettings.hidePinyin) sentencePinyinEl.style.display = 'none';
+        else sentencePinyinEl.style.display = 'block';
+        
+    } else if (sentenceContainer) {
+        sentenceContainer.style.display = 'none';
     }
 }
 
@@ -800,5 +818,3 @@ window.endGame = function() {
 
 // Chạy khởi tạo
 checkAuth();
- 
- 
