@@ -559,7 +559,7 @@ window.closeMatchGame = function() { document.getElementById('wordMatchGameScree
 
 
 // ==========================================
-// 10. LOGIC GAME CHÍNH (CÓ SENTENCE MINING)
+// 10. LOGIC GAME CHÍNH (SENTENCE MINING & PHÓNG TO CHỮ HÁN)
 // ==========================================
 function normalizePinyin(str) { return str.normalize('NFD').replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "").toLowerCase(); }
 
@@ -651,14 +651,13 @@ function showQuestion() {
         return;
     }
 
-    // Bóc tách dữ liệu 3 cột cơ bản
     const currentWord = quizData[currentIndex];
     const hanzi = currentWord[0] || ""; 
     const pinyin = currentWord[1] || ""; 
     const meaning = currentWord[2] || "";
     const lvl = currentWord[currentWord.length - 1]; 
 
-    // Bóc tách dữ liệu 3 cột Sentence Mining (nếu có)
+    // Bóc tách Sentence Mining
     let exHanzi = "", exPinyin = "", exMeaning = "";
     if (currentWord.length >= 7) { 
         exHanzi = currentWord[3] || "";
@@ -683,6 +682,9 @@ function showQuestion() {
     let correctAnswer = "";
     let hiddenText = "";
 
+    // Mặc định tắt phóng to
+    answerContainer.classList.remove('hanzi-mode');
+
     if (selectedMode === "GÕ PINYIN") {
         mainQ.innerText = hanzi; mainQ.style.fontSize = "7.5rem"; 
         hiddenText = meaning; 
@@ -697,6 +699,8 @@ function showQuestion() {
             mainQ.innerText = hanzi; mainQ.style.fontSize = "7.5rem"; hiddenText = meaning; correctAnswer = pinyin;
         } else { 
             mainQ.innerText = meaning; mainQ.style.fontSize = "4rem"; hiddenText = pinyin; correctAnswer = hanzi;
+            // Bật phóng to Hán tự cho chế độ Mặt chữ
+            answerContainer.classList.add('hanzi-mode');
         }
         renderAnswers(correctAnswer, lvl ? lvl.toUpperCase() : "CUSTOM");
     }
@@ -720,10 +724,8 @@ function showQuestion() {
         
         let displaySentenceHanzi = exHanzi;
         if (selectedMode === "CHỮ HÁN") {
-            // Giấu chữ Hán trong câu nếu đang chơi chế độ tìm Chữ Hán
             displaySentenceHanzi = exHanzi.split(hanzi).join(`<span class="highlight-word">[___]</span>`);
         } else {
-            // Bôi đỏ bình thường
             displaySentenceHanzi = exHanzi.split(hanzi).join(`<span class="highlight-word">${hanzi}</span>`);
         }
         
