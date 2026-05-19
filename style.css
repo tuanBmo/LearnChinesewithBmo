@@ -176,7 +176,19 @@ input:checked + .tg-slider:before { transform: translateX(22px); }
 @keyframes floatAnim { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
 @keyframes popOut { to { transform: scale(0); opacity: 0; } }
 @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-10px); } 40%, 80% { transform: translateX(10px); } }
+/* Phóng to đáp án khi ở chế độ CHỮ HÁN */
+.answer-grid.hanzi-mode .ans-btn {
+    font-size: 2.8rem; /* Phóng to chữ Hán lên gần gấp đôi */
+    font-weight: 700;
+    line-height: 1;
+}
 
+/* Kích thước riêng cho điện thoại */
+@media (max-width: 768px) {
+    .answer-grid.hanzi-mode .ans-btn {
+        font-size: 2.2rem; 
+    }
+}
 /* ==========================================
    📱 RESPONSIVE - GIAO DIỆN ĐIỆN THOẠI
    ========================================== */
