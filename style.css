@@ -220,4 +220,4 @@ input:checked + .tg-slider:before { transform: translateX(22px); }
     .auth-box { padding: 30px 20px; }
 }
 * { -webkit-overflow-scrolling: touch; }
- 
+  
