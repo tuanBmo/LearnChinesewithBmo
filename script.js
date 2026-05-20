@@ -601,4 +601,25 @@ function checkTypingAnswer() {
     const userInput = document.getElementById('pinyinInput').value; if (!userInput.trim()) return; 
     const currentWord = quizData[currentIndex]; const hanzi = currentWord[0]; const correctPinyin = currentWord[1]; const currentLevel = (currentWord[currentWord.length - 1] || "CUSTOM").toUpperCase();
     if (normalizePinyin(userInput) === normalizePinyin(correctPinyin)) { playSound('correct'); recordCorrectWord(currentLevel, hanzi); currentIndex++; showQuestion(); }
-    else { hp--; playSound('wrong'); alert(`Sai rồi! Đáp án đúng: ${correctPinyin}`); document.getElementById
+    else { hp--; playSound('wrong'); alert(`Sai rồi! Đáp án đúng: ${correctPinyin}`); document.getElementById('hpDisplay').innerText = "❤️".repeat(Math.max(0, hp)); if(!isReviewMode) missedWords.push(quizData[currentIndex]); else quizData.push(quizData[currentIndex]); currentIndex++; showQuestion(); }
+}
+
+function renderAnswers(correct, currentLevel) {
+    const container = document.getElementById('answerContainer'); container.innerHTML = "";
+    const colIndex = selectedMode === "NGHĨA" ? 2 : (selectedMode === "PINYIN" ? 1 : 0); const pool = [...new Set(quizData.map(r => r[colIndex]))];
+    let choices = [correct]; while (choices.length < 4 && pool.length > 4) { let rand = pool[Math.floor(Math.random() * pool.length)]; if (!choices.includes(rand)) choices.push(rand); }
+    choices.sort(() => Math.random() - 0.5);
+    choices.forEach(text => {
+        const btn = document.createElement('button'); btn.className = "ans-btn"; btn.innerText = text;
+        btn.onclick = () => {
+            if (text === correct) { playSound('correct'); const hanzi = quizData[currentIndex][0]; recordCorrectWord(currentLevel, hanzi); currentIndex++; showQuestion(); }
+            else { hp--; playSound('wrong'); alert(`Sai rồi! Đáp án đúng: ${correct}`); document.getElementById('hpDisplay').innerText = "❤️".repeat(Math.max(0, hp)); if(!isReviewMode) missedWords.push(quizData[currentIndex]); else quizData.push(quizData[currentIndex]); currentIndex++; showQuestion(); }
+        }; container.appendChild(btn);
+    });
+}
+
+window.startReviewMode = function() { document.getElementById('reviewModal').style.display = 'none'; quizData = [...missedWords]; missedWords = []; currentIndex = 0; isReviewMode = true; hp = 3; document.getElementById('hpDisplay').innerText = "❤️❤️❤️"; showQuestion(); }
+window.endGame = function() { document.getElementById('reviewModal').style.display = 'none'; document.getElementById('gameScreen').style.display = 'none'; updateProfileXP(); renderLevelScores(); switchTab('dashboard-view'); }
+
+// Khởi chạy
+checkAuth();
