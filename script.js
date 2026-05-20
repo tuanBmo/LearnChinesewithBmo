@@ -402,13 +402,14 @@ if (levelGrid) {
 }
 
 document.querySelectorAll('.mode-btn').forEach(btn => {
-    btn.onclick = () => {
-        // Chỉ apply cho nhóm chọn mode luyện tập, không liên đới tới group Ngữ pháp
-        if(btn.parentElement.id !== 'grammarLevelGroup') {
+    // Chỉ thêm sự kiện click cho các nút bên tab Luyện tập, tha cho tab Ngữ pháp
+    if(btn.parentElement.id !== 'grammarLevelGroup') {
+        btn.addEventListener('click', () => {
             btn.parentElement.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active'); selectedMode = btn.getAttribute('data-mode');
-        }
-    };
+            btn.classList.add('active'); 
+            selectedMode = btn.getAttribute('data-mode');
+        });
+    }
 });
 
 const fileUpload = document.getElementById('fileUpload');
