@@ -624,3 +624,4 @@ window.endGame = function() { document.getElementById('reviewModal').style.displ
 // Khởi chạy
 checkAuth();
  
+ 
