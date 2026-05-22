@@ -6,7 +6,7 @@ let selectedLevels = [];
 let selectedPersonalFiles = [];
 let selectedMode = "NGHĨA";
 let quizData = [];
-let grammarData = []; // Mảng chứa dữ liệu ngữ pháp
+let grammarData = []; 
 let currentIndex = 0;
 let hp = 5;
 let missedWords = []; 
@@ -105,7 +105,6 @@ if(searchInput) {
             searchBox.style.display = 'block';
         }
     });
-
     document.addEventListener('click', (e) => {
         if(!searchInput.contains(e.target) && !searchBox.contains(e.target)) {
             searchBox.style.display = 'none';
@@ -202,7 +201,7 @@ function processStreakCalendar() {
 }
 
 // ==========================================
-// 6. THỐNG KÊ UNIQUE TỪ VỰNG
+// 6. THỐNG KÊ UNIQUE TỪ VỰNG & PROGRESS
 // ==========================================
 function recordCorrectWord(level, hanziWord) {
     if(!isReviewMode) {
@@ -279,7 +278,7 @@ async function loadGrammarData() {
             const text = await response.text();
             const parsed = Papa.parse(text, { skipEmptyLines: true });
             grammarData = parsed.data.filter(row => row.length >= 6);
-            renderGrammar('1'); // Tự động load Quyển 1 khi vào app
+            renderGrammar('1'); 
         } else {
             document.getElementById('grammarListContainer').innerHTML = `
                 <p class="muted" style="text-align:center; padding: 20px;">
@@ -341,7 +340,7 @@ function checkAuth() {
     } else {
         if (authModal) authModal.style.display = 'none';
         loadGlobalDictionary(); processStreakCalendar(); updateProfileXP(); renderLevelScores();
-        initSettingsUI(); renderDailyQuote(); loadGrammarData(); // TẢI NGỮ PHÁP
+        initSettingsUI(); renderDailyQuote(); loadGrammarData(); 
     }
 }
 
@@ -402,12 +401,10 @@ if (levelGrid) {
 }
 
 document.querySelectorAll('.mode-btn').forEach(btn => {
-    // Chỉ thêm sự kiện click cho các nút bên tab Luyện tập, tha cho tab Ngữ pháp
     if(btn.parentElement.id !== 'grammarLevelGroup') {
         btn.addEventListener('click', () => {
             btn.parentElement.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active'); 
-            selectedMode = btn.getAttribute('data-mode');
+            btn.classList.add('active'); selectedMode = btn.getAttribute('data-mode');
         });
     }
 });
@@ -523,6 +520,12 @@ window.closeMatchGame = function() { document.getElementById('wordMatchGameScree
 // ==========================================
 // 11. LOGIC GAME LUYỆN TẬP CHÍNH & SENTENCE MINING
 // ==========================================
+// THUẬT TOÁN CHỐNG SẬP NGẦM KHI THIẾU PINYIN
+function normalizePinyin(str) { 
+    if (!str) return ""; // Trả về rỗng nếu CSV thiếu dữ liệu
+    return String(str).normalize('NFD').replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "").toLowerCase(); 
+}
+
 function updateGameProgress() {
     const progressFill = document.getElementById('gameProgress');
     if (progressFill && quizData.length > 0) { const percent = Math.round((currentIndex / quizData.length) * 100); progressFill.style.width = `${percent}%`; }
@@ -604,11 +607,32 @@ function showQuestion() {
 }
 
 function checkTypingAnswer() {
-    const userInput = document.getElementById('pinyinInput').value; if (!userInput.trim()) return; 
-    const currentWord = quizData[currentIndex]; const hanzi = currentWord[0]; const correctPinyin = currentWord[1]; const currentLevel = (currentWord[currentWord.length - 1] || "CUSTOM").toUpperCase();
-    if (normalizePinyin(userInput) === normalizePinyin(correctPinyin)) { playSound('correct'); recordCorrectWord(currentLevel, hanzi); currentIndex++; showQuestion(); }
-    else { hp--; playSound('wrong'); alert(`Sai rồi! Đáp án đúng: ${correctPinyin}`); document.getElementById('hpDisplay').innerText = "❤️".repeat(Math.max(0, hp)); if(!isReviewMode) missedWords.push(quizData[currentIndex]); else quizData.push(quizData[currentIndex]); currentIndex++; showQuestion(); }
+    const pinyinInput = document.getElementById('pinyinInput');
+    const userInput = pinyinInput.value; 
+    
+    // CẢNH BÁO NẾU BỎ TRỐNG
+    if (!userInput.trim()) {
+        alert("Vui lòng gõ đáp án Pinyin vào ô trống nhé!");
+        pinyinInput.focus();
+        return; 
+    }
+
+    const currentWord = quizData[currentIndex]; 
+    const hanzi = currentWord[0]; 
+    const correctPinyin = currentWord[1] || ""; // Tránh lỗi undefined
+    const currentLevel = (currentWord[currentWord.length - 1] || "CUSTOM").toUpperCase();
+    
+    if (normalizePinyin(userInput) === normalizePinyin(correctPinyin)) { 
+        playSound('correct'); recordCorrectWord(currentLevel, hanzi); currentIndex++; showQuestion(); 
+    } else { 
+        hp--; playSound('wrong'); alert(`Sai rồi! Đáp án đúng: ${correctPinyin}`); document.getElementById('hpDisplay').innerText = "❤️".repeat(Math.max(0, hp)); if(!isReviewMode) missedWords.push(quizData[currentIndex]); else quizData.push(quizData[currentIndex]); currentIndex++; showQuestion(); 
+    }
 }
+
+const btnSubmitPinyin = document.getElementById('btnSubmitPinyin');
+if (btnSubmitPinyin) btnSubmitPinyin.addEventListener('click', checkTypingAnswer);
+const pinyinInput = document.getElementById('pinyinInput');
+if (pinyinInput) pinyinInput.addEventListener('keypress', function(e) { if (e.key === 'Enter') { e.preventDefault(); checkTypingAnswer(); } });
 
 function renderAnswers(correct, currentLevel) {
     const container = document.getElementById('answerContainer'); container.innerHTML = "";
