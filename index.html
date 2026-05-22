@@ -63,8 +63,9 @@
             <div class="answer-grid" id="answerContainer"></div>
 
             <div id="typingContainer" style="display: none; text-align: center;">
-                <input type="text" id="pinyinInput" class="playful-input" placeholder="Gõ pinyin vào đây..." autocomplete="off">
-                <button id="btnSubmitPinyin" class="btn-primary btn-bouncy" style="margin-top: 30px; font-size: 1.4rem; padding: 20px 60px;">
+                <input type="text" id="pinyinInput" class="playful-input" placeholder="Gõ pinyin vào đây..." autocomplete="off" onkeypress="handlePinyinEnter(event)">
+                
+                <button id="btnSubmitPinyin" class="btn-primary btn-bouncy" style="margin-top: 30px; font-size: 1.4rem; padding: 20px 60px;" onclick="checkTypingAnswer()">
                     Kiểm tra <i class='bx bx-check'></i>
                 </button>
             </div>
