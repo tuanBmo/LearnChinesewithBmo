@@ -16,7 +16,7 @@ function getSafeData(key, defaultVal) {
     try { return JSON.parse(localStorage.getItem(key)) || defaultVal; } 
     catch(e) { return defaultVal; }
 }
- 
+  
 let hskMasteredWords = getSafeData('hsk_mastered_words_v2', {});
 let hskLevelTotals = getSafeData('hsk_level_totals_v2', {}); 
 
