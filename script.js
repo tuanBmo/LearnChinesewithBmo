@@ -37,7 +37,6 @@ function normalizeWordData(row, levelName) {
     let p = row[1] || "";
     let t = "", m = "", eh = "", ep = "", em = "";
     
-    // Nếu có 7 cột trở lên -> Định dạng mới có "Loại từ"
     if (row.length >= 7) {
         t = row[2] || "";
         m = row[3] || "";
@@ -45,19 +44,16 @@ function normalizeWordData(row, levelName) {
         ep = row[5] || "";
         em = row[6] || "";
     } 
-    // Nếu có 6 cột -> Định dạng cũ không có "Loại từ"
     else if (row.length === 6) {
         m = row[2] || "";
         eh = row[3] || "";
         ep = row[4] || "";
         em = row[5] || "";
     } 
-    // Nếu có 4 cột -> File cá nhân tùy chỉnh (Hán, Pinyin, Loại từ, Nghĩa)
     else if (row.length === 4) {
         t = row[2] || "";
         m = row[3] || "";
     }
-    // Mặc định 3 cột
     else {
         m = row[2] || "";
     }
@@ -67,14 +63,6 @@ function normalizeWordData(row, levelName) {
 // ==========================================
 // 2. DATA TRÍCH DẪN & HÌNH NỀN
 // ==========================================
-const motivationalBgImages = [
-    "https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=800&auto=format&fit=crop", 
-    "https://images.unsplash.com/photo-1528722828814-77b9b83aafb2?q=80&w=800&auto=format&fit=crop", 
-    "https://images.unsplash.com/photo-1444703686981-a3abbc4d4fe3?q=80&w=800&auto=format&fit=crop", 
-    "https://images.unsplash.com/photo-1520034475321-cbe63696469a?q=80&w=800&auto=format&fit=crop", 
-    "https://images.unsplash.com/photo-1497561813398-8fcc7a37b567?q=80&w=800&auto=format&fit=crop"  
-];
-
 const motivationalQuotes = [
     { hanzi: "不怕慢，就怕停。", pinyin: "Bù pà màn, jiù pà tíng.", meaning: "Không sợ chậm, chỉ sợ dừng." },
     { hanzi: "千里之行，始于足下。", pinyin: "Qiān lǐ zhī xíng, shǐ yú zú xià.", meaning: "Đường đi ngàn dặm bắt đầu từ một bước chân." },
@@ -119,7 +107,7 @@ if(searchInput) {
         const results = globalDictionary.filter(word => {
             return (word[0] && word[0].toLowerCase().includes(query)) || 
                    (word[1] && word[1].toLowerCase().includes(query)) || 
-                   (word[3] && word[3].toLowerCase().includes(query)); // Cột index 3 là Nghĩa sau khi normalize
+                   (word[3] && word[3].toLowerCase().includes(query)); 
         }).slice(0, 15);
 
         if(results.length > 0) {
@@ -176,14 +164,11 @@ function playSound(type) {
 function renderDailyQuote() {
     const dayNumber = Math.floor(Date.now() / (1000 * 60 * 60 * 24));
     const quote = motivationalQuotes[dayNumber % motivationalQuotes.length];
-    const bgUrl = motivationalBgImages[dayNumber % motivationalBgImages.length];
-    const card = document.getElementById('dailyQuoteCard');
     const hanziEl = document.getElementById('dailyQuoteHanzi');
     const pinyinEl = document.getElementById('dailyQuotePinyin');
     const meaningEl = document.getElementById('dailyQuoteMeaning');
-    if (hanziEl && card) {
+    if (hanziEl) {
         hanziEl.innerText = quote.hanzi; pinyinEl.innerText = quote.pinyin; meaningEl.innerText = quote.meaning;
-        card.style.backgroundImage = `url('${bgUrl}')`;
     }
 }
 
@@ -246,7 +231,7 @@ function recordCorrectWord(level, hanziWord) {
 }
 
 // ==========================================
-// 7. SỔ TAY NGỮ PHÁP (LOAD & RENDER)
+// 7. SỔ TAY NGỮ PHÁP
 // ==========================================
 async function loadGrammarData() {
     try {
@@ -260,10 +245,10 @@ async function loadGrammarData() {
             document.getElementById('grammarListContainer').innerHTML = `
                 <p class="muted" style="text-align:center; padding: 20px;">
                     <i class='bx bx-info-circle' style='font-size: 2rem;'></i><br>
-                    Chưa tìm thấy tệp <strong>grammar.csv</strong> ở thư mục gốc. Hãy tạo tệp để kích hoạt tủ sách ngữ pháp!
+                    Chưa tìm thấy tệp <strong>grammar.csv</strong> ở thư mục gốc.
                 </p>`;
         }
-    } catch (e) { console.log("Lỗi tải bộ dữ liệu ngữ pháp:", e); }
+    } catch (e) { }
 }
 
 window.changeGrammarLevel = function(level, btn) {
@@ -282,7 +267,7 @@ function renderGrammar(level) {
     });
 
     if(filtered.length === 0) {
-        container.innerHTML = `<p class="muted" style="text-align:center; padding:30px;">Quyển ${level} chưa có dữ liệu cấu trúc câu trong file grammar.csv.</p>`;
+        container.innerHTML = `<p class="muted" style="text-align:center; padding:30px;">Quyển ${level} chưa có dữ liệu cấu trúc câu.</p>`;
         return;
     }
 
@@ -293,7 +278,6 @@ function renderGrammar(level) {
             <div class="grammar-item">
                 <div class="grammar-header">
                     <h3>${idx + 1}. ${title}</h3>
-                    <span class="tag sky-tag">Quyển ${level}</span>
                 </div>
                 <p class="muted" style="margin-bottom: 15px;">${explanation}</p>
                 <div class="grammar-example">
@@ -307,7 +291,7 @@ function renderGrammar(level) {
 }
 
 // ==========================================
-// 8. KHỞI TẠO APP
+// 8. KHỞI TẠO APP & RENDER GIAO DIỆN NGANG
 // ==========================================
 function checkAuth() {
     const authModal = document.getElementById('authModal');
@@ -354,7 +338,7 @@ function updateGlobalProgress() {
     let totalMastered = 0; let totalTarget = 0;
     Object.keys(hskMasteredWords).forEach(lvl => {
         totalMastered += hskMasteredWords[lvl] ? hskMasteredWords[lvl].length : 0;
-        totalTarget += hskLevelTotals[lvl] || 150; // Mặc định 150 để demo nếu chưa load file
+        totalTarget += hskLevelTotals[lvl] || 150; 
     });
     let percent = totalTarget === 0 ? 0 : Math.min(Math.round((totalMastered / totalTarget) * 100), 100);
     const circle = document.getElementById('topProgressCircle');
@@ -363,8 +347,7 @@ function updateGlobalProgress() {
     if (circle && percentText && detailText) {
         percentText.innerText = `${percent}%`;
         detailText.innerHTML = `${totalMastered} / ${totalTarget} từ<br><span>Đã master</span>`;
-        // Gradient xanh neon
-        circle.style.background = `conic-gradient(#10B981 ${percent}%, rgba(255,255,255,0.05) 0deg)`;
+        circle.style.background = `conic-gradient(#14B8A6 ${percent}%, rgba(255,255,255,0.05) 0deg)`;
     }
 }
 
@@ -372,34 +355,32 @@ function renderLevelScores() {
     const container = document.getElementById('levelStatsList');
     if(!container) return;
     
-    // Đảm bảo container trống và có cấu trúc bao bọc ngang
     container.innerHTML = "";
-    
     const playedLevels = Object.keys(hskMasteredWords).sort();
-    
-    // Nếu chưa chơi, hiển thị các thẻ giả định HSK1-HSK6
     let levelsToDisplay = playedLevels.length > 0 ? playedLevels : ["HSK1", "HSK2", "HSK3", "HSK4", "HSK5", "HSK6"];
 
-    // Gán class để CSS hiển thị dạng lưới ngang cuộn được
-    container.className = 'level-stats-horizontal';
+    const mascotEmojis = {
+        "HSK1": "🐼", "HSK2": "🎋", "HSK3": "👷", 
+        "HSK4": "🦸", "HSK5": "🥷", "HSK6": "🎓"
+    };
 
     levelsToDisplay.forEach(lvl => {
         let mastered = hskMasteredWords[lvl] ? hskMasteredWords[lvl].length : 0; 
         let maxWords = hskLevelTotals[lvl] || 150; 
         const percent = Math.min(Math.round((mastered / maxWords) * 100), 100);
+        const mascot = mascotEmojis[lvl] || "🐼";
         
         const item = document.createElement('div'); 
-        item.className = 'stat-item';
-        item.setAttribute('data-lvl', lvl); // Dùng data attribute để CSS gán màu
+        item.className = 'level-card';
+        item.setAttribute('data-lvl', lvl); 
         
         item.innerHTML = `
-            <div class="stat-top">
-                <div class="stat-name">${lvl}</div>
-                <div class="stat-score">${mastered}/${maxWords} từ</div>
+            <div class="lc-title">${lvl}</div>
+            <div class="lc-bar-bg">
+                <div class="lc-bar-fill" style="width: ${percent}%;"></div>
             </div>
-            <div class="stat-bar-bg">
-                <div class="stat-bar-fill" style="width: ${percent}%;"></div>
-            </div>
+            <div class="lc-text">${mastered}/${maxWords} từ</div>
+            <div class="mascot-img">${mascot}</div>
         `;
         container.appendChild(item);
     });
@@ -415,7 +396,7 @@ function updateProfileXP() {
     if(userProfileDiv) {
         userProfileDiv.innerHTML = `
             <div class="streak-badge"><i class='bx bxs-star'></i> ${xp} XP</div>
-            <div class="avatar"><img src="https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser)}&background=8B5CF6&color=fff&bold=true" alt="User"></div>
+            <div class="avatar"><img src="https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser)}&background=A855F7&color=fff&bold=true" alt="User"></div>
         `;
     }
 }
@@ -476,7 +457,7 @@ function renderPersonalFiles() {
     if (Object.keys(personalFiles).length === 0) { selectGrid.innerHTML = `<p class="muted">(Chưa có file nào)</p>`; }
     Object.keys(personalFiles).forEach(name => {
         const item = document.createElement('div'); item.className = 'file-item';
-        item.innerHTML = `<h4><i class='bx bx-file' style="color: var(--accent-sky); font-size:1.5rem;"></i> ${name}.csv</h4><button class="btn-delete" onclick="deleteFile('${name}')">Xóa</button>`;
+        item.innerHTML = `<h4><i class='bx bx-file' style="color: var(--neon-sky); font-size:1.5rem;"></i> ${name}.csv</h4><button class="btn-delete" onclick="deleteFile('${name}')">Xóa</button>`;
         list.appendChild(item);
         const btn = document.createElement('button'); btn.className = 'pill-btn';
         if (selectedPersonalFiles.includes(name)) btn.classList.add('active');
@@ -521,7 +502,7 @@ window.startMatchGame = async function() {
         } catch (e) { return []; } return [];
     });
     const results = await Promise.all(fetchPromises); results.forEach(data => { allWords = [...allWords, ...data]; });
-    if (allWords.length === 0) { container.innerHTML = `<h3 style="color:var(--accent-pink);">Không tìm thấy dữ liệu phù hợp!</h3>`; return; }
+    if (allWords.length === 0) { container.innerHTML = `<h3 style="color:var(--neon-pink);">Không tìm thấy dữ liệu phù hợp!</h3>`; return; }
 
     allWords.sort(() => Math.random() - 0.5); let wordsForGame = allWords.slice(0, count);
     matchedCount = 0; matchGameSelected = []; document.getElementById('matchProgressText').innerText = `0 / ${count}`; container.innerHTML = "";
@@ -530,7 +511,7 @@ window.startMatchGame = async function() {
     wordsForGame.forEach((word, idx) => {
         allBubbles.push({ id: idx, type: 'hanzi', text: word[0] }); 
         allBubbles.push({ id: idx, type: 'pinyin', text: word[1] }); 
-        allBubbles.push({ id: idx, type: 'meaning', text: word[3] }); // Sử dụng index 3 theo hàm chuẩn hóa
+        allBubbles.push({ id: idx, type: 'meaning', text: word[3] }); 
     });
     allBubbles.sort(() => Math.random() - 0.5); 
     allBubbles.forEach((b) => {
@@ -569,7 +550,7 @@ function handleBubbleClick(bubble, totalCount) {
 window.closeMatchGame = function() { document.getElementById('wordMatchGameScreen').style.display = 'none'; }
 
 // ==========================================
-// 11. LOGIC GAME LUYỆN TẬP CHÍNH & SENTENCE MINING
+// 11. LOGIC GAME LUYỆN TẬP CHÍNH
 // ==========================================
 function normalizePinyin(str) { 
     if (!str) return ""; 
@@ -580,7 +561,7 @@ function updateGameProgress() {
     const progressFill = document.getElementById('gameProgress');
     if (progressFill && quizData.length > 0) { const percent = Math.round((currentIndex / quizData.length) * 100); progressFill.style.width = `${percent}%`; }
 }
-function shootConfetti() { try { if (typeof confetti === 'function') confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#8B5CF6', '#EC4899', '#0EA5E9'] }); } catch(e) {} }
+function shootConfetti() { try { if (typeof confetti === 'function') confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#A855F7', '#EC4899', '#0EA5E9'] }); } catch(e) {} }
 
 const btnStart = document.getElementById('btnStart');
 if (btnStart) {
@@ -632,7 +613,6 @@ function showQuestion() {
 
     document.getElementById('lvlBadge').innerText = isReviewMode ? "ÔN TẬP" : (lvl || "HSK").toUpperCase();
     
-    // Xử lý hiển thị Loại từ
     const typeBadge = document.getElementById('typeBadge');
     if (typeBadge) {
         if (wordType) {
@@ -724,5 +704,4 @@ function renderAnswers(correct, currentLevel) {
 window.startReviewMode = function() { document.getElementById('reviewModal').style.display = 'none'; quizData = [...missedWords]; missedWords = []; currentIndex = 0; isReviewMode = true; hp = 3; document.getElementById('hpDisplay').innerText = "❤️❤️❤️"; showQuestion(); }
 window.endGame = function() { document.getElementById('reviewModal').style.display = 'none'; document.getElementById('gameScreen').style.display = 'none'; updateProfileXP(); renderLevelScores(); switchTab('dashboard-view'); }
 
-// Khởi chạy
 checkAuth();
