@@ -134,7 +134,7 @@ if(searchInput) {
             `).join('');
             searchBox.style.display = 'block';
         } else {
-            searchBox.innerHTML = `<div style="padding:15px; color:#94A3B8; text-align:center;">Không tìm thấy từ vựng nào!</div>`;
+            searchBox.innerHTML = `<div style="padding:15px; color:var(--text-secondary); text-align:center;">Không tìm thấy từ vựng nào!</div>`;
             searchBox.style.display = 'block';
         }
     });
@@ -295,7 +295,7 @@ function renderGrammar(level) {
                     <h3>${idx + 1}. ${title}</h3>
                     <span class="tag sky-tag">Quyển ${level}</span>
                 </div>
-                <p class="muted" style="margin-bottom: 15px; color: var(--text-secondary);">${explanation}</p>
+                <p class="muted" style="margin-bottom: 15px;">${explanation}</p>
                 <div class="grammar-example">
                     <p class="ex-hanzi">${exHanzi}</p>
                     <p class="ex-pinyin">${exPinyin}</p>
@@ -354,7 +354,7 @@ function updateGlobalProgress() {
     let totalMastered = 0; let totalTarget = 0;
     Object.keys(hskMasteredWords).forEach(lvl => {
         totalMastered += hskMasteredWords[lvl] ? hskMasteredWords[lvl].length : 0;
-        totalTarget += hskLevelTotals[lvl] || 100; 
+        totalTarget += hskLevelTotals[lvl] || 150; // Mặc định 150 để demo nếu chưa load file
     });
     let percent = totalTarget === 0 ? 0 : Math.min(Math.round((totalMastered / totalTarget) * 100), 100);
     const circle = document.getElementById('topProgressCircle');
@@ -362,34 +362,48 @@ function updateGlobalProgress() {
     const detailText = document.getElementById('topProgressText');
     if (circle && percentText && detailText) {
         percentText.innerText = `${percent}%`;
-        detailText.innerHTML = `${totalMastered} / ${totalTarget} từ<br><span style="font-size: 0.8rem; opacity: 0.8;">Đã master</span>`;
-        circle.style.background = `conic-gradient(#10B981 ${percent}%, rgba(255,255,255,0.5) 0deg)`;
+        detailText.innerHTML = `${totalMastered} / ${totalTarget} từ<br><span>Đã master</span>`;
+        // Gradient xanh neon
+        circle.style.background = `conic-gradient(#10B981 ${percent}%, rgba(255,255,255,0.05) 0deg)`;
     }
 }
 
 function renderLevelScores() {
-    const list = document.getElementById('levelStatsList');
-    if(!list) return;
-    list.innerHTML = "";
+    const container = document.getElementById('levelStatsList');
+    if(!container) return;
+    
+    // Đảm bảo container trống và có cấu trúc bao bọc ngang
+    container.innerHTML = "";
+    
     const playedLevels = Object.keys(hskMasteredWords).sort();
-    if(playedLevels.length === 0) {
-        list.innerHTML = `<p class="muted" style="text-align: center; padding: 20px;">Bạn chưa master từ nào. Chơi game thôi!</p>`;
-        updateGlobalProgress(); return;
-    }
-    playedLevels.forEach(lvl => {
-        let mastered = hskMasteredWords[lvl].length; let maxWords = hskLevelTotals[lvl] || 100; 
+    
+    // Nếu chưa chơi, hiển thị các thẻ giả định HSK1-HSK6
+    let levelsToDisplay = playedLevels.length > 0 ? playedLevels : ["HSK1", "HSK2", "HSK3", "HSK4", "HSK5", "HSK6"];
+
+    // Gán class để CSS hiển thị dạng lưới ngang cuộn được
+    container.className = 'level-stats-horizontal';
+
+    levelsToDisplay.forEach(lvl => {
+        let mastered = hskMasteredWords[lvl] ? hskMasteredWords[lvl].length : 0; 
+        let maxWords = hskLevelTotals[lvl] || 150; 
         const percent = Math.min(Math.round((mastered / maxWords) * 100), 100);
-        const item = document.createElement('div'); item.className = 'stat-row';
+        
+        const item = document.createElement('div'); 
+        item.className = 'stat-item';
+        item.setAttribute('data-lvl', lvl); // Dùng data attribute để CSS gán màu
+        
         item.innerHTML = `
-            <div class="stat-info-wrap">
-                <div class="stat-lvl-name"><i class='bx bx-medal' style="color: var(--accent-yellow-text); font-size: 1.5rem;"></i> ${lvl}</div>
-                <div class="stat-score">${mastered} TỪ</div>
+            <div class="stat-top">
+                <div class="stat-name">${lvl}</div>
+                <div class="stat-score">${mastered}/${maxWords} từ</div>
             </div>
-            <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: ${percent}%;"></div></div>
-            <div class="muted" style="text-align: right; font-weight: 700;">Đã master: ${mastered} / ${maxWords} (${percent}%)</div>
+            <div class="stat-bar-bg">
+                <div class="stat-bar-fill" style="width: ${percent}%;"></div>
+            </div>
         `;
-        list.appendChild(item);
+        container.appendChild(item);
     });
+    
     updateGlobalProgress();
 }
 
@@ -400,8 +414,8 @@ function updateProfileXP() {
     const userProfileDiv = document.getElementById('userProfileBar');
     if(userProfileDiv) {
         userProfileDiv.innerHTML = `
-            <div class="streak-badge"><i class='bx bxs-star' style="color: #F59E0B; font-size:1.2rem;"></i> ${xp} XP</div>
-            <div class="avatar"><img src="https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser)}&background=4F46E5&color=fff&bold=true" alt="User"></div>
+            <div class="streak-badge"><i class='bx bxs-star'></i> ${xp} XP</div>
+            <div class="avatar"><img src="https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser)}&background=8B5CF6&color=fff&bold=true" alt="User"></div>
         `;
     }
 }
@@ -462,7 +476,7 @@ function renderPersonalFiles() {
     if (Object.keys(personalFiles).length === 0) { selectGrid.innerHTML = `<p class="muted">(Chưa có file nào)</p>`; }
     Object.keys(personalFiles).forEach(name => {
         const item = document.createElement('div'); item.className = 'file-item';
-        item.innerHTML = `<h4><i class='bx bx-file' style="color: var(--accent-sky-text); font-size:1.5rem;"></i> ${name}.csv</h4><button class="btn-delete" onclick="deleteFile('${name}')">Xóa</button>`;
+        item.innerHTML = `<h4><i class='bx bx-file' style="color: var(--accent-sky); font-size:1.5rem;"></i> ${name}.csv</h4><button class="btn-delete" onclick="deleteFile('${name}')">Xóa</button>`;
         list.appendChild(item);
         const btn = document.createElement('button'); btn.className = 'pill-btn';
         if (selectedPersonalFiles.includes(name)) btn.classList.add('active');
@@ -507,7 +521,7 @@ window.startMatchGame = async function() {
         } catch (e) { return []; } return [];
     });
     const results = await Promise.all(fetchPromises); results.forEach(data => { allWords = [...allWords, ...data]; });
-    if (allWords.length === 0) { container.innerHTML = `<h3 style="color:var(--accent-pink-text);">Không tìm thấy dữ liệu phù hợp!</h3>`; return; }
+    if (allWords.length === 0) { container.innerHTML = `<h3 style="color:var(--accent-pink);">Không tìm thấy dữ liệu phù hợp!</h3>`; return; }
 
     allWords.sort(() => Math.random() - 0.5); let wordsForGame = allWords.slice(0, count);
     matchedCount = 0; matchGameSelected = []; document.getElementById('matchProgressText').innerText = `0 / ${count}`; container.innerHTML = "";
@@ -557,7 +571,6 @@ window.closeMatchGame = function() { document.getElementById('wordMatchGameScree
 // ==========================================
 // 11. LOGIC GAME LUYỆN TẬP CHÍNH & SENTENCE MINING
 // ==========================================
-// ... (Hàm giữ nguyên tương tự như file code gốc đã cung cấp ở phản hồi trước)
 function normalizePinyin(str) { 
     if (!str) return ""; 
     return String(str).normalize('NFD').replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "").toLowerCase(); 
@@ -567,7 +580,7 @@ function updateGameProgress() {
     const progressFill = document.getElementById('gameProgress');
     if (progressFill && quizData.length > 0) { const percent = Math.round((currentIndex / quizData.length) * 100); progressFill.style.width = `${percent}%`; }
 }
-function shootConfetti() { try { if (typeof confetti === 'function') confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); } catch(e) {} }
+function shootConfetti() { try { if (typeof confetti === 'function') confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#8B5CF6', '#EC4899', '#0EA5E9'] }); } catch(e) {} }
 
 const btnStart = document.getElementById('btnStart');
 if (btnStart) {
@@ -639,13 +652,13 @@ function showQuestion() {
     let correctAnswer = ""; let hiddenText = ""; answerContainer.classList.remove('hanzi-mode');
 
     if (selectedMode === "GÕ PINYIN") {
-        mainQ.innerText = hanzi; mainQ.style.fontSize = "7.5rem"; hiddenText = meaning; 
+        mainQ.innerText = hanzi; mainQ.style.fontSize = "6rem"; hiddenText = meaning; 
         answerContainer.style.display = 'none'; typingContainer.style.display = 'block'; pinyinInput.value = ''; setTimeout(() => pinyinInput.focus(), 100); 
     } else {
         typingContainer.style.display = 'none'; answerContainer.style.display = 'grid';
-        if (selectedMode === "NGHĨA") { mainQ.innerText = hanzi; mainQ.style.fontSize = "7.5rem"; hiddenText = pinyin; correctAnswer = meaning; }
-        else if (selectedMode === "PINYIN") { mainQ.innerText = hanzi; mainQ.style.fontSize = "7.5rem"; hiddenText = meaning; correctAnswer = pinyin; }
-        else { mainQ.innerText = meaning; mainQ.style.fontSize = "4rem"; hiddenText = pinyin; correctAnswer = hanzi; answerContainer.classList.add('hanzi-mode'); }
+        if (selectedMode === "NGHĨA") { mainQ.innerText = hanzi; mainQ.style.fontSize = "6rem"; hiddenText = pinyin; correctAnswer = meaning; }
+        else if (selectedMode === "PINYIN") { mainQ.innerText = hanzi; mainQ.style.fontSize = "6rem"; hiddenText = meaning; correctAnswer = pinyin; }
+        else { mainQ.innerText = meaning; mainQ.style.fontSize = "3.5rem"; hiddenText = pinyin; correctAnswer = hanzi; answerContainer.classList.add('hanzi-mode'); }
         renderAnswers(correctAnswer, lvl ? lvl.toUpperCase() : "CUSTOM");
     }
 
