@@ -15,7 +15,7 @@
     --shadow-neon: 0 0 15px rgba(139, 92, 246, 0.4);
     --border-glass: 1px solid rgba(255, 255, 255, 0.1);
 }
-
+ 
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Quicksand', sans-serif; transition: all 0.3s ease; }
 body { background-color: var(--bg-body); color: var(--text-primary); display: flex; height: 100vh; overflow: hidden; background-image: radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.15) 0%, transparent 40%), radial-gradient(circle at 90% 80%, rgba(236, 72, 153, 0.15) 0%, transparent 40%); }
 .muted { color: var(--text-secondary); font-size: 0.95rem; font-weight: 500;}
