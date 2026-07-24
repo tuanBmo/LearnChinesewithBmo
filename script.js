@@ -19,11 +19,9 @@ function getSafeData(key, defaultVal) {
   
 let hskMasteredWords = getSafeData('hsk_mastered_words_v2', {});
 let hskLevelTotals = getSafeData('hsk_level_totals_v2', {}); 
-
 let personalFiles = getSafeData('hsk_personal_files', {});
 let currentUser = localStorage.getItem('hsk_current_user');
 let appSettings = getSafeData('hsk_settings', { hidePinyin: false, shuffle: true });
-
 let loginHistory = getSafeData('hsk_login_history', []);
 let currentStreak = 0;
 
@@ -31,7 +29,7 @@ let matchGameSelected = [];
 let matchedCount = 0;
 let globalDictionary = [];
 
-// Hàm chuẩn hóa dữ liệu để tương thích cả file CSV cũ (3, 6 cột) và mới (7 cột)
+// Chuẩn hóa dữ liệu tương thích cả CSV 3, 6 hoặc 7 cột
 function normalizeWordData(row, levelName) {
     let h = row[0] || "";
     let p = row[1] || "";
@@ -43,18 +41,15 @@ function normalizeWordData(row, levelName) {
         eh = row[4] || "";
         ep = row[5] || "";
         em = row[6] || "";
-    } 
-    else if (row.length === 6) {
+    } else if (row.length === 6) {
         m = row[2] || "";
         eh = row[3] || "";
         ep = row[4] || "";
         em = row[5] || "";
-    } 
-    else if (row.length === 4) {
+    } else if (row.length === 4) {
         t = row[2] || "";
         m = row[3] || "";
-    }
-    else {
+    } else {
         m = row[2] || "";
     }
     return [h, p, t, m, eh, ep, em, levelName];
@@ -347,7 +342,7 @@ function updateGlobalProgress() {
     if (circle && percentText && detailText) {
         percentText.innerText = `${percent}%`;
         detailText.innerHTML = `${totalMastered} / ${totalTarget} từ<br><span>Đã master</span>`;
-        circle.style.background = `conic-gradient(#14B8A6 ${percent}%, rgba(255,255,255,0.05) 0deg)`;
+        circle.style.background = `conic-gradient(var(--neon-teal) ${percent}%, rgba(255,255,255,0.05) 0deg)`;
     }
 }
 
