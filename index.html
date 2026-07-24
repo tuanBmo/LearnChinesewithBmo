@@ -3,33 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LearnChinesewithBmo - Space Bento</title>
+    <title>HSK Trainer - Space Bento</title>
+    <!-- Fonts & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <!-- Confetti Library -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Custom CSS -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
  
-    <!-- Modal Đăng nhập -->
+    <!-- MODAL ĐĂNG NHẬP -->
     <div id="authModal" class="modal-overlay">
         <div class="auth-box">
             <div class="logo-center">
                 <div class="logo-mark">汉</div>
                 <h2>HSK Trainer</h2>
             </div>
-            <p style="text-align: center; color: var(--text-secondary); margin-bottom: 25px;">Nhập biệt danh để bắt đầu hành trình!</p>
+            <p style="text-align: center; color: var(--text-secondary); margin-bottom: 25px;">Nhập biệt danh để bắt đầu hành trình chinh phục tiếng Trung!</p>
             <input type="text" id="usernameInput" class="auth-input" placeholder="Nhập tên của bạn..." required autocomplete="off">
             <button class="btn-primary" id="btnLogin" style="width: 100%; margin-top: 10px;">Bắt đầu ngay 🚀</button>
         </div>
     </div>
 
-    <!-- Modal Ôn tập -->
+    <!-- MODAL ÔN TẬP TỪ SAI -->
     <div id="reviewModal" class="modal-overlay" style="display: none;">
         <div class="auth-box" style="text-align: center;">
             <div style="font-size: 4.5rem; margin-bottom: 10px; text-shadow: 0 0 20px rgba(236,72,153,0.5);">🎯</div>
             <h2>Hoàn thành bài học!</h2>
-            <p style="color: var(--text-secondary); margin: 15px 0 25px;">Bạn có <strong id="missedCount" style="color: var(--accent-pink); font-size: 1.3rem;">0</strong> từ cần ôn lại. Chiến luôn chứ?</p>
+            <p style="color: var(--text-secondary); margin: 15px 0 25px;">Bạn có <strong id="missedCount" style="color: var(--neon-pink); font-size: 1.3rem;">0</strong> từ cần ôn lại. Chiến luôn chứ?</p>
             <div style="display: flex; gap: 15px;">
                 <button class="btn-secondary" style="flex: 1;" onclick="endGame()">Để sau</button>
                 <button class="btn-primary" style="flex: 1; background: linear-gradient(135deg, #F59E0B, #EA580C); box-shadow: 0 0 15px rgba(245,158,11,0.4);" onclick="startReviewMode()">Ôn ngay 🔥</button>
@@ -37,20 +40,20 @@
         </div>
     </div>
 
-    <!-- Màn hình Mini Game Ghép từ -->
+    <!-- MÀN HÌNH MINIGAME GHÉP TỪ -->
     <div id="wordMatchGameScreen" class="game-overlay" style="display: none;">
         <div class="game-container" style="max-width: 1000px;">
             <nav class="game-hud">
                 <button class="btn-icon" onclick="closeMatchGame()"><i class='bx bx-x'></i></button>
                 <h2 style="color: #fff; margin: 0; text-shadow: 0 0 10px rgba(139,92,246,0.5);">Ghép bộ 3 yếu tố</h2>
-                <div id="matchProgressText" style="font-weight: 700; color: var(--accent-sky); font-size: 1.2rem;">0 / 5</div>
+                <div id="matchProgressText" style="font-weight: 700; color: var(--neon-sky); font-size: 1.2rem;">0 / 5</div>
             </nav>
             <p style="text-align: center; color: var(--text-secondary); font-weight: 500; margin-bottom: 20px;">Chọn đúng 1 Chữ Hán + 1 Pinyin + 1 Nghĩa để ghép thành từ hoàn chỉnh!</p>
             <div id="floatingBubblesContainer" class="floating-bubbles-area"></div>
         </div>
     </div>
 
-    <!-- Màn hình Luyện tập chính -->
+    <!-- MÀN HÌNH LUYỆN TẬP CHÍNH -->
     <div id="gameScreen" class="game-overlay" style="display: none;">
         <div class="game-container">
             <nav class="game-hud">
@@ -61,7 +64,7 @@
 
             <div class="flashcard-area">
                 <span class="tag sky-tag" id="lvlBadge" style="position: absolute; top: 25px; right: 25px;">HSK</span>
-                <span class="tag" id="typeBadge" style="position: absolute; top: 25px; left: 25px; display: none; background: rgba(139,92,246,0.2); color: var(--accent-purple); border: 1px solid var(--accent-purple);"></span>
+                <span class="tag" id="typeBadge" style="position: absolute; top: 25px; left: 25px; display: none; background: rgba(139,92,246,0.2); color: var(--neon-purple); border: 1px solid var(--neon-purple);"></span>
                 
                 <h1 class="main-q" id="mainQuestion">你好</h1>
                 
@@ -88,8 +91,9 @@
         </div>
     </div>
 
-    <!-- Layout Ứng dụng chính -->
+    <!-- LAYOUT ỨNG DỤNG CHÍNH -->
     <div class="app-layout">
+        <!-- SIDEBAR -->
         <aside class="sidebar">
             <div class="logo">
                 <div class="logo-mark">汉</div>
@@ -109,7 +113,9 @@
             </nav>
         </aside>
 
+        <!-- MAIN CONTENT -->
         <main class="main-content">
+            <!-- TOP BAR -->
             <header class="top-bar">
                 <div class="search-bar">
                     <i class='bx bx-search'></i>
@@ -122,8 +128,7 @@
             <!-- 1. DASHBOARD VIEW (Bento Grid) -->
             <div id="dashboard-view" class="view-section active">
                 <div class="bento-grid">
-                    
-                    <!-- 1. Hero Card -->
+                    <!-- Hero Card -->
                     <div class="bento-card hero-card" id="dailyQuoteCard">
                         <div class="hero-tag"><i class='bx bx-sparkles'></i> ĐỘNG LỰC HÔM NAY</div>
                         <div class="hero-content">
@@ -133,7 +138,7 @@
                         </div>
                     </div>
 
-                    <!-- 2. Streak Card -->
+                    <!-- Streak Card -->
                     <div class="bento-card glow-orange streak-card">
                         <div class="card-top-label orange-text">DAILY STREAK</div>
                         <div class="streak-center">
@@ -150,7 +155,7 @@
                         </div>
                     </div>
 
-                    <!-- 3. Progress Card -->
+                    <!-- Progress Card -->
                     <div class="bento-card glow-teal progress-card">
                         <div class="card-top-label teal-text">TỔNG TIẾN ĐỘ</div>
                         <div class="circular-progress-wrapper">
@@ -163,7 +168,7 @@
                         </div>
                     </div>
 
-                    <!-- 4. Crossword Card -->
+                    <!-- Crossword Card -->
                     <div class="bento-card glow-gray mini-card" onclick="switchTab('hanzi-grid-view')">
                         <div class="mini-card-content">
                             <div class="icon-mockup crossword-mockup">
@@ -177,7 +182,7 @@
                         </div>
                     </div>
 
-                    <!-- 5. Minigame Card -->
+                    <!-- Minigame Card -->
                     <div class="bento-card glow-rainbow mini-card" onclick="switchTab('minigame-view')">
                         <div class="mini-card-content">
                             <img src="https://cdn-icons-png.flaticon.com/512/13/13973.png" alt="Gamepad" class="gamepad-icon">
@@ -231,7 +236,7 @@
             <div id="minigame-view" class="view-section">
                 <div class="bento-card" style="max-width: 600px; margin: 0 auto; text-align: center; padding: 40px;">
                     <div style="font-size: 5rem; margin-bottom: 15px; text-shadow: 0 0 20px rgba(139,92,246,0.5);">🧩</div>
-                    <h2 style="font-size: 2rem; color: var(--accent-purple);">Mini Game: Ghép Từ</h2>
+                    <h2 style="font-size: 2rem; color: var(--neon-purple);">Mini Game: Ghép Từ</h2>
                     <p class="muted" style="font-size: 1.05rem; margin-top: 10px;">Luyện phản xạ nhanh tay lẹ mắt. Tìm và ghép đúng 3 yếu tố.</p>
                     
                     <div style="margin: 30px 0; background: rgba(0,0,0,0.2); padding: 25px; border-radius: 20px; text-align: left; border: 1px solid rgba(255,255,255,0.05);">
@@ -341,10 +346,9 @@
         </main>
     </div>
 
+    <!-- PapaParse Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <!-- Custom JS -->
     <script src="script.js"></script>
-
-    <!-- !!! CHÚ Ý: BẠN HÃY COPY TOÀN BỘ CÁC THẺ <script type="application/json"> CHỨA DỮ LIỆU TỪ VỰNG HSK VÀ BASE64 TỪ FILE INDEX.HTML CŨ CỦA BẠN VÀ DÁN VÀO ĐÂY ĐỂ GAME HOẠT ĐỘNG !!! -->
-
 </body>
 </html>
