@@ -228,7 +228,8 @@ function recordCorrectWord(level, hanziWord) {
 }
 
 // ==========================================
-// 7. SỔ TAY NGỮ PHÁP
+// ==========================================
+// 7. SỔ TAY NGỮ PHÁP (TỐI ƯU CHO 4 CỘT GRAMMAR.CSV)
 // ==========================================
 async function loadGrammarData() {
     try {
@@ -236,16 +237,17 @@ async function loadGrammarData() {
         if (response.ok) {
             const text = await response.text();
             const parsed = Papa.parse(text, { skipEmptyLines: true });
-            grammarData = parsed.data.filter(row => row.length >= 6);
-            renderGrammar('1'); 
+            // Lọc các dòng có từ 3 cột trở lên (File của bạn có chính xác 4 cột)
+            grammarData = parsed.data.filter(row => row.length >= 3 && row[0].trim() !== "");
         } else {
-            document.getElementById('grammarListContainer').innerHTML = `
-                <p class="muted" style="text-align:center; padding: 20px;">
-                    <i class='bx bx-info-circle' style='font-size: 2rem;'></i><br>
-                    Chưa tìm thấy tệp <strong>grammar.csv</strong> ở thư mục gốc.
-                </p>`;
+            console.error("Không tải được file grammar.csv trên kho lưu trữ.");
         }
-    } catch (e) { }
+    } catch (e) { 
+        console.error("Lỗi tải grammar.csv:", e);
+    }
+    
+    // Mặc định hiển thị Quyển 1 sau khi tải dữ liệu xong
+    renderGrammar('1'); 
 }
 
 window.changeGrammarLevel = function(level, btn) {
@@ -258,35 +260,65 @@ function renderGrammar(level) {
     const container = document.getElementById('grammarListContainer');
     if(!container) return;
 
+    if (grammarData.length === 0) {
+        container.innerHTML = `<p class="muted" style="text-align:center; padding:30px;">Chưa tải được dữ liệu từ file grammar.csv.</p>`;
+        return;
+    }
+
+    // Lọc theo Cột số 2 (row[1]) chứa số Quyển (1, 2, 3, 4)
     const filtered = grammarData.filter(row => {
-        const rLvl = row[1] ? row[1].toString().trim().toLowerCase() : "";
-        return rLvl === level.toLowerCase() || rLvl.includes('hsk' + level) || rLvl.includes('quyển ' + level) || rLvl === level;
+        const rLvl = row[1] ? row[1].toString().trim() : "";
+        return rLvl === level || rLvl === `Quyển ${level}` || rLvl.includes(level);
     });
 
     if(filtered.length === 0) {
-        container.innerHTML = `<p class="muted" style="text-align:center; padding:30px;">Quyển ${level} chưa có dữ liệu cấu trúc câu.</p>`;
+        container.innerHTML = `
+            <div style="text-align:center; padding:40px; background:#F8FAFC; border-radius:16px; border:1px dashed #CBD5E1;">
+                <i class='bx bx-book-open' style='font-size: 2.5rem; color:#94A3B8; margin-bottom:10px;'></i>
+                <p style="color:#475569; font-weight:700; font-size:1.05rem;">Quyển ${level} chưa có dữ liệu cấu trúc câu.</p>
+            </div>`;
         return;
     }
 
     container.innerHTML = filtered.map((row, idx) => {
-        const title = row[0] || "Cấu trúc"; const explanation = row[2] || "";
-        const exHanzi = row[3] || ""; const exPinyin = row[4] || ""; const exMeaning = row[5] || "";
+        const title = row[0] || "Cấu trúc ngữ pháp"; 
+        const lvlTag = row[1] ? `Quyển ${row[1]}` : "";
+        const explanation = row[2] || "";
+        const exText = row[3] || "";
+        
+        // Bóc tách ô ví dụ gộp (row[3]) thành từng câu dựa theo số thứ tự (1., 2., 3.)
+        const exParts = exText.split(/(?=\d+\.\s)/g).filter(ex => ex.trim() !== "");
+        
+        // Phân tích từng câu thành Hán - Pinyin - Nghĩa tiếng Việt
+        const examplesHTML = exParts.map(ex => {
+            const match = ex.match(/(\d+\.\s*.*?)\s*\((.*?)\)\s*(.*)/);
+            if (match) {
+                return `
+                    <div class="grammar-example" style="margin-top: 10px; background: #F8FAFC; padding: 14px 18px; border-radius: 12px; border: 1px solid #F1F5F9;">
+                        <p class="ex-hanzi" style="font-size: 1.15rem; color: #0F172A; font-weight: 700; margin-bottom: 4px; font-family: 'Quicksand', sans-serif;">${match[1]}</p>
+                        <p class="ex-pinyin" style="color: var(--color-blue); font-size: 0.95rem; font-weight: 600; margin-bottom: 4px;">${match[2]}</p>
+                        <p class="ex-meaning" style="color: var(--text-secondary); font-size: 0.9rem; font-style: italic;">${match[3]}</p>
+                    </div>
+                `;
+            } else {
+                return `<div class="grammar-example" style="margin-top: 10px; padding: 12px; background: #F8FAFC; border-radius: 10px;">${ex}</div>`;
+            }
+        }).join('');
+
         return `
-            <div class="grammar-item">
-                <div class="grammar-header">
-                    <h3>${idx + 1}. ${title}</h3>
+            <div class="grammar-item" style="background: #fff; border: 1px solid var(--border-color); padding: 22px 26px; border-radius: var(--radius-lg); border-left: 5px solid var(--color-purple); margin-bottom: 16px; box-shadow: var(--shadow-sm);">
+                <div class="grammar-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 10px;">
+                    <h3 style="font-size: 1.2rem; color: #0F172A; font-weight: 800;">${idx + 1}. ${title}</h3>
+                    <span class="tag purple-tag" style="background: var(--color-purple-light); color: var(--color-purple); padding: 4px 12px; border-radius: 6px; font-size: 0.75rem; font-weight: 800;">${lvlTag}</span>
                 </div>
-                <p class="muted">${explanation}</p>
-                <div class="grammar-example">
-                    <p class="ex-hanzi">${exHanzi}</p>
-                    <p class="ex-pinyin">${exPinyin}</p>
-                    <p class="ex-meaning">${exMeaning}</p>
+                <p class="muted" style="margin: 8px 0 14px; color:#334155; font-size: 0.95rem; line-height: 1.6; font-weight: 500;">${explanation}</p>
+                <div class="examples-container">
+                    ${examplesHTML}
                 </div>
             </div>
         `;
     }).join('');
 }
-
 // ==========================================
 // 8. KHỞI TẠO APP & RENDER GIAO DIỆN
 // ==========================================
