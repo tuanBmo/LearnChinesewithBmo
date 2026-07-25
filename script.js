@@ -11,7 +11,7 @@ let currentIndex = 0;
 let hp = 5;
 let missedWords = []; 
 let isReviewMode = false; 
-
+ 
 function getSafeData(key, defaultVal) {
     try { return JSON.parse(localStorage.getItem(key)) || defaultVal; } 
     catch(e) { return defaultVal; }
