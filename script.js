@@ -11,7 +11,7 @@ let currentIndex = 0;
 let hp = 5;
 let missedWords = []; 
 let isReviewMode = false; 
- 
+
 function getSafeData(key, defaultVal) {
     try { return JSON.parse(localStorage.getItem(key)) || defaultVal; } 
     catch(e) { return defaultVal; }
@@ -29,7 +29,7 @@ let matchGameSelected = [];
 let matchedCount = 0;
 let globalDictionary = [];
 
-// Chuẩn hóa dữ liệu tương thích cả CSV 3, 6 hoặc 7 cột
+// Chuẩn hóa dữ liệu tương thích CSV 3, 6 hoặc 7 cột
 function normalizeWordData(row, levelName) {
     let h = row[0] || "";
     let p = row[1] || "";
@@ -59,13 +59,11 @@ function normalizeWordData(row, levelName) {
 // 2. DATA TRÍCH DẪN & HÌNH NỀN
 // ==========================================
 const motivationalQuotes = [
-    { hanzi: "不怕慢，就怕停。", pinyin: "Bù pà màn, jiù pà tíng.", meaning: "Không sợ chậm, chỉ sợ dừng." },
-    { hanzi: "千里之行，始于足下。", pinyin: "Qiān lǐ zhī xíng, shǐ yú zú xià.", meaning: "Đường đi ngàn dặm bắt đầu từ một bước chân." },
-    { hanzi: "学如逆水行舟，不进则退。", pinyin: "Xué rú nì shuǐ xíng zhōu, bù jìn zé tuì.", meaning: "Học như thuyền ngược dòng, không tiến ắt lùi." },
-    { hanzi: "只要功夫深，铁杵磨成针。", pinyin: "Zhǐ yào gōng fū shēn, tiě chǔ mó chéng zhēn.", meaning: "Có công mài sắt, có ngày nên kim." },
-    { hanzi: "熟能生巧。", pinyin: "Shú néng shēng qiǎo.", meaning: "Trăm hay không bằng tay quen." },
-    { hanzi: "万事开头难。", pinyin: "Wàn shì kāi tóu nán.", meaning: "Vạn sự khởi đầu nan." },
-    { hanzi: "吃得苦中苦，方为人上人。", pinyin: "Chī dé kǔ zhōng kǔ, fāng wéi rén shàng rén.", meaning: "Chịu được khổ trong khổ, mới làm được người trên người." }
+    { hanzi: "不怕慢，就怕停。", pinyin: "Bù pà màn, jiù pà tíng — Không sợ chậm, chỉ sợ dừng." },
+    { hanzi: "千里之行，始于足下。", pinyin: "Qiān lǐ zhī xíng, shǐ yú zú xià — Đường đi ngàn dặm bắt đầu từ một bước chân." },
+    { hanzi: "学如逆水行舟，不进则退。", pinyin: "Xué rú nì shuǐ xíng zhōu, bù jìn zé tuì — Học như thuyền ngược dòng, không tiến ắt lùi." },
+    { hanzi: "只要功夫深，铁杵磨成针。", pinyin: "Zhǐ yào gōng fū shēn, tiě chǔ mó chéng zhēn — Có công mài sắt, có ngày nên kim." },
+    { hanzi: "熟能生巧。", pinyin: "Shú néng shēng qiǎo — Trăm hay không bằng tay quen." }
 ];
 
 // ==========================================
@@ -110,7 +108,7 @@ if(searchInput) {
                 <div class="search-item">
                     <div>
                         <span class="search-item-hanzi">${w[0]}</span>
-                        <span class="search-item-detail">${w[1]} - ${w[3]}</span>
+                        <span class="search-item-detail">${w[1]} — ${w[3]}</span>
                     </div>
                     <span class="search-item-lvl">${w[7]}</span>
                 </div>
@@ -128,6 +126,14 @@ if(searchInput) {
     });
 }
 
+// Phím tắt tìm kiếm CMD/CTRL + K
+document.addEventListener('keydown', (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        if (searchInput) searchInput.focus();
+    }
+});
+
 // ==========================================
 // 4. HỆ THỐNG ÂM THANH
 // ==========================================
@@ -140,11 +146,11 @@ function playSound(type) {
     
     if(type === 'pop') {
         osc.type = 'sine'; osc.frequency.setValueAtTime(400, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.1);
-        gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime); gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+        gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime); gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
         osc.start(); osc.stop(audioCtx.currentTime + 0.1);
     } else if (type === 'correct') {
         osc.type = 'sine'; osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.1); 
-        gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime); gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+        gainNode.gain.setValueAtTime(0.25, audioCtx.currentTime); gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
         osc.start(); osc.stop(audioCtx.currentTime + 0.3);
     } else if (type === 'wrong') {
         osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.2);
@@ -161,9 +167,8 @@ function renderDailyQuote() {
     const quote = motivationalQuotes[dayNumber % motivationalQuotes.length];
     const hanziEl = document.getElementById('dailyQuoteHanzi');
     const pinyinEl = document.getElementById('dailyQuotePinyin');
-    const meaningEl = document.getElementById('dailyQuoteMeaning');
     if (hanziEl) {
-        hanziEl.innerText = quote.hanzi; pinyinEl.innerText = quote.pinyin; meaningEl.innerText = quote.meaning;
+        hanziEl.innerText = quote.hanzi; pinyinEl.innerText = quote.pinyin;
     }
 }
 
@@ -180,7 +185,9 @@ function processStreakCalendar() {
         if(loginHistory.includes(checkStr)) { currentStreak++; checkDate.setDate(checkDate.getDate() - 1); } else { break; }
     }
     const streakUI = document.getElementById('streakCountUI');
+    const bannerStreak = document.getElementById('bannerStreakText');
     if (streakUI) streakUI.innerText = currentStreak;
+    if (bannerStreak) bannerStreak.innerText = `${currentStreak} Days Streak`;
 
     const grid = document.getElementById('calendarGrid');
     const monthLabel = document.getElementById('calendarMonth');
@@ -197,19 +204,14 @@ function processStreakCalendar() {
     let startOffset = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1; 
 
     for(let i = startOffset - 1; i >= 0; i--) { 
-        const cell = document.createElement('div'); cell.className = 'cal-day'; cell.innerText = daysInPrevMonth - i; grid.appendChild(cell);
+        const cell = document.createElement('div'); cell.className = 'cal-day'; cell.style.opacity = '0.3'; cell.innerText = daysInPrevMonth - i; grid.appendChild(cell);
     }
     for(let i = 1; i <= daysInMonth; i++) {
-        const cell = document.createElement('div'); cell.className = 'cal-day current-month'; cell.innerText = i;
+        const cell = document.createElement('div'); cell.className = 'cal-day'; cell.innerText = i;
         let cellDateStr = `${year}-${month + 1}-${i}`;
         if (i === d.getDate()) cell.classList.add('today');
         if (loginHistory.includes(cellDateStr)) cell.classList.add('active');
         grid.appendChild(cell);
-    }
-    const totalCells = startOffset + daysInMonth;
-    const remainingCells = (7 - (totalCells % 7)) % 7;
-    for(let i = 1; i <= remainingCells; i++) {
-        const cell = document.createElement('div'); cell.className = 'cal-day'; cell.innerText = i; grid.appendChild(cell);
     }
 }
 
@@ -274,7 +276,7 @@ function renderGrammar(level) {
                 <div class="grammar-header">
                     <h3>${idx + 1}. ${title}</h3>
                 </div>
-                <p class="muted" style="margin-bottom: 15px;">${explanation}</p>
+                <p class="muted">${explanation}</p>
                 <div class="grammar-example">
                     <p class="ex-hanzi">${exHanzi}</p>
                     <p class="ex-pinyin">${exPinyin}</p>
@@ -286,7 +288,7 @@ function renderGrammar(level) {
 }
 
 // ==========================================
-// 8. KHỞI TẠO APP & RENDER GIAO DIỆN NGANG
+// 8. KHỞI TẠO APP & RENDER GIAO DIỆN
 // ==========================================
 function checkAuth() {
     const authModal = document.getElementById('authModal');
@@ -294,6 +296,9 @@ function checkAuth() {
         if (authModal) authModal.style.display = 'flex';
     } else {
         if (authModal) authModal.style.display = 'none';
+        const welcomeText = document.getElementById('welcomeUserText');
+        if(welcomeText) welcomeText.innerText = `Welcome back, ${currentUser}! ✨`;
+        
         loadGlobalDictionary(); processStreakCalendar(); updateProfileXP(); renderLevelScores();
         initSettingsUI(); renderDailyQuote(); loadGrammarData(); 
     }
@@ -335,17 +340,24 @@ function updateGlobalProgress() {
         totalMastered += hskMasteredWords[lvl] ? hskMasteredWords[lvl].length : 0;
         totalTarget += hskLevelTotals[lvl] || 150; 
     });
-    let percent = totalTarget === 0 ? 0 : Math.min(Math.round((totalMastered / totalTarget) * 100), 100);
-    const circle = document.getElementById('topProgressCircle');
+    if(totalTarget === 0) totalTarget = 1200; // default target
+    let percent = Math.min(Math.round((totalMastered / totalTarget) * 100), 100);
+    
+    // Cập nhật 4 Thẻ chỉ số pastel
     const percentText = document.getElementById('topProgressPercent');
-    const detailText = document.getElementById('topProgressText');
-    if (circle && percentText && detailText) {
-        percentText.innerText = `${percent}%`;
-        detailText.innerHTML = `${totalMastered} / ${totalTarget} từ<br><span>Đã master</span>`;
-        circle.style.background = `conic-gradient(var(--neon-teal) ${percent}%, rgba(255,255,255,0.05) 0deg)`;
-    }
+    const masteredWordsEl = document.getElementById('masteredWordsCount');
+    const totalWordsEl = document.getElementById('totalWordsTarget');
+    const sidebarProgressEl = document.getElementById('sidebarProgressText');
+    const sidebarBarEl = document.getElementById('sidebarProgressBar');
+
+    if (percentText) percentText.innerText = `↗ ${percent}%`;
+    if (masteredWordsEl) masteredWordsEl.innerText = totalMastered;
+    if (totalWordsEl) totalWordsEl.innerText = totalTarget;
+    if (sidebarProgressEl) sidebarProgressEl.innerText = `${percent}%`;
+    if (sidebarBarEl) sidebarBarEl.style.width = `${percent}%`;
 }
 
+// Render các thanh tiến độ trong White Card dạng dòng (DreamsAI Bar Style)
 function renderLevelScores() {
     const container = document.getElementById('levelStatsList');
     if(!container) return;
@@ -354,28 +366,20 @@ function renderLevelScores() {
     const playedLevels = Object.keys(hskMasteredWords).sort();
     let levelsToDisplay = playedLevels.length > 0 ? playedLevels : ["HSK1", "HSK2", "HSK3", "HSK4", "HSK5", "HSK6"];
 
-    const mascotEmojis = {
-        "HSK1": "🐼", "HSK2": "🎋", "HSK3": "👷", 
-        "HSK4": "🦸", "HSK5": "🥷", "HSK6": "🎓"
-    };
-
-    levelsToDisplay.forEach(lvl => {
+    levelsToDisplay.forEach((lvl, index) => {
         let mastered = hskMasteredWords[lvl] ? hskMasteredWords[lvl].length : 0; 
         let maxWords = hskLevelTotals[lvl] || 150; 
         const percent = Math.min(Math.round((mastered / maxWords) * 100), 100);
-        const mascot = mascotEmojis[lvl] || "🐼";
+        const barClass = `bar-hsk${(index % 6) + 1}`;
         
         const item = document.createElement('div'); 
-        item.className = 'level-card';
-        item.setAttribute('data-lvl', lvl); 
-        
+        item.className = 'mastery-row';
         item.innerHTML = `
-            <div class="lc-title">${lvl}</div>
-            <div class="lc-bar-bg">
-                <div class="lc-bar-fill" style="width: ${percent}%;"></div>
+            <div class="m-label">${lvl}</div>
+            <div class="m-bar-wrap">
+                <div class="m-bar-fill ${barClass}" style="width: ${percent}%;"></div>
             </div>
-            <div class="lc-text">${mastered}/${maxWords} từ</div>
-            <div class="mascot-img">${mascot}</div>
+            <div class="m-stat">${mastered}/${maxWords} (${percent}%)</div>
         `;
         container.appendChild(item);
     });
@@ -388,10 +392,12 @@ function updateProfileXP() {
     Object.keys(hskMasteredWords).forEach(lvl => { totalMastered += hskMasteredWords[lvl].length; });
     const xp = totalMastered * 5; 
     const userProfileDiv = document.getElementById('userProfileBar');
+    const xpUI = document.getElementById('totalXpUI');
+    if(xpUI) xpUI.innerText = `${xp} XP`;
     if(userProfileDiv) {
         userProfileDiv.innerHTML = `
             <div class="streak-badge"><i class='bx bxs-star'></i> ${xp} XP</div>
-            <div class="avatar"><img src="https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser)}&background=A855F7&color=fff&bold=true" alt="User"></div>
+            <div class="avatar"><img src="https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser)}&background=7C3AED&color=fff&bold=true" alt="User"></div>
         `;
     }
 }
@@ -403,7 +409,13 @@ function switchTab(targetId) {
     document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
     const target = document.getElementById(targetId); if(target) target.classList.add('active');
     document.querySelectorAll('.nav-links a[data-target]').forEach(l => {
-        if(l.getAttribute('data-target') === targetId) l.classList.add('active'); else l.classList.remove('active');
+        if(l.getAttribute('data-target') === targetId) {
+            l.classList.add('active');
+            const titleEl = document.getElementById('currentTabTitle');
+            if(titleEl) titleEl.innerText = l.innerText.trim();
+        } else {
+            l.classList.remove('active');
+        }
     });
 }
 document.querySelectorAll('.nav-links a[data-target]').forEach(link => {
@@ -449,10 +461,10 @@ function renderPersonalFiles() {
     const list = document.getElementById('personalFilesList'); const selectGrid = document.getElementById('personalSelectGrid');
     if(!list || !selectGrid) return;
     list.innerHTML = ''; selectGrid.innerHTML = '';
-    if (Object.keys(personalFiles).length === 0) { selectGrid.innerHTML = `<p class="muted">(Chưa có file nào)</p>`; }
+    if (Object.keys(personalFiles).length === 0) { selectGrid.innerHTML = `<p class="muted">(Chưa có file nào uploaded)</p>`; }
     Object.keys(personalFiles).forEach(name => {
         const item = document.createElement('div'); item.className = 'file-item';
-        item.innerHTML = `<h4><i class='bx bx-file' style="color: var(--neon-sky); font-size:1.5rem;"></i> ${name}.csv</h4><button class="btn-delete" onclick="deleteFile('${name}')">Xóa</button>`;
+        item.innerHTML = `<h4><i class='bx bx-file' style="color: var(--color-blue); font-size:1.4rem;"></i> ${name}.csv</h4><button class="btn-delete" onclick="deleteFile('${name}')">Xóa tệp</button>`;
         list.appendChild(item);
         const btn = document.createElement('button'); btn.className = 'pill-btn';
         if (selectedPersonalFiles.includes(name)) btn.classList.add('active');
@@ -497,7 +509,7 @@ window.startMatchGame = async function() {
         } catch (e) { return []; } return [];
     });
     const results = await Promise.all(fetchPromises); results.forEach(data => { allWords = [...allWords, ...data]; });
-    if (allWords.length === 0) { container.innerHTML = `<h3 style="color:var(--neon-pink);">Không tìm thấy dữ liệu phù hợp!</h3>`; return; }
+    if (allWords.length === 0) { container.innerHTML = `<h3 style="color:var(--color-pink);">Không tìm thấy dữ liệu phù hợp!</h3>`; return; }
 
     allWords.sort(() => Math.random() - 0.5); let wordsForGame = allWords.slice(0, count);
     matchedCount = 0; matchGameSelected = []; document.getElementById('matchProgressText').innerText = `0 / ${count}`; container.innerHTML = "";
@@ -511,7 +523,7 @@ window.startMatchGame = async function() {
     allBubbles.sort(() => Math.random() - 0.5); 
     allBubbles.forEach((b) => {
         const bubble = document.createElement('div'); bubble.className = `match-bubble ${b.type}`; bubble.innerText = b.text;
-        bubble.dataset.id = b.id; bubble.dataset.type = b.type; bubble.style.animationDelay = `${Math.random() * 2}s`;
+        bubble.dataset.id = b.id; bubble.dataset.type = b.type;
         bubble.onclick = () => handleBubbleClick(bubble, count); container.appendChild(bubble);
     });
 }
@@ -534,7 +546,7 @@ function handleBubbleClick(bubble, totalCount) {
             setTimeout(() => {
                 document.querySelectorAll('.match-bubble.correct').forEach(el => el.remove());
                 if (matchedCount === totalCount) { shootConfetti(); setTimeout(() => { alert("Wow! Phản xạ xuất thần!"); closeMatchGame(); }, 800); }
-            }, 500);
+            }, 400);
         } else {
             playSound('wrong'); matchGameSelected.forEach(n => { n.classList.remove('selected'); n.classList.add('wrong'); });
             setTimeout(() => { document.querySelectorAll('.match-bubble.wrong').forEach(n => { n.classList.remove('wrong'); n.classList.remove('selected'); }); }, 400);
@@ -556,13 +568,13 @@ function updateGameProgress() {
     const progressFill = document.getElementById('gameProgress');
     if (progressFill && quizData.length > 0) { const percent = Math.round((currentIndex / quizData.length) * 100); progressFill.style.width = `${percent}%`; }
 }
-function shootConfetti() { try { if (typeof confetti === 'function') confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#A855F7', '#EC4899', '#0EA5E9'] }); } catch(e) {} }
+function shootConfetti() { try { if (typeof confetti === 'function') confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#7C3AED', '#EC4899', '#0EA5E9'] }); } catch(e) {} }
 
 const btnStart = document.getElementById('btnStart');
 if (btnStart) {
     btnStart.onclick = async () => {
         if (selectedLevels.length === 0 && selectedPersonalFiles.length === 0) return alert("Vui lòng chọn ít nhất 1 Cấp độ hoặc File cá nhân!");
-        btnStart.innerHTML = "ĐANG TẢI... <i class='bx bx-loader-alt bx-spin'></i>"; quizData = [];
+        btnStart.innerHTML = "ĐANG TẢI DỮ LIỆU... <i class='bx bx-loader-alt bx-spin'></i>"; quizData = [];
 
         for (let lvl of selectedLevels) {
             try {
@@ -582,10 +594,10 @@ if (btnStart) {
             if(!hskLevelTotals[upperName]) { hskLevelTotals[upperName] = cleanData.length; localStorage.setItem('hsk_level_totals_v2', JSON.stringify(hskLevelTotals)); }
             quizData = [...quizData, ...cleanData.map(r => normalizeWordData(r, upperName))];
         }
-        if (quizData.length === 0) { btnStart.innerHTML = "BẮT ĐẦU CHIẾN <i class='bx bx-play'></i>"; return alert("Dữ liệu trống!"); }
+        if (quizData.length === 0) { btnStart.innerHTML = "BẮT ĐẦU CHIẾN NGAY <i class='bx bx-right-arrow-alt'></i>"; return alert("Dữ liệu trống!"); }
         if(appSettings.shuffle) { quizData.sort(() => Math.random() - 0.5); }
         hp = 5; currentIndex = 0; missedWords = []; isReviewMode = false;
-        document.getElementById('hpDisplay').innerText = "❤️❤️❤️❤️❤️"; btnStart.innerHTML = "BẮT ĐẦU CHIẾN <i class='bx bx-play'></i>";
+        document.getElementById('hpDisplay').innerText = "❤️❤️❤️❤️❤️"; btnStart.innerHTML = "BẮT ĐẦU CHIẾN NGAY <i class='bx bx-right-arrow-alt'></i>";
         document.getElementById('gameScreen').style.display = 'block'; showQuestion();
     };
 }
@@ -627,13 +639,13 @@ function showQuestion() {
     let correctAnswer = ""; let hiddenText = ""; answerContainer.classList.remove('hanzi-mode');
 
     if (selectedMode === "GÕ PINYIN") {
-        mainQ.innerText = hanzi; mainQ.style.fontSize = "6rem"; hiddenText = meaning; 
+        mainQ.innerText = hanzi; mainQ.style.fontSize = "5.5rem"; hiddenText = meaning; 
         answerContainer.style.display = 'none'; typingContainer.style.display = 'block'; pinyinInput.value = ''; setTimeout(() => pinyinInput.focus(), 100); 
     } else {
         typingContainer.style.display = 'none'; answerContainer.style.display = 'grid';
-        if (selectedMode === "NGHĨA") { mainQ.innerText = hanzi; mainQ.style.fontSize = "6rem"; hiddenText = pinyin; correctAnswer = meaning; }
-        else if (selectedMode === "PINYIN") { mainQ.innerText = hanzi; mainQ.style.fontSize = "6rem"; hiddenText = meaning; correctAnswer = pinyin; }
-        else { mainQ.innerText = meaning; mainQ.style.fontSize = "3.5rem"; hiddenText = pinyin; correctAnswer = hanzi; answerContainer.classList.add('hanzi-mode'); }
+        if (selectedMode === "NGHĨA") { mainQ.innerText = hanzi; mainQ.style.fontSize = "5.5rem"; hiddenText = pinyin; correctAnswer = meaning; }
+        else if (selectedMode === "PINYIN") { mainQ.innerText = hanzi; mainQ.style.fontSize = "5.5rem"; hiddenText = meaning; correctAnswer = pinyin; }
+        else { mainQ.innerText = meaning; mainQ.style.fontSize = "3.2rem"; hiddenText = pinyin; correctAnswer = hanzi; answerContainer.classList.add('hanzi-mode'); }
         renderAnswers(correctAnswer, lvl ? lvl.toUpperCase() : "CUSTOM");
     }
 
