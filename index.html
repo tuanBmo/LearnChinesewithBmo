@@ -253,6 +253,37 @@
 
                 </div>
 
+                <!-- BẮT ĐẦU: KHỐI TÍNH NĂNG MỚI (Từ vựng sai & Web hữu ích) -->
+                <div class="dashboard-grid" style="margin-top: 20px;">
+                    
+                    <!-- Tính năng: Trang web hữu ích -->
+                    <div class="content-card" style="padding: 24px;">
+                        <h3 class="card-title" style="margin-bottom: 15px;"><i class='bx bx-link'></i> Web hữu ích</h3>
+                        <p class="muted" style="margin-bottom: 15px;">Lưu các công cụ, từ điển để truy cập nhanh.</p>
+                        <div id="usefulLinksContainer"></div>
+                        <div style="display:flex; gap:8px; margin-top:15px; flex-wrap: wrap;">
+                            <input type="text" id="linkName" placeholder="Tên web..." class="select-input" style="width:35%; padding: 8px 12px; font-size: 0.85rem;">
+                            <input type="url" id="linkUrl" placeholder="https://..." class="select-input" style="flex:1; padding: 8px 12px; font-size: 0.85rem;">
+                            <button class="btn-primary" onclick="addNewLink()" style="padding: 8px 14px;"><i class='bx bx-plus'></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Tính năng: Từ vựng sai theo HSK -->
+                    <div class="content-card" style="padding: 24px;">
+                        <div class="card-header" style="margin-bottom: 15px;">
+                            <div>
+                                <h3 class="card-title"><i class='bx bx-error-circle' style="color:var(--color-pink);"></i> Từ vựng đã sai</h3>
+                                <p class="muted">Các từ bị sai khi luyện tập, hiển thị cả nghĩa và Pinyin để học lại.</p>
+                            </div>
+                        </div>
+                        <div id="globalMissedWordsContainer" style="max-height: 350px; overflow-y: auto; padding-right: 5px;">
+                            <!-- Dữ liệu sẽ được render bằng JS -->
+                        </div>
+                    </div>
+
+                </div>
+                <!-- KẾT THÚC: KHỐI TÍNH NĂNG MỚI -->
+
             </div>
 
             <!-- 2. PRACTICE VIEW -->
