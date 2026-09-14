@@ -24,6 +24,8 @@ let currentUser = localStorage.getItem('hsk_current_user');
 let appSettings = getSafeData('hsk_settings', { hidePinyin: false, shuffle: true });
 let loginHistory = getSafeData('hsk_login_history', []);
 let currentStreak = 0;
+let globalMissedWords = getSafeData('hsk_global_missed_words', {}); 
+let usefulLinks = getSafeData('hsk_useful_links', []);
 
 let matchGameSelected = [];
 let matchedCount = 0;
@@ -228,7 +230,6 @@ function recordCorrectWord(level, hanziWord) {
 }
 
 // ==========================================
-// ==========================================
 // 7. SỔ TAY NGỮ PHÁP (TỐI ƯU CHO 4 CỘT GRAMMAR.CSV)
 // ==========================================
 async function loadGrammarData() {
@@ -319,6 +320,7 @@ function renderGrammar(level) {
         `;
     }).join('');
 }
+
 // ==========================================
 // 8. KHỞI TẠO APP & RENDER GIAO DIỆN
 // ==========================================
@@ -333,6 +335,7 @@ function checkAuth() {
         
         loadGlobalDictionary(); processStreakCalendar(); updateProfileXP(); renderLevelScores();
         initSettingsUI(); renderDailyQuote(); loadGrammarData(); 
+        renderGlobalMissedWords(); renderUsefulLinks(); 
     }
 }
 
@@ -720,6 +723,7 @@ window.checkTypingAnswer = function() {
     } else { 
         hp--; playSound('wrong'); alert(`Sai rồi! Đáp án đúng: ${correctPinyin}`); document.getElementById('hpDisplay').innerText = "❤️".repeat(Math.max(0, hp)); 
         if(!isReviewMode) missedWords.push(quizData[currentIndex]); else quizData.push(quizData[currentIndex]); 
+        recordMissedWordGlobal(quizData[currentIndex], currentLevel);
         currentIndex++; showQuestion(); 
     }
 };
@@ -735,12 +739,138 @@ function renderAnswers(correct, currentLevel) {
         const btn = document.createElement('button'); btn.className = "ans-btn"; btn.innerText = text;
         btn.onclick = () => {
             if (text === correct) { playSound('correct'); const hanzi = quizData[currentIndex][0]; recordCorrectWord(currentLevel, hanzi); currentIndex++; showQuestion(); }
-            else { hp--; playSound('wrong'); alert(`Sai rồi! Đáp án đúng: ${correct}`); document.getElementById('hpDisplay').innerText = "❤️".repeat(Math.max(0, hp)); if(!isReviewMode) missedWords.push(quizData[currentIndex]); else quizData.push(quizData[currentIndex]); currentIndex++; showQuestion(); }
+            else { 
+                hp--; 
+                playSound('wrong'); 
+                alert(`Sai rồi! Đáp án đúng: ${correct}`); 
+                document.getElementById('hpDisplay').innerText = "❤️".repeat(Math.max(0, hp)); 
+                if(!isReviewMode) missedWords.push(quizData[currentIndex]); else quizData.push(quizData[currentIndex]); 
+                recordMissedWordGlobal(quizData[currentIndex], currentLevel);
+                currentIndex++; 
+                showQuestion(); 
+            }
         }; container.appendChild(btn);
     });
 }
 
 window.startReviewMode = function() { document.getElementById('reviewModal').style.display = 'none'; quizData = [...missedWords]; missedWords = []; currentIndex = 0; isReviewMode = true; hp = 3; document.getElementById('hpDisplay').innerText = "❤️❤️❤️"; showQuestion(); }
 window.endGame = function() { document.getElementById('reviewModal').style.display = 'none'; document.getElementById('gameScreen').style.display = 'none'; updateProfileXP(); renderLevelScores(); switchTab('dashboard-view'); }
+
+// ==========================================
+// 12. TÍNH NĂNG MỚI: TỪ VỰNG SAI & WEB HỮU ÍCH
+// ==========================================
+
+// --- XỬ LÝ TỪ VỰNG SAI ---
+function recordMissedWordGlobal(wordData, level) {
+    let lvl = (level || "CUSTOM").toUpperCase();
+    if(!globalMissedWords[lvl]) globalMissedWords[lvl] = [];
+    
+    // Kiểm tra chống trùng lặp theo Chữ Hán
+    if(!globalMissedWords[lvl].find(w => w[0] === wordData[0])) {
+        globalMissedWords[lvl].push(wordData);
+        localStorage.setItem('hsk_global_missed_words', JSON.stringify(globalMissedWords));
+    }
+    renderGlobalMissedWords();
+}
+
+window.removeGlobalMissedWord = function(lvl, hanzi) {
+    if(globalMissedWords[lvl]) {
+        globalMissedWords[lvl] = globalMissedWords[lvl].filter(w => w[0] !== hanzi);
+        localStorage.setItem('hsk_global_missed_words', JSON.stringify(globalMissedWords));
+        renderGlobalMissedWords();
+    }
+}
+
+function renderGlobalMissedWords() {
+    const container = document.getElementById('globalMissedWordsContainer');
+    if(!container) return;
+    container.innerHTML = "";
+    
+    let hasData = false;
+    Object.keys(globalMissedWords).sort().forEach(lvl => {
+        if(globalMissedWords[lvl] && globalMissedWords[lvl].length > 0) {
+            hasData = true;
+            const lvlGroup = document.createElement('div');
+            lvlGroup.style.marginBottom = "20px";
+            lvlGroup.innerHTML = `<h4 style="color:var(--color-purple); margin-bottom:12px; display:flex; align-items:center; gap:8px;">${lvl} <span class="badge-pill" style="background:#F1F5F9; color:#475569;">${globalMissedWords[lvl].length} từ</span></h4>`;
+            
+            const grid = document.createElement('div');
+            grid.style.display = "flex"; grid.style.flexWrap = "wrap"; grid.style.gap = "12px";
+            
+            globalMissedWords[lvl].forEach(w => {
+                const wordCard = document.createElement('div');
+                wordCard.style.cssText = "background:#F8FAFC; border:1px solid #E2E8F0; padding:12px 16px; border-radius:12px; display:flex; align-items:center; gap:14px; box-shadow: var(--shadow-sm); flex-grow: 1;";
+                wordCard.innerHTML = `
+                    <div style="font-size:1.8rem; font-weight:800; color:#0F172A; font-family:'Quicksand', sans-serif;">${w[0]}</div>
+                    <div style="display:flex; flex-direction:column; flex: 1;">
+                        <span style="font-size:0.95rem; font-weight:700; color:var(--color-blue); margin-bottom:2px;">${w[1]}</span>
+                        <span style="font-size:0.85rem; color:#64748B;">${w[3]}</span>
+                    </div>
+                    <button onclick="removeGlobalMissedWord('${lvl}', '${w[0]}')" title="Đã thuộc từ này" style="background:var(--color-mint-light); border:1px solid var(--color-mint); color:#065F46; border-radius:8px; cursor:pointer; padding:6px; font-size:1.2rem; display:flex; align-items:center; justify-content:center; transition: all 0.2s;"><i class='bx bx-check'></i></button>
+                `;
+                grid.appendChild(wordCard);
+            });
+            lvlGroup.appendChild(grid);
+            container.appendChild(lvlGroup);
+        }
+    });
+    
+    if(!hasData) {
+        container.innerHTML = `<div style="text-align:center; padding:30px; background:#F8FAFC; border-radius:12px; border:1px dashed #CBD5E1;"><p class="muted">Tuyệt vời! Bạn chưa có từ vựng nào bị hổng kiến thức. 🎉</p></div>`;
+    }
+}
+
+// --- XỬ LÝ WEB HỮU ÍCH ---
+window.addNewLink = function() {
+    const nameInput = document.getElementById('linkName');
+    const urlInput = document.getElementById('linkUrl');
+    const name = nameInput.value.trim();
+    let url = urlInput.value.trim();
+    
+    if(name && url) {
+        if(!url.startsWith('http')) url = 'https://' + url;
+        usefulLinks.push({name, url});
+        localStorage.setItem('hsk_useful_links', JSON.stringify(usefulLinks));
+        nameInput.value = ''; urlInput.value = '';
+        renderUsefulLinks();
+    } else {
+        alert("Vui lòng nhập đủ tên và đường dẫn web nhé!");
+    }
+}
+
+window.removeLink = function(index) {
+    usefulLinks.splice(index, 1);
+    localStorage.setItem('hsk_useful_links', JSON.stringify(usefulLinks));
+    renderUsefulLinks();
+}
+
+function renderUsefulLinks() {
+    const container = document.getElementById('usefulLinksContainer');
+    if(!container) return;
+    container.innerHTML = "";
+    
+    if(usefulLinks.length === 0) {
+        container.innerHTML = `<p class="muted" style="margin-bottom:15px; font-style:italic;">Chưa có liên kết nào. Hãy ghim các web bạn hay dùng vào đây nhé!</p>`;
+        return;
+    }
+    
+    const list = document.createElement('div');
+    list.style.display = "flex"; list.style.flexDirection = "column"; list.style.gap = "8px"; list.style.marginBottom = "15px";
+    
+    usefulLinks.forEach((link, idx) => {
+        const item = document.createElement('div');
+        item.style.cssText = "display:flex; justify-content:space-between; align-items:center; background:#F8FAFC; padding:10px 14px; border-radius:10px; border:1px solid #E2E8F0; transition: all 0.2s;";
+        
+        item.onmouseover = () => item.style.backgroundColor = "#F1F5F9";
+        item.onmouseout = () => item.style.backgroundColor = "#F8FAFC";
+
+        item.innerHTML = `
+            <a href="${link.url}" target="_blank" style="text-decoration:none; font-weight:600; color:var(--color-blue); display:flex; align-items:center; gap:8px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1;"><i class='bx bx-link-external'></i> ${link.name}</a>
+            <button onclick="removeLink(${idx})" style="background:none; border:none; color:#94A3B8; cursor:pointer; padding: 4px;"><i class='bx bx-trash'></i></button>
+        `;
+        list.appendChild(item);
+    });
+    container.appendChild(list);
+}
 
 checkAuth();
