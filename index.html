@@ -7,8 +7,9 @@
     <!-- Fonts & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-    <!-- Confetti Library -->
+    <!-- Confetti & Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Custom CSS -->
     <link rel="stylesheet" href="style.css">
 </head>
@@ -106,7 +107,6 @@
                 <a href="#" data-target="practice-view"><i class='bx bx-joystick'></i> Luyện tập nhanh</a>
                 <a href="#" data-target="minigame-view"><i class='bx bx-game'></i> Mini Games</a>
                 <a href="#" data-target="grammar-view"><i class='bx bx-book-bookmark'></i> Ngữ pháp HSK</a>
-                <a href="#" data-target="hanzi-grid-view"><i class='bx bx-grid-alt'></i> Ô Chữ Hán</a>
                 
                 <p class="nav-title">QUẢN LÝ DỮ LIỆU</p>
                 <a href="#" data-target="personal-view"><i class='bx bx-folder'></i> File cá nhân</a>
@@ -173,116 +173,78 @@
                     </div>
                 </div>
 
-                <!-- Bento Content Grid -->
-                <div class="dashboard-grid">
+                <!-- Bento Content Grid: Chia 2 cột (Trái - Phải) -->
+                <div class="dashboard-grid" style="grid-template-columns: 1fr 1.3fr; align-items: start;">
                     
-                    <!-- 4 Thẻ chỉ số màu Pastel -->
-                    <div class="stats-grid">
-                        <div class="stat-card pastel-purple">
-                            <div class="stat-top">
-                                <div class="stat-icon"><i class='bx bxs-hot'></i></div>
-                                <span class="trend-badge positive">🔥 Daily</span>
+                    <!-- ================= CỘT TRÁI ================= -->
+                    <div style="display: flex; flex-direction: column; gap: 20px;">
+                        
+                        <!-- 4 Thẻ chỉ số màu Pastel -->
+                        <div class="stats-grid">
+                            <div class="stat-card pastel-purple">
+                                <div class="stat-top"><div class="stat-icon"><i class='bx bxs-hot'></i></div><span class="trend-badge positive">🔥 Daily</span></div>
+                                <div class="stat-info"><h3 id="streakCountUI">0</h3><p>Ngày liên tiếp</p></div>
                             </div>
-                            <div class="stat-info">
-                                <h3 id="streakCountUI">0</h3>
-                                <p>Ngày liên tiếp</p>
+                            <div class="stat-card pastel-mint">
+                                <div class="stat-top"><div class="stat-icon"><i class='bx bx-target-lock'></i></div><span class="trend-badge positive" id="topProgressPercent">0%</span></div>
+                                <div class="stat-info"><h3 id="masteredWordsCount">0</h3><p>Từ đã thuộc</p></div>
                             </div>
-                        </div>
-
-                        <div class="stat-card pastel-mint">
-                            <div class="stat-top">
-                                <div class="stat-icon"><i class='bx bx-target-lock'></i></div>
-                                <span class="trend-badge positive" id="topProgressPercent">0%</span>
+                            <div class="stat-card pastel-orange">
+                                <div class="stat-top"><div class="stat-icon"><i class='bx bx-book-reader'></i></div><span class="trend-badge neutral">📚 HSK 1-6</span></div>
+                                <div class="stat-info"><h3 id="totalWordsTarget">0</h3><p>Tổng mục tiêu</p></div>
                             </div>
-                            <div class="stat-info">
-                                <h3 id="masteredWordsCount">0</h3>
-                                <p>Từ đã thuộc</p>
-                            </div>
-                        </div>
-
-                        <div class="stat-card pastel-orange">
-                            <div class="stat-top">
-                                <div class="stat-icon"><i class='bx bx-book-reader'></i></div>
-                                <span class="trend-badge neutral">📚 HSK 1-6</span>
-                            </div>
-                            <div class="stat-info">
-                                <h3 id="totalWordsTarget">0</h3>
-                                <p>Tổng mục tiêu</p>
+                            <div class="stat-card pastel-blue">
+                                <div class="stat-top"><div class="stat-icon"><i class='bx bx-star'></i></div><span class="trend-badge positive">⭐ Rank</span></div>
+                                <div class="stat-info"><h3 id="totalXpUI">0 XP</h3><p>Điểm tích lũy</p></div>
                             </div>
                         </div>
 
-                        <div class="stat-card pastel-blue">
-                            <div class="stat-top">
-                                <div class="stat-icon"><i class='bx bx-star'></i></div>
-                                <span class="trend-badge positive">⭐ Rank</span>
+                        <!-- Thẻ Biểu đồ Quạt (Tiến độ HSK) -->
+                        <div class="main-chart-card">
+                            <div class="card-header" style="margin-bottom: 10px;">
+                                <div>
+                                    <h3 class="card-title"><i class='bx bx-pie-chart-alt-2'></i> Tiến độ theo Cấp độ</h3>
+                                </div>
                             </div>
-                            <div class="stat-info">
-                                <h3 id="totalXpUI">0 XP</h3>
-                                <p>Điểm tích lũy</p>
+                            <!-- Khung chứa Biểu đồ -->
+                            <div style="width: 100%; max-width: 260px; margin: 0 auto;">
+                                <canvas id="hskPieChart"></canvas>
                             </div>
                         </div>
+
+                        <!-- Tính năng: Trang web hữu ích -->
+                        <div class="content-card" style="padding: 24px;">
+                            <h3 class="card-title" style="margin-bottom: 15px;"><i class='bx bx-link'></i> Web hữu ích</h3>
+                            <p class="muted" style="margin-bottom: 15px;">Lưu các công cụ, từ điển truy cập nhanh.</p>
+                            <div id="usefulLinksContainer"></div>
+                            <div style="display:flex; gap:8px; margin-top:15px; flex-wrap: wrap;">
+                                <input type="text" id="linkName" placeholder="Tên web (VD: Từ điển)..." class="select-input" style="width:35%; padding: 8px 12px; font-size: 0.85rem;" onkeypress="if(event.key === 'Enter') addNewLink()">
+                                <input type="url" id="linkUrl" placeholder="https://..." class="select-input" style="flex:1; padding: 8px 12px; font-size: 0.85rem;" onkeypress="if(event.key === 'Enter') addNewLink()">
+                                <button class="btn-primary" onclick="addNewLink()" style="padding: 8px 14px;"><i class='bx bx-plus'></i></button>
+                            </div>
+                        </div>
+
                     </div>
+                    <!-- ================= HẾT CỘT TRÁI ================= -->
 
-                    <!-- Thẻ Biểu đồ & Lịch (White Card lớn) -->
-                    <div class="main-chart-card">
-                        <div class="card-header">
+
+                    <!-- ================= CỘT PHẢI ================= -->
+                    <div class="content-card" style="padding: 24px; display: flex; flex-direction: column; height: 100%; min-height: 500px;">
+                        <div class="card-header" style="margin-bottom: 20px; border-bottom: 1px solid #E2E8F0; padding-bottom: 15px;">
                             <div>
-                                <h3 class="card-title"><i class='bx bx-bar-chart-alt-2'></i> Tiến độ theo Cấp độ HSK</h3>
-                                <p class="muted">Thống kê chi tiết lượng từ vựng đã thành thạo</p>
-                            </div>
-                            <div class="filter-pills">
-                                <button class="filter-pill active">Tất cả HSK</button>
+                                <h3 class="card-title"><i class='bx bx-error-circle' style="color:var(--color-pink);"></i> Bảng từ vựng đã sai</h3>
+                                <p class="muted" style="margin-top: 5px;">Hệ thống tự ghi nhận để bạn ôn tập lại cho chắc chắn.</p>
                             </div>
                         </div>
-
-                        <!-- Mastery Bars -->
-                        <div class="mastery-bars-container" id="levelStatsList"></div>
-
-                        <!-- Lịch Streak -->
-                        <div class="calendar-section" style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #F1F5F9;">
-                            <div class="card-header" style="margin-bottom: 15px;">
-                                <h4 style="font-size: 0.95rem; font-weight: 700; color:#334155;"><i class='bx bx-calendar-check'></i> Hoạt động điểm danh tháng này</h4>
-                                <span id="calendarMonth" class="badge-pill" style="background:#F1F5F9; color:#475569;">Tháng / Năm</span>
-                            </div>
-                            <div class="cal-header">
-                                <div>T2</div><div>T3</div><div>T4</div><div>T5</div><div>T6</div><div>T7</div><div>CN</div>
-                            </div>
-                            <div id="calendarGrid" class="calendar-grid"></div>
+                        
+                        <!-- Vùng chứa danh sách (có thanh cuộn nếu quá dài) -->
+                        <div id="globalMissedWordsContainer" style="flex: 1; overflow-y: auto; padding-right: 10px;">
+                            <!-- Dữ liệu render bằng JS -->
                         </div>
                     </div>
+                    <!-- ================= HẾT CỘT PHẢI ================= -->
 
                 </div>
-
-                <!-- BẮT ĐẦU: KHỐI TÍNH NĂNG MỚI (Từ vựng sai & Web hữu ích) -->
-                <div class="dashboard-grid" style="margin-top: 20px;">
-                    
-                    <!-- Tính năng: Trang web hữu ích -->
-                    <div class="content-card" style="padding: 24px;">
-                        <h3 class="card-title" style="margin-bottom: 15px;"><i class='bx bx-link'></i> Web hữu ích</h3>
-                        <p class="muted" style="margin-bottom: 15px;">Lưu các công cụ, từ điển để truy cập nhanh.</p>
-                        <div id="usefulLinksContainer"></div>
-                        <div style="display:flex; gap:8px; margin-top:15px; flex-wrap: wrap;">
-                            <input type="text" id="linkName" placeholder="Tên web..." class="select-input" style="width:35%; padding: 8px 12px; font-size: 0.85rem;">
-                            <input type="url" id="linkUrl" placeholder="https://..." class="select-input" style="flex:1; padding: 8px 12px; font-size: 0.85rem;">
-                            <button class="btn-primary" onclick="addNewLink()" style="padding: 8px 14px;"><i class='bx bx-plus'></i></button>
-                        </div>
-                    </div>
-
-                    <!-- Tính năng: Từ vựng sai theo HSK -->
-                    <div class="content-card" style="padding: 24px;">
-                        <div class="card-header" style="margin-bottom: 15px;">
-                            <div>
-                                <h3 class="card-title"><i class='bx bx-error-circle' style="color:var(--color-pink);"></i> Từ vựng đã sai</h3>
-                                <p class="muted">Các từ bị sai khi luyện tập, hiển thị cả nghĩa và Pinyin để học lại.</p>
-                            </div>
-                        </div>
-                        <div id="globalMissedWordsContainer" style="max-height: 350px; overflow-y: auto; padding-right: 5px;">
-                            <!-- Dữ liệu sẽ được render bằng JS -->
-                        </div>
-                    </div>
-
-                </div>
-                <!-- KẾT THÚC: KHỐI TÍNH NĂNG MỚI -->
 
             </div>
 
@@ -425,15 +387,6 @@
                 </div>
             </div>
 
-            <!-- 7. HANZI GRID VIEW -->
-            <div id="hanzi-grid-view" class="view-section">
-                <div class="content-card" style="padding: 20px; height:calc(100vh - 110px);">
-                    <iframe id="hanziGridFrame" title="Ô Chữ Hán - Từ vựng HSK"
-                        style="width:100%; height:100%; border:none; border-radius: 12px; overflow:hidden;"
-                        loading="lazy"></iframe>
-                </div>
-            </div>
-            
         </main>
     </div>
 
