@@ -11,7 +11,6 @@ let currentIndex = 0;
 let hp = 5;
 let missedWords = []; 
 let isReviewMode = false; 
-let hskChartInstance = null; // Quản lý vòng đời của biểu đồ
  
 function getSafeData(key, defaultVal) {
     try { return JSON.parse(localStorage.getItem(key)) || defaultVal; } 
@@ -129,7 +128,6 @@ if(searchInput) {
     });
 }
 
-// Phím tắt tìm kiếm CMD/CTRL + K
 document.addEventListener('keydown', (e) => {
     if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
@@ -206,7 +204,7 @@ function recordCorrectWord(level, hanziWord) {
 }
 
 // ==========================================
-// 7. SỔ TAY NGỮ PHÁP (TỐI ƯU CHO 4 CỘT GRAMMAR.CSV)
+// 7. SỔ TAY NGỮ PHÁP
 // ==========================================
 async function loadGrammarData() {
     try {
@@ -215,8 +213,6 @@ async function loadGrammarData() {
             const text = await response.text();
             const parsed = Papa.parse(text, { skipEmptyLines: true });
             grammarData = parsed.data.filter(row => row.length >= 3 && row[0].trim() !== "");
-        } else {
-            console.error("Không tải được file grammar.csv trên kho lưu trữ.");
         }
     } catch (e) { 
         console.error("Lỗi tải grammar.csv:", e);
@@ -360,63 +356,9 @@ function updateGlobalProgress() {
     if (sidebarBarEl) sidebarBarEl.style.width = `${percent}%`;
 }
 
-// Render biểu đồ quạt (Pie Chart / Doughnut) bằng Chart.js
+// Bỏ biểu đồ, chỉ update số liệu
 function renderLevelScores() {
     updateGlobalProgress();
-    
-    const ctx = document.getElementById('hskPieChart');
-    if(!ctx) return;
-
-    const playedLevels = Object.keys(hskMasteredWords).sort();
-    let levelsToDisplay = playedLevels.length > 0 ? playedLevels : ["HSK1", "HSK2", "HSK3", "HSK4", "HSK5", "HSK6"];
-
-    let labels = [];
-    let dataCounts = [];
-    let bgColors = ['#10B981', '#0EA5E9', '#3B82F6', '#8B5CF6', '#EC4899', '#F59E0B']; 
-
-    levelsToDisplay.forEach((lvl) => {
-        let mastered = hskMasteredWords[lvl] ? hskMasteredWords[lvl].length : 0;
-        labels.push(lvl);
-        dataCounts.push(mastered);
-    });
-
-    const totalWords = dataCounts.reduce((a, b) => a + b, 0);
-    if (totalWords === 0) {
-        labels = ["Chưa học từ nào"];
-        dataCounts = [1];
-        bgColors = ['#E2E8F0'];
-    }
-
-    if (hskChartInstance) {
-        hskChartInstance.destroy();
-    }
-
-    hskChartInstance = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: labels,
-            datasets: [{
-                data: dataCounts,
-                backgroundColor: bgColors,
-                borderWidth: 2,
-                borderColor: '#ffffff',
-                hoverOffset: 4
-            }]
-        },
-        options: {
-            responsive: true,
-            cutout: '65%',
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        padding: 15,
-                        font: { family: "'Plus Jakarta Sans', sans-serif", weight: 'bold', size: 11 }
-                    }
-                }
-            }
-        }
-    });
 }
 
 function updateProfileXP() {
@@ -791,26 +733,26 @@ function renderGlobalMissedWords() {
             lvlGroup.style.marginBottom = "20px";
             lvlGroup.innerHTML = `<h4 style="color:var(--color-purple); margin-bottom:12px; display:flex; align-items:center; gap:8px;">${lvl} <span class="badge-pill" style="background:#F1F5F9; color:#475569;">${globalMissedWords[lvl].length} từ</span></h4>`;
             
-            const grid = document.createElement('div');
-            // Dùng CSS Grid tự động phân cột cân bằng, các thẻ sẽ thẳng băng
-            grid.style.display = "grid"; 
-            grid.style.gridTemplateColumns = "repeat(auto-fill, minmax(200px, 1fr))"; 
-            grid.style.gap = "14px";
+            // Container dạng List (Danh sách xếp dọc)
+            const listContainer = document.createElement('div');
+            listContainer.style.display = "flex"; 
+            listContainer.style.flexDirection = "column"; 
+            listContainer.style.gap = "12px";
             
             globalMissedWords[lvl].forEach(w => {
                 const wordCard = document.createElement('div');
-                wordCard.style.cssText = "background:#F8FAFC; border:1px solid #E2E8F0; padding:12px 16px; border-radius:12px; display:flex; align-items:center; gap:14px; box-shadow: var(--shadow-sm);";
+                wordCard.style.cssText = "background:#F8FAFC; border:1px solid #E2E8F0; padding:14px 18px; border-radius:12px; display:flex; align-items:center; gap:16px; box-shadow: var(--shadow-sm);";
                 wordCard.innerHTML = `
-                    <div style="font-size:1.8rem; font-weight:800; color:#0F172A; font-family:'Quicksand', sans-serif;">${w[0]}</div>
-                    <div style="display:flex; flex-direction:column; flex: 1; overflow:hidden;">
-                        <span style="font-size:0.95rem; font-weight:700; color:var(--color-blue); margin-bottom:2px; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;">${w[1]}</span>
-                        <span style="font-size:0.85rem; color:#64748B; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;">${w[3]}</span>
+                    <div style="font-size:1.8rem; font-weight:800; color:#0F172A; font-family:'Quicksand', sans-serif; min-width:60px; text-align:center;">${w[0]}</div>
+                    <div style="display:flex; flex-direction:column; flex: 1;">
+                        <span style="font-size:1rem; font-weight:700; color:var(--color-blue); margin-bottom:4px;">${w[1]}</span>
+                        <span style="font-size:0.9rem; color:#475569; line-height:1.4;">${w[3]}</span>
                     </div>
-                    <button onclick="removeGlobalMissedWord('${lvl}', '${w[0]}')" title="Đã thuộc từ này" style="background:var(--color-mint-light); border:1px solid var(--color-mint); color:#065F46; border-radius:8px; cursor:pointer; padding:6px; font-size:1.2rem; display:flex; align-items:center; justify-content:center; transition: all 0.2s;"><i class='bx bx-check'></i></button>
+                    <button onclick="removeGlobalMissedWord('${lvl}', '${w[0]}')" title="Đã thuộc từ này" style="background:var(--color-mint-light); border:1px solid var(--color-mint); color:#065F46; border-radius:8px; cursor:pointer; padding:8px 10px; font-size:1.2rem; display:flex; align-items:center; justify-content:center; transition: all 0.2s;"><i class='bx bx-check'></i></button>
                 `;
-                grid.appendChild(wordCard);
+                listContainer.appendChild(wordCard);
             });
-            lvlGroup.appendChild(grid);
+            lvlGroup.appendChild(listContainer);
             container.appendChild(lvlGroup);
         }
     });
