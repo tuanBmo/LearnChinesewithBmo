@@ -3,7 +3,7 @@
 // ==========================================
 const levels = ["HSK1", "HSK2", "HSK3", "HSK4", "HSK5", "HSK6"];
 let selectedLevels = [];
-let selectedPersonalFiles = []; 
+let selectedPersonalFiles = [];
 let selectedMode = "NGHĨA";
 let quizData = [];
 let grammarData = []; 
@@ -11,6 +11,7 @@ let currentIndex = 0;
 let hp = 5;
 let missedWords = []; 
 let isReviewMode = false; 
+let hskChartInstance = null; 
  
 function getSafeData(key, defaultVal) {
     try { return JSON.parse(localStorage.getItem(key)) || defaultVal; } 
@@ -242,7 +243,7 @@ function renderGrammar(level) {
 
     if(filtered.length === 0) {
         container.innerHTML = `
-            <div style="text-align:center; padding:40px; background:#F8FAFC; border-radius:16px; border:1px dashed #CBD5E1;">
+            <div style="text-align:center; padding:40px; border-radius:16px; border:1px dashed var(--glass-border);">
                 <i class='bx bx-book-open' style='font-size: 2.5rem; color:#94A3B8; margin-bottom:10px;'></i>
                 <p style="color:#475569; font-weight:700; font-size:1.05rem;">Quyển ${level} chưa có dữ liệu cấu trúc câu.</p>
             </div>`;
@@ -260,22 +261,22 @@ function renderGrammar(level) {
             const match = ex.match(/(\d+\.\s*.*?)\s*\((.*?)\)\s*(.*)/);
             if (match) {
                 return `
-                    <div class="grammar-example" style="margin-top: 10px; background: #F8FAFC; padding: 14px 18px; border-radius: 12px; border: 1px solid #F1F5F9;">
+                    <div class="grammar-example" style="margin-top: 10px; border-radius: 12px;">
                         <p class="ex-hanzi" style="font-size: 1.15rem; color: #0F172A; font-weight: 700; margin-bottom: 4px; font-family: 'Quicksand', sans-serif;">${match[1]}</p>
                         <p class="ex-pinyin" style="color: var(--color-blue); font-size: 0.95rem; font-weight: 600; margin-bottom: 4px;">${match[2]}</p>
                         <p class="ex-meaning" style="color: var(--text-secondary); font-size: 0.9rem; font-style: italic;">${match[3]}</p>
                     </div>
                 `;
             } else {
-                return `<div class="grammar-example" style="margin-top: 10px; padding: 12px; background: #F8FAFC; border-radius: 10px;">${ex}</div>`;
+                return `<div class="grammar-example" style="margin-top: 10px; padding: 12px; border-radius: 10px;">${ex}</div>`;
             }
         }).join('');
 
         return `
-            <div class="grammar-item" style="background: #fff; border: 1px solid var(--border-color); padding: 22px 26px; border-radius: var(--radius-lg); border-left: 5px solid var(--color-purple); margin-bottom: 16px; box-shadow: var(--shadow-sm);">
+            <div class="grammar-item" style="border-left: 5px solid var(--color-purple);">
                 <div class="grammar-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 10px;">
                     <h3 style="font-size: 1.2rem; color: #0F172A; font-weight: 800;">${idx + 1}. ${title}</h3>
-                    <span class="tag purple-tag" style="background: var(--color-purple-light); color: var(--color-purple); padding: 4px 12px; border-radius: 6px; font-size: 0.75rem; font-weight: 800;">${lvlTag}</span>
+                    <span class="tag purple-tag">${lvlTag}</span>
                 </div>
                 <p class="muted" style="margin: 8px 0 14px; color:#334155; font-size: 0.95rem; line-height: 1.6; font-weight: 500;">${explanation}</p>
                 <div class="examples-container">
@@ -356,9 +357,63 @@ function updateGlobalProgress() {
     if (sidebarBarEl) sidebarBarEl.style.width = `${percent}%`;
 }
 
-// Bỏ biểu đồ, chỉ update số liệu
+// Render biểu đồ quạt (Pie Chart / Doughnut) bằng Chart.js
 function renderLevelScores() {
     updateGlobalProgress();
+    
+    const ctx = document.getElementById('hskPieChart');
+    if(!ctx) return;
+
+    const playedLevels = Object.keys(hskMasteredWords).sort();
+    let levelsToDisplay = playedLevels.length > 0 ? playedLevels : ["HSK1", "HSK2", "HSK3", "HSK4", "HSK5", "HSK6"];
+
+    let labels = [];
+    let dataCounts = [];
+    let bgColors = ['#10B981', '#0EA5E9', '#3B82F6', '#8B5CF6', '#EC4899', '#F59E0B']; 
+
+    levelsToDisplay.forEach((lvl) => {
+        let mastered = hskMasteredWords[lvl] ? hskMasteredWords[lvl].length : 0;
+        labels.push(lvl);
+        dataCounts.push(mastered);
+    });
+
+    const totalWords = dataCounts.reduce((a, b) => a + b, 0);
+    if (totalWords === 0) {
+        labels = ["Chưa học từ nào"];
+        dataCounts = [1];
+        bgColors = ['rgba(255,255,255,0.4)'];
+    }
+
+    if (hskChartInstance) {
+        hskChartInstance.destroy();
+    }
+
+    hskChartInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: dataCounts,
+                backgroundColor: bgColors,
+                borderWidth: 2,
+                borderColor: 'transparent',
+                hoverOffset: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            cutout: '65%',
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 15,
+                        font: { family: "'Plus Jakarta Sans', sans-serif", weight: 'bold', size: 11 }
+                    }
+                }
+            }
+        }
+    });
 }
 
 function updateProfileXP() {
@@ -658,7 +713,13 @@ window.checkTypingAnswer = function() {
     const currentLevel = (currentWord[7] || "CUSTOM").toUpperCase();
     
     if (normalizePinyin(userInput) === normalizePinyin(correctPinyin)) { 
-        playSound('correct'); recordCorrectWord(currentLevel, hanzi); currentIndex++; showQuestion(); 
+        playSound('correct'); 
+        recordCorrectWord(currentLevel, hanzi); 
+        
+        // Tự động xóa khỏi list từ sai ở Dashboard nếu làm đúng
+        if(isReviewMode) window.removeGlobalMissedWord(currentLevel, hanzi); 
+        
+        currentIndex++; showQuestion(); 
     } else { 
         hp--; playSound('wrong'); alert(`Sai rồi! Đáp án đúng: ${correctPinyin}`); document.getElementById('hpDisplay').innerText = "❤️".repeat(Math.max(0, hp)); 
         if(!isReviewMode) missedWords.push(quizData[currentIndex]); else quizData.push(quizData[currentIndex]); 
@@ -670,14 +731,35 @@ window.checkTypingAnswer = function() {
 function renderAnswers(correct, currentLevel) {
     const container = document.getElementById('answerContainer'); container.innerHTML = "";
     const colIndex = selectedMode === "NGHĨA" ? 3 : (selectedMode === "PINYIN" ? 1 : 0); 
-    const pool = [...new Set(quizData.map(r => r[colIndex]))];
     
-    let choices = [correct]; while (choices.length < 4 && pool.length > 4) { let rand = pool[Math.floor(Math.random() * pool.length)]; if (!choices.includes(rand)) choices.push(rand); }
+    let pool = [...new Set(quizData.map(r => r[colIndex]))];
+    
+    // Bổ sung đáp án nhiễu nếu bộ từ đang ôn tập quá ít
+    if (pool.length < 4 && globalDictionary && globalDictionary.length > 4) {
+        let extraPool = [...new Set(globalDictionary.map(r => r[colIndex]))];
+        pool = [...new Set([...pool, ...extraPool])];
+    }
+    
+    let choices = [correct]; 
+    while (choices.length < 4 && pool.length >= 4) { 
+        let rand = pool[Math.floor(Math.random() * pool.length)]; 
+        if (!choices.includes(rand)) choices.push(rand); 
+    }
     choices.sort(() => Math.random() - 0.5);
+    
     choices.forEach(text => {
         const btn = document.createElement('button'); btn.className = "ans-btn"; btn.innerText = text;
         btn.onclick = () => {
-            if (text === correct) { playSound('correct'); const hanzi = quizData[currentIndex][0]; recordCorrectWord(currentLevel, hanzi); currentIndex++; showQuestion(); }
+            const hanzi = quizData[currentIndex][0]; 
+            if (text === correct) { 
+                playSound('correct'); 
+                recordCorrectWord(currentLevel, hanzi); 
+                
+                // Tự động xóa khỏi list từ sai ở Dashboard nếu làm đúng trong chế độ ôn
+                if(isReviewMode) window.removeGlobalMissedWord(currentLevel, hanzi); 
+                
+                currentIndex++; showQuestion(); 
+            }
             else { 
                 hp--; 
                 playSound('wrong'); 
@@ -731,7 +813,7 @@ function renderGlobalMissedWords() {
             hasData = true;
             const lvlGroup = document.createElement('div');
             lvlGroup.style.marginBottom = "20px";
-            lvlGroup.innerHTML = `<h4 style="color:var(--color-purple); margin-bottom:12px; display:flex; align-items:center; gap:8px;">${lvl} <span class="badge-pill" style="background:#F1F5F9; color:#475569;">${globalMissedWords[lvl].length} từ</span></h4>`;
+            lvlGroup.innerHTML = `<h4 style="color:var(--color-purple); margin-bottom:12px; display:flex; align-items:center; gap:8px;">${lvl} <span class="badge-pill" style="background:rgba(255,255,255,0.6); color:#475569; border: 1px solid rgba(255,255,255,0.8);">${globalMissedWords[lvl].length} từ</span></h4>`;
             
             // Container dạng List (Danh sách xếp dọc)
             const listContainer = document.createElement('div');
@@ -741,14 +823,14 @@ function renderGlobalMissedWords() {
             
             globalMissedWords[lvl].forEach(w => {
                 const wordCard = document.createElement('div');
-                wordCard.style.cssText = "background:#F8FAFC; border:1px solid #E2E8F0; padding:14px 18px; border-radius:12px; display:flex; align-items:center; gap:16px; box-shadow: var(--shadow-sm);";
+                wordCard.style.cssText = "background:rgba(255,255,255,0.4); border:1px solid rgba(255,255,255,0.6); padding:14px 18px; border-radius:12px; display:flex; align-items:center; gap:16px; box-shadow: inset 0 1px 3px rgba(255,255,255,0.6), var(--glass-shadow); backdrop-filter: blur(8px);";
                 wordCard.innerHTML = `
                     <div style="font-size:1.8rem; font-weight:800; color:#0F172A; font-family:'Quicksand', sans-serif; min-width:60px; text-align:center;">${w[0]}</div>
                     <div style="display:flex; flex-direction:column; flex: 1;">
-                        <span style="font-size:1rem; font-weight:700; color:var(--color-blue); margin-bottom:4px;">${w[1]}</span>
-                        <span style="font-size:0.9rem; color:#475569; line-height:1.4;">${w[3]}</span>
+                        <span style="font-size:1rem; font-weight:800; color:var(--color-blue); margin-bottom:4px; text-shadow: 0 1px 1px rgba(255,255,255,0.8);">${w[1]}</span>
+                        <span style="font-size:0.9rem; color:#475569; line-height:1.4; font-weight:600;">${w[3]}</span>
                     </div>
-                    <button onclick="removeGlobalMissedWord('${lvl}', '${w[0]}')" title="Đã thuộc từ này" style="background:var(--color-mint-light); border:1px solid var(--color-mint); color:#065F46; border-radius:8px; cursor:pointer; padding:8px 10px; font-size:1.2rem; display:flex; align-items:center; justify-content:center; transition: all 0.2s;"><i class='bx bx-check'></i></button>
+                    <button onclick="removeGlobalMissedWord('${lvl}', '${w[0]}')" title="Đã thuộc từ này" style="background:rgba(16,185,129,0.2); border:1px solid rgba(16,185,129,0.4); color:#065F46; border-radius:8px; cursor:pointer; padding:8px 10px; font-size:1.2rem; display:flex; align-items:center; justify-content:center; transition: all 0.2s; backdrop-filter: blur(4px);"><i class='bx bx-check'></i></button>
                 `;
                 listContainer.appendChild(wordCard);
             });
@@ -758,7 +840,7 @@ function renderGlobalMissedWords() {
     });
     
     if(!hasData) {
-        container.innerHTML = `<div style="text-align:center; padding:40px; background:#F8FAFC; border-radius:12px; border:1px dashed #CBD5E1;"><p class="muted" style="font-size:1rem;">Tuyệt vời! Bạn chưa có từ vựng nào bị hổng kiến thức. 🎉</p></div>`;
+        container.innerHTML = `<div style="text-align:center; padding:40px; background:rgba(255,255,255,0.3); border-radius:12px; border:1px dashed rgba(255,255,255,0.8); backdrop-filter:blur(8px);"><p class="muted" style="font-size:1rem; color:#1E293B; font-weight:600;">Tuyệt vời! Bạn chưa có từ vựng nào bị hổng kiến thức. 🎉</p></div>`;
     }
 }
 
@@ -801,18 +883,49 @@ function renderUsefulLinks() {
     
     usefulLinks.forEach((link, idx) => {
         const item = document.createElement('div');
-        item.style.cssText = "display:flex; justify-content:space-between; align-items:center; background:#F8FAFC; padding:10px 14px; border-radius:10px; border:1px solid #E2E8F0; transition: all 0.2s;";
+        item.style.cssText = "display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.4); padding:10px 14px; border-radius:10px; border:1px solid rgba(255,255,255,0.6); transition: all 0.2s; backdrop-filter: blur(8px);";
         
-        item.onmouseover = () => item.style.backgroundColor = "#F1F5F9";
-        item.onmouseout = () => item.style.backgroundColor = "#F8FAFC";
+        item.onmouseover = () => { item.style.background = "rgba(255,255,255,0.7)"; item.style.transform = "translateY(-1px)"; };
+        item.onmouseout = () => { item.style.background = "rgba(255,255,255,0.4)"; item.style.transform = "translateY(0)"; };
 
         item.innerHTML = `
-            <a href="${link.url}" target="_blank" style="text-decoration:none; font-weight:600; color:var(--color-blue); display:flex; align-items:center; gap:8px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1;"><i class='bx bx-link-external'></i> ${link.name}</a>
+            <a href="${link.url}" target="_blank" style="text-decoration:none; font-weight:700; color:var(--color-blue); display:flex; align-items:center; gap:8px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; text-shadow: 0 1px 1px rgba(255,255,255,0.8);"><i class='bx bx-link-external'></i> ${link.name}</a>
             <button onclick="removeLink(${idx})" style="background:none; border:none; color:#94A3B8; cursor:pointer; padding: 4px;"><i class='bx bx-trash'></i></button>
         `;
         list.appendChild(item);
     });
     container.appendChild(list);
+}
+
+// --- KHỞI ĐỘNG CHẾ ĐỘ ÔN TẬP TỪ SAI TỔNG HỢP ---
+window.startGlobalReviewMode = function() {
+    let allMissed = [];
+    Object.keys(globalMissedWords).forEach(lvl => {
+        if(globalMissedWords[lvl]) {
+            allMissed = allMissed.concat(globalMissedWords[lvl]);
+        }
+    });
+    
+    if (allMissed.length === 0) {
+        alert("Tuyệt vời! Bạn chưa có từ vựng nào cần ôn tập cả. 🎉");
+        return;
+    }
+
+    quizData = [...allMissed];
+    if(appSettings.shuffle) { quizData.sort(() => Math.random() - 0.5); }
+    
+    hp = 5; 
+    currentIndex = 0; 
+    missedWords = []; 
+    isReviewMode = true; 
+    
+    document.getElementById('hpDisplay').innerText = "❤️❤️❤️❤️❤️";
+    
+    document.getElementById('reviewModal').style.display = 'none'; 
+    document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
+    document.getElementById('gameScreen').style.display = 'block'; 
+    
+    showQuestion();
 }
 
 checkAuth();
