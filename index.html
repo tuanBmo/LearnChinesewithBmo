@@ -215,21 +215,24 @@
 
 
                     <!-- ================= CỘT PHẢI ================= -->
-                    <div class="content-card" style="padding: 24px; display: flex; flex-direction: column; height: 100%; min-height: 500px;">
-                        <div class="card-header" style="margin-bottom: 20px; border-bottom: 1px solid #E2E8F0; padding-bottom: 15px;">
-                            <div>
-                                <h3 class="card-title"><i class='bx bx-error-circle' style="color:var(--color-pink);"></i> Bảng từ vựng đã sai</h3>
-                                <p class="muted" style="margin-top: 5px;">Hệ thống tự ghi nhận để bạn ôn tập lại cho chắc chắn. Đầy đủ Nghĩa và Pinyin.</p>
-                            </div>
-                        </div>
-                        
-                        <!-- Vùng chứa danh sách (có thanh cuộn nếu quá dài) -->
-                        <div id="globalMissedWordsContainer" style="flex: 1; overflow-y: auto; padding-right: 10px;">
-                            <!-- Dữ liệu render bằng JS -->
-                        </div>
-                    </div>
-                    <!-- ================= HẾT CỘT PHẢI ================= -->
-
+<div class="content-card" style="padding: 24px; display: flex; flex-direction: column; height: 100%; min-height: 500px;">
+    <div class="card-header" style="margin-bottom: 20px; border-bottom: 1px solid var(--glass-border); padding-bottom: 15px; flex-wrap: wrap; gap: 15px;">
+        <div>
+            <h3 class="card-title"><i class='bx bx-error-circle' style="color:var(--color-pink);"></i> Bảng từ vựng đã sai</h3>
+            <p class="muted" style="margin-top: 5px;">Hệ thống tự ghi nhận để bạn ôn tập lại. Đầy đủ Nghĩa và Pinyin.</p>
+        </div>
+        <!-- NÚT ÔN TẬP MỚI THÊM VÀO -->
+        <button class="btn-primary" style="padding: 10px 20px; font-size: 0.95rem; border-radius: 100px;" onclick="startGlobalReviewMode()">
+            <i class='bx bx-play-circle' style="font-size: 1.2rem;"></i> Ôn tập ngay
+        </button>
+    </div>
+    
+    <!-- Vùng chứa danh sách (có thanh cuộn nếu quá dài) -->
+    <div id="globalMissedWordsContainer" style="flex: 1; overflow-y: auto; padding-right: 10px;">
+        <!-- Dữ liệu render bằng JS -->
+    </div>
+</div>
+<!-- ================= HẾT CỘT PHẢI ================= -->
                 </div>
 
             </div>
