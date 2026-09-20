@@ -32,26 +32,18 @@ let matchGameSelected = [];
 let matchedCount = 0;
 let globalDictionary = [];
 
-// Chuẩn hóa dữ liệu tương thích CSV 3, 6 hoặc 7 cột
+// Chuẩn hóa dữ liệu CSV
 function normalizeWordData(row, levelName) {
     let h = row[0] || "";
     let p = row[1] || "";
     let t = "", m = "", eh = "", ep = "", em = "";
     
     if (row.length >= 7) {
-        t = row[2] || "";
-        m = row[3] || "";
-        eh = row[4] || "";
-        ep = row[5] || "";
-        em = row[6] || "";
+        t = row[2] || ""; m = row[3] || ""; eh = row[4] || ""; ep = row[5] || ""; em = row[6] || "";
     } else if (row.length === 6) {
-        m = row[2] || "";
-        eh = row[3] || "";
-        ep = row[4] || "";
-        em = row[5] || "";
+        m = row[2] || ""; eh = row[3] || ""; ep = row[4] || ""; em = row[5] || "";
     } else if (row.length === 4) {
-        t = row[2] || "";
-        m = row[3] || "";
+        t = row[2] || ""; m = row[3] || "";
     } else {
         m = row[2] || "";
     }
@@ -59,7 +51,7 @@ function normalizeWordData(row, levelName) {
 }
 
 // ==========================================
-// 2. DATA TRÍCH DẪN & HÌNH NỀN
+// 2. DATA TRÍCH DẪN
 // ==========================================
 const motivationalQuotes = [
     { hanzi: "不怕慢，就怕停。", pinyin: "Bù pà màn, jiù pà tíng — Không sợ chậm, chỉ sợ dừng." },
@@ -162,7 +154,7 @@ function playSound(type) {
 }
 
 // ==========================================
-// 5. CÂU NÓI ĐỘNG LỰC & LỊCH STREAK
+// 5. CÂU NÓI ĐỘNG LỰC & STREAK
 // ==========================================
 function renderDailyQuote() {
     const dayNumber = Math.floor(Date.now() / (1000 * 60 * 60 * 24));
@@ -192,9 +184,6 @@ function processStreakCalendar() {
     if (bannerStreak) bannerStreak.innerText = `${currentStreak} Days Streak`;
 }
 
-// ==========================================
-// 6. THỐNG KÊ UNIQUE TỪ VỰNG & PROGRESS
-// ==========================================
 function recordCorrectWord(level, hanziWord) {
     if(!isReviewMode) {
         if(!hskMasteredWords[level]) hskMasteredWords[level] = [];
@@ -215,9 +204,7 @@ async function loadGrammarData() {
             const parsed = Papa.parse(text, { skipEmptyLines: true });
             grammarData = parsed.data.filter(row => row.length >= 3 && row[0].trim() !== "");
         }
-    } catch (e) { 
-        console.error("Lỗi tải grammar.csv:", e);
-    }
+    } catch (e) { console.error("Lỗi tải grammar.csv:", e); }
     renderGrammar('1'); 
 }
 
@@ -261,7 +248,7 @@ function renderGrammar(level) {
             const match = ex.match(/(\d+\.\s*.*?)\s*\((.*?)\)\s*(.*)/);
             if (match) {
                 return `
-                    <div class="grammar-example" style="margin-top: 10px; border-radius: 12px;">
+                    <div class="grammar-example" style="margin-top: 10px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.4);">
                         <p class="ex-hanzi" style="font-size: 1.15rem; color: #0F172A; font-weight: 700; margin-bottom: 4px; font-family: 'Quicksand', sans-serif;">${match[1]}</p>
                         <p class="ex-pinyin" style="color: var(--color-blue); font-size: 0.95rem; font-weight: 600; margin-bottom: 4px;">${match[2]}</p>
                         <p class="ex-meaning" style="color: var(--text-secondary); font-size: 0.9rem; font-style: italic;">${match[3]}</p>
@@ -302,6 +289,7 @@ function checkAuth() {
         loadGlobalDictionary(); processStreakCalendar(); updateProfileXP(); renderLevelScores();
         initSettingsUI(); renderDailyQuote(); loadGrammarData(); 
         renderGlobalMissedWords(); renderUsefulLinks(); 
+        initLearnView();
     }
 }
 
@@ -384,9 +372,7 @@ function renderLevelScores() {
         bgColors = ['rgba(255,255,255,0.4)'];
     }
 
-    if (hskChartInstance) {
-        hskChartInstance.destroy();
-    }
+    if (hskChartInstance) { hskChartInstance.destroy(); }
 
     hskChartInstance = new Chart(ctx, {
         type: 'doughnut',
@@ -404,13 +390,7 @@ function renderLevelScores() {
             responsive: true,
             cutout: '65%',
             plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        padding: 15,
-                        font: { family: "'Plus Jakarta Sans', sans-serif", weight: 'bold', size: 11 }
-                    }
-                }
+                legend: { position: 'bottom', labels: { padding: 15, font: { family: "'Plus Jakarta Sans', sans-serif", weight: 'bold', size: 11 } } }
             }
         }
     });
@@ -464,7 +444,7 @@ if (levelGrid) {
 }
 
 document.querySelectorAll('.mode-btn').forEach(btn => {
-    if(btn.parentElement.id !== 'grammarLevelGroup') {
+    if(btn.parentElement.id !== 'grammarLevelGroup' && btn.parentElement.id !== 'learnLevelGroup') {
         btn.addEventListener('click', () => {
             btn.parentElement.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active'); selectedMode = btn.getAttribute('data-mode');
@@ -480,7 +460,7 @@ if (fileUpload) {
         reader.onload = function(e) {
             const name = file.name.replace('.csv', ''); personalFiles[name] = e.target.result;
             localStorage.setItem('hsk_personal_files', JSON.stringify(personalFiles));
-            alert("Đã tải lên file: " + name); renderPersonalFiles(); loadGlobalDictionary(); 
+            alert("Đã tải lên file: " + name); renderPersonalFiles(); loadGlobalDictionary(); initLearnView();
         };
         reader.readAsText(file);
     });
@@ -492,7 +472,7 @@ function renderPersonalFiles() {
     list.innerHTML = ''; selectGrid.innerHTML = '';
     if (Object.keys(personalFiles).length === 0) { selectGrid.innerHTML = `<p class="muted">(Chưa có file nào uploaded)</p>`; }
     Object.keys(personalFiles).forEach(name => {
-        const item = document.createElement('div'); item.className = 'file-item';
+        const item = document.createElement('div'); item.className = 'file-item glass-panel';
         item.innerHTML = `<h4><i class='bx bx-file' style="color: var(--color-blue); font-size:1.4rem;"></i> ${name}.csv</h4><button class="btn-delete" onclick="deleteFile('${name}')">Xóa tệp</button>`;
         list.appendChild(item);
         const btn = document.createElement('button'); btn.className = 'pill-btn';
@@ -508,7 +488,7 @@ function renderPersonalFiles() {
 window.deleteFile = function(name) {
     if(confirm(`Bạn có chắc muốn xóa file ${name}?`)) {
         delete personalFiles[name]; localStorage.setItem('hsk_personal_files', JSON.stringify(personalFiles));
-        selectedPersonalFiles = selectedPersonalFiles.filter(l => l !== name); renderPersonalFiles(); loadGlobalDictionary(); 
+        selectedPersonalFiles = selectedPersonalFiles.filter(l => l !== name); renderPersonalFiles(); loadGlobalDictionary(); initLearnView();
     }
 }
 renderPersonalFiles();
@@ -551,7 +531,7 @@ window.startMatchGame = async function() {
     });
     allBubbles.sort(() => Math.random() - 0.5); 
     allBubbles.forEach((b) => {
-        const bubble = document.createElement('div'); bubble.className = `match-bubble ${b.type}`; bubble.innerText = b.text;
+        const bubble = document.createElement('div'); bubble.className = `match-bubble glass-panel ${b.type}`; bubble.innerText = b.text;
         bubble.dataset.id = b.id; bubble.dataset.type = b.type;
         bubble.onclick = () => handleBubbleClick(bubble, count); container.appendChild(bubble);
     });
@@ -715,10 +695,7 @@ window.checkTypingAnswer = function() {
     if (normalizePinyin(userInput) === normalizePinyin(correctPinyin)) { 
         playSound('correct'); 
         recordCorrectWord(currentLevel, hanzi); 
-        
-        // Tự động xóa khỏi list từ sai ở Dashboard nếu làm đúng
         if(isReviewMode) window.removeGlobalMissedWord(currentLevel, hanzi); 
-        
         currentIndex++; showQuestion(); 
     } else { 
         hp--; playSound('wrong'); alert(`Sai rồi! Đáp án đúng: ${correctPinyin}`); document.getElementById('hpDisplay').innerText = "❤️".repeat(Math.max(0, hp)); 
@@ -734,7 +711,6 @@ function renderAnswers(correct, currentLevel) {
     
     let pool = [...new Set(quizData.map(r => r[colIndex]))];
     
-    // Bổ sung đáp án nhiễu nếu bộ từ đang ôn tập quá ít
     if (pool.length < 4 && globalDictionary && globalDictionary.length > 4) {
         let extraPool = [...new Set(globalDictionary.map(r => r[colIndex]))];
         pool = [...new Set([...pool, ...extraPool])];
@@ -748,16 +724,13 @@ function renderAnswers(correct, currentLevel) {
     choices.sort(() => Math.random() - 0.5);
     
     choices.forEach(text => {
-        const btn = document.createElement('button'); btn.className = "ans-btn"; btn.innerText = text;
+        const btn = document.createElement('button'); btn.className = "ans-btn glass-panel"; btn.innerText = text;
         btn.onclick = () => {
             const hanzi = quizData[currentIndex][0]; 
             if (text === correct) { 
                 playSound('correct'); 
                 recordCorrectWord(currentLevel, hanzi); 
-                
-                // Tự động xóa khỏi list từ sai ở Dashboard nếu làm đúng trong chế độ ôn
                 if(isReviewMode) window.removeGlobalMissedWord(currentLevel, hanzi); 
-                
                 currentIndex++; showQuestion(); 
             }
             else { 
@@ -774,19 +747,14 @@ function renderAnswers(correct, currentLevel) {
     });
 }
 
-window.startReviewMode = function() { document.getElementById('reviewModal').style.display = 'none'; quizData = [...missedWords]; missedWords = []; currentIndex = 0; isReviewMode = true; hp = 3; document.getElementById('hpDisplay').innerText = "❤️❤️❤️"; showQuestion(); }
 window.endGame = function() { document.getElementById('reviewModal').style.display = 'none'; document.getElementById('gameScreen').style.display = 'none'; updateProfileXP(); renderLevelScores(); switchTab('dashboard-view'); }
 
 // ==========================================
-// 12. TÍNH NĂNG MỚI: TỪ VỰNG SAI & WEB HỮU ÍCH
+// 12. TỪ VỰNG SAI, WEB HỮU ÍCH & ÔN TẬP
 // ==========================================
-
-// --- XỬ LÝ TỪ VỰNG SAI ---
 function recordMissedWordGlobal(wordData, level) {
     let lvl = (level || "CUSTOM").toUpperCase();
     if(!globalMissedWords[lvl]) globalMissedWords[lvl] = [];
-    
-    // Kiểm tra chống trùng lặp theo Chữ Hán
     if(!globalMissedWords[lvl].find(w => w[0] === wordData[0])) {
         globalMissedWords[lvl].push(wordData);
         localStorage.setItem('hsk_global_missed_words', JSON.stringify(globalMissedWords));
@@ -815,11 +783,8 @@ function renderGlobalMissedWords() {
             lvlGroup.style.marginBottom = "20px";
             lvlGroup.innerHTML = `<h4 style="color:var(--color-purple); margin-bottom:12px; display:flex; align-items:center; gap:8px;">${lvl} <span class="badge-pill" style="background:rgba(255,255,255,0.6); color:#475569; border: 1px solid rgba(255,255,255,0.8);">${globalMissedWords[lvl].length} từ</span></h4>`;
             
-            // Container dạng List (Danh sách xếp dọc)
             const listContainer = document.createElement('div');
-            listContainer.style.display = "flex"; 
-            listContainer.style.flexDirection = "column"; 
-            listContainer.style.gap = "12px";
+            listContainer.style.display = "flex"; listContainer.style.flexDirection = "column"; listContainer.style.gap = "12px";
             
             globalMissedWords[lvl].forEach(w => {
                 const wordCard = document.createElement('div');
@@ -844,7 +809,6 @@ function renderGlobalMissedWords() {
     }
 }
 
-// --- XỬ LÝ WEB HỮU ÍCH ---
 window.addNewLink = function() {
     const nameInput = document.getElementById('linkName');
     const urlInput = document.getElementById('linkUrl');
@@ -884,7 +848,6 @@ function renderUsefulLinks() {
     usefulLinks.forEach((link, idx) => {
         const item = document.createElement('div');
         item.style.cssText = "display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.4); padding:10px 14px; border-radius:10px; border:1px solid rgba(255,255,255,0.6); transition: all 0.2s; backdrop-filter: blur(8px);";
-        
         item.onmouseover = () => { item.style.background = "rgba(255,255,255,0.7)"; item.style.transform = "translateY(-1px)"; };
         item.onmouseout = () => { item.style.background = "rgba(255,255,255,0.4)"; item.style.transform = "translateY(0)"; };
 
@@ -897,7 +860,6 @@ function renderUsefulLinks() {
     container.appendChild(list);
 }
 
-// --- KHỞI ĐỘNG CHẾ ĐỘ ÔN TẬP TỪ SAI TỔNG HỢP ---
 window.startGlobalReviewMode = function() {
     let allMissed = [];
     Object.keys(globalMissedWords).forEach(lvl => {
@@ -905,27 +867,133 @@ window.startGlobalReviewMode = function() {
             allMissed = allMissed.concat(globalMissedWords[lvl]);
         }
     });
-    
     if (allMissed.length === 0) {
         alert("Tuyệt vời! Bạn chưa có từ vựng nào cần ôn tập cả. 🎉");
         return;
     }
-
     quizData = [...allMissed];
     if(appSettings.shuffle) { quizData.sort(() => Math.random() - 0.5); }
     
-    hp = 5; 
-    currentIndex = 0; 
-    missedWords = []; 
-    isReviewMode = true; 
-    
+    hp = 5; currentIndex = 0; missedWords = []; isReviewMode = true; 
     document.getElementById('hpDisplay').innerText = "❤️❤️❤️❤️❤️";
     
     document.getElementById('reviewModal').style.display = 'none'; 
     document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
     document.getElementById('gameScreen').style.display = 'block'; 
-    
     showQuestion();
 }
 
-checkAuth();
+window.startReviewMode = function() { document.getElementById('reviewModal').style.display = 'none'; quizData = [...missedWords]; missedWords = []; currentIndex = 0; isReviewMode = true; hp = 3; document.getElementById('hpDisplay').innerText = "❤️❤️❤️"; showQuestion(); }
+
+// ==========================================
+// 13. TÍNH NĂNG MỚI: HỌC TỪ VỰNG TỔNG QUAN
+// ==========================================
+function initLearnView() {
+    const group = document.getElementById('learnLevelGroup');
+    if(!group) return;
+    group.innerHTML = '';
+    
+    levels.forEach(lvl => {
+        const btn = document.createElement('button');
+        btn.className = 'mode-btn';
+        btn.innerText = lvl;
+        btn.onclick = () => loadLearnVocabulary(lvl, btn, false);
+        group.appendChild(btn);
+    });
+
+    Object.keys(personalFiles).forEach(name => {
+        const btn = document.createElement('button');
+        btn.className = 'mode-btn';
+        btn.innerHTML = `<i class='bx bx-folder'></i> ${name}`;
+        btn.onclick = () => loadLearnVocabulary(name, btn, true);
+        group.appendChild(btn);
+    });
+    
+    if(levels.length > 0) {
+        setTimeout(() => loadLearnVocabulary(levels[0], group.firstChild, false), 500);
+    }
+}
+
+async function loadLearnVocabulary(level, btnNode, isPersonal = false) {
+    const group = document.getElementById('learnLevelGroup');
+    if(group) {
+        group.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+    }
+    if(btnNode) btnNode.classList.add('active');
+
+    const container = document.getElementById('learnContentArea');
+    container.innerHTML = `<div style="text-align:center; padding:40px;"><i class='bx bx-loader-alt bx-spin' style="font-size:2.5rem; color:var(--color-purple);"></i><p style="margin-top:10px; font-weight:700; color:#475569;">Đang trích xuất dữ liệu ${level}...</p></div>`;
+
+    let vocabData = [];
+
+    if (isPersonal) {
+        const text = personalFiles[level];
+        const parsed = Papa.parse(text, { skipEmptyLines: true });
+        vocabData = parsed.data.filter(r => r.length >= 3 && r[0].trim() !== "").map(r => normalizeWordData(r, level.toUpperCase()));
+        renderLearnList(vocabData);
+    } else {
+        try {
+            let res = await fetch(`${level}.csv`);
+            if (!res.ok) res = await fetch(`${level.toLowerCase()}.csv`);
+            if (res.ok) {
+                const text = await res.text();
+                const parsed = Papa.parse(text, { skipEmptyLines: true });
+                vocabData = parsed.data.filter(r => r.length >= 3 && r[0].trim() !== "").map(r => normalizeWordData(r, level.toUpperCase()));
+                renderLearnList(vocabData);
+            } else {
+                container.innerHTML = `<div style="text-align:center; padding:30px; background:rgba(255,255,255,0.3); border-radius:16px; border:1px dashed rgba(255,255,255,0.8);"><p class="muted">Không tìm thấy file dữ liệu cho ${level}.</p></div>`;
+            }
+        } catch (e) {
+             container.innerHTML = `<p class="muted" style="text-align:center;">Lỗi tải dữ liệu.</p>`;
+        }
+    }
+}
+
+function renderLearnList(data) {
+    const container = document.getElementById('learnContentArea');
+    if(data.length === 0) {
+        container.innerHTML = `<div style="text-align:center; padding:30px; background:rgba(255,255,255,0.3); border-radius:16px; border:1px dashed rgba(255,255,255,0.8);"><p class="muted">Danh sách từ vựng trống.</p></div>`;
+        return;
+    }
+
+    container.innerHTML = data.map((w, idx) => {
+        const hanzi = w[0];
+        const pinyin = w[1];
+        const type = w[2];
+        const meaning = w[3];
+        const exHanzi = w[4] || "";
+        const exPinyin = w[5] || "";
+        const exMeaning = w[6] || "";
+        
+        let exampleHTML = "";
+        if(exHanzi) {
+             const highlightedEx = exHanzi.split(hanzi).join(`<span style="color:var(--color-pink); font-weight:800;">${hanzi}</span>`);
+             exampleHTML = `
+                <div style="margin-top: 14px; padding-top: 14px; border-top: 1px dashed rgba(0,0,0,0.1);">
+                    <p style="font-size:1.15rem; font-family:'Quicksand', sans-serif; font-weight:700; color:#1E293B; margin-bottom:6px;">${highlightedEx}</p>
+                    <p style="font-size:0.95rem; color:var(--color-blue); margin-bottom:4px; font-weight:600;">${exPinyin}</p>
+                    <p style="font-size:0.9rem; color:#475569; font-style:italic;">${exMeaning}</p>
+                </div>
+             `;
+        }
+
+        return `
+            <div style="background:rgba(255,255,255,0.4); border:1px solid rgba(255,255,255,0.6); padding:20px 24px; border-radius:16px; box-shadow: inset 0 1px 3px rgba(255,255,255,0.6), var(--glass-shadow); backdrop-filter: blur(8px);">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                    <div style="display:flex; gap: 20px; align-items:center;">
+                        <div style="font-size: 2.8rem; font-weight:800; font-family:'Quicksand', sans-serif; color:#0F172A; min-width: 70px; text-align:center; text-shadow: 0 2px 10px rgba(255,255,255,0.8);">${hanzi}</div>
+                        <div>
+                            <div style="display:flex; align-items:center; gap:10px; margin-bottom:6px;">
+                                <span style="font-size:1.15rem; font-weight:800; color:var(--color-blue); text-shadow: 0 1px 1px rgba(255,255,255,0.8);">${pinyin}</span>
+                                ${type ? `<span style="font-size:0.75rem; font-weight:800; padding:4px 10px; background:rgba(124,58,237,0.15); color:var(--color-purple); border-radius:8px; border: 1px solid rgba(124,58,237,0.3);">${type}</span>` : ''}
+                            </div>
+                            <p style="font-size:1.05rem; color:#1E293B; font-weight:700; line-height:1.4;">${meaning}</p>
+                        </div>
+                    </div>
+                    <div style="font-size: 0.85rem; font-weight:800; color:#64748B; background:rgba(255,255,255,0.6); padding:6px 12px; border-radius:8px; border: 1px solid rgba(255,255,255,0.8);">#${idx + 1}</div>
+                </div>
+                ${exampleHTML}
+            </div>
+        `;
+    }).join('');
+}
