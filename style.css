@@ -35,7 +35,6 @@ body {
     display: flex; 
     height: 100vh; 
     overflow: hidden; 
-    /* Gradient nền pastel sinh động */
     background: linear-gradient(120deg, #e0c3fc 0%, #8ec5fc 100%);
     position: relative;
     z-index: 1;
@@ -184,7 +183,7 @@ body::after {
 .gc-1 i { color: #FDE047; }
 .gc-2 i { color: #FF8A00; }
 
-/* DASHBOARD GRID & STAT CARDS (Glassy Pastels) */
+/* DASHBOARD GRID & STAT CARDS */
 .dashboard-grid { display: grid; gap: 24px; }
 .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-content: start; }
 .stat-card { border-radius: var(--radius-lg); padding: 22px; display: flex; flex-direction: column; justify-content: space-between; height: 145px; }
@@ -206,7 +205,7 @@ body::after {
 .pastel-blue { background: rgba(224, 242, 254, 0.5); border-color: rgba(255,255,255,0.6); }
 .pastel-blue .stat-icon { color: #0284C7; }
 
-/* CONTENT CARDS (General Glass Containers) */
+/* CONTENT CARDS */
 .content-card, .main-chart-card { border-radius: var(--radius-xl); padding: 28px; }
 .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
 .card-title { font-size: 1.25rem; font-weight: 800; color: #0F172A; display: flex; align-items: center; gap: 10px; }
@@ -253,7 +252,7 @@ input:checked + .tg-slider:before { transform: translateX(22px); }
 .file-item, .grammar-item, .grammar-example { padding: 18px 24px; border-radius: 16px; margin-bottom: 12px; }
 .btn-delete { background: rgba(254, 226, 226, 0.8); color: #EF4444; border: 1px solid rgba(254, 202, 202, 0.8); padding: 10px 16px; border-radius: 10px; font-weight: 800; cursor: pointer; font-size: 0.85rem;}
 
-/* MODALS & GAME OVERLAYS (Glassy Overlays) */
+/* MODALS & GAME OVERLAYS */
 .modal-overlay, .game-overlay { position: fixed; inset: 0; z-index: 2000; display: flex; justify-content: center; align-items: center; background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); }
 .game-overlay { display: block; overflow-y: auto; align-items: flex-start; }
 .auth-box { width: 420px; max-width: 90%; padding: 40px; border-radius: var(--radius-xl); }
