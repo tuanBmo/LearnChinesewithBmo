@@ -7,7 +7,7 @@
     <!-- Fonts & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-    <!-- Thư viện Chart.js & Confetti -->
+    <!-- Chart.js & Confetti -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Custom CSS -->
@@ -17,12 +17,12 @@
  
     <!-- MODAL ĐĂNG NHẬP -->
     <div id="authModal" class="modal-overlay">
-        <div class="auth-box">
+        <div class="auth-box glass-panel">
             <div class="logo-center">
                 <div class="logo-mark">汉</div>
                 <h2>HSK Trainer AI</h2>
             </div>
-            <p class="muted" style="margin-bottom: 25px; text-align: center;">Nhập biệt danh để bắt đầu trải nghiệm học tập hiện đại!</p>
+            <p class="muted" style="margin-bottom: 25px; text-align: center;">Nhập biệt danh để bắt đầu trải nghiệm!</p>
             <input type="text" id="usernameInput" class="auth-input" placeholder="Tên hiển thị của bạn..." required autocomplete="off" style="width: 100%;">
             <button class="btn-primary" id="btnLogin" style="width: 100%; margin-top: 15px; padding: 16px;">Bắt đầu ngay 🚀</button>
         </div>
@@ -30,7 +30,7 @@
 
     <!-- MODAL ÔN TẬP TỪ SAI KHI XONG GAME -->
     <div id="reviewModal" class="modal-overlay" style="display: none;">
-        <div class="auth-box" style="text-align: center;">
+        <div class="auth-box glass-panel" style="text-align: center;">
             <div style="font-size: 4.5rem; margin-bottom: 10px;">🎯</div>
             <h2>Hoàn thành bài học!</h2>
             <p class="muted" style="margin: 15px 0 25px;">Bạn có <strong id="missedCount" style="color: var(--color-pink); font-size: 1.3rem;">0</strong> từ cần ôn lại. Chiến luôn chứ?</p>
@@ -41,16 +41,57 @@
         </div>
     </div>
 
-    <!-- MÀN HÌNH MINIGAME GHÉP TỪ -->
+    <!-- MÀN HÌNH MINIGAME 1: GHÉP 3 YẾU TỐ -->
     <div id="wordMatchGameScreen" class="game-overlay" style="display: none;">
         <div class="game-container" style="max-width: 1000px;">
             <nav class="game-hud">
-                <button class="btn-icon-square" onclick="closeMatchGame()"><i class='bx bx-x'></i></button>
-                <h2 style="margin: 0; font-weight: 800; color: #1E293B; text-shadow: 0 1px 2px rgba(255,255,255,0.8);">🧩 Ghép bộ 3 yếu tố</h2>
+                <button class="btn-icon-square" onclick="closeMinigame('wordMatchGameScreen')"><i class='bx bx-x'></i></button>
+                <h2 style="margin: 0; font-weight: 800; color: #1E293B; text-shadow: 0 1px 2px rgba(255,255,255,0.8);">🧩 Ghép 3 yếu tố</h2>
                 <div id="matchProgressText" class="badge-pill" style="font-size: 1.1rem; background: rgba(224,242,254,0.6); color: #0284C7;">0 / 5</div>
             </nav>
-            <p class="muted" style="text-align: center; margin-bottom: 20px;">Chọn đúng 1 Chữ Hán + 1 Pinyin + 1 Nghĩa để ghép thành từ hoàn chỉnh!</p>
+            <p class="muted" style="text-align: center; margin-bottom: 20px;">Chọn đúng bộ 3: Chữ Hán + Pinyin + Nghĩa để hoàn thành!</p>
             <div id="floatingBubblesContainer" class="floating-bubbles-area"></div>
+        </div>
+    </div>
+
+    <!-- MÀN HÌNH MINIGAME 2: LẬT THẺ 2 CỘT -->
+    <div id="flipGameScreen" class="game-overlay" style="display: none;">
+        <div class="game-container" style="max-width: 900px;">
+            <nav class="game-hud">
+                <button class="btn-icon-square" onclick="closeMinigame('flipGameScreen')"><i class='bx bx-x'></i></button>
+                <h2 style="margin: 0; font-weight: 800; color: #1E293B; text-shadow: 0 1px 2px rgba(255,255,255,0.8);">🎴 Lật Thẻ Nối Nghĩa</h2>
+                <div id="flipProgressText" class="badge-pill" style="font-size: 1.1rem; background: rgba(243,232,255,0.8); color: var(--color-purple);">0 / 5</div>
+            </nav>
+            <p class="muted" style="text-align: center; margin-bottom: 20px;">Tìm thẻ Chữ Hán bên trái và ghép với Nghĩa tiếng Việt tương ứng bên phải!</p>
+            
+            <div class="flip-board" id="flipBoard">
+                <div class="flip-col" id="flipColLeft"></div>
+                <div class="flip-col" id="flipColRight"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MÀN HÌNH MINIGAME 3: BẮN TỪ RƠI -->
+    <div id="fallingGameScreen" class="game-overlay" style="display: none; overflow: hidden;">
+        <div class="game-container" style="max-width: 800px; height: 100vh; position: relative; padding: 20px 0;">
+            <nav class="game-hud" style="margin-bottom: 10px;">
+                <button class="btn-icon-square" onclick="closeFallingGame()"><i class='bx bx-x'></i></button>
+                <h2 style="margin: 0; font-weight: 800; color: #1E293B; text-shadow: 0 1px 2px rgba(255,255,255,0.8);">🚀 Phòng Không Pinyin</h2>
+                <div style="display: flex; gap: 15px; align-items: center;">
+                    <div id="fallingScoreText" style="font-weight: 800; font-size: 1.2rem; color: var(--color-purple);">Điểm: 0</div>
+                    <div id="fallingLivesText" style="font-size: 1.2rem;">❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️</div>
+                </div>
+            </nav>
+            <p class="muted" style="text-align: center; margin-bottom: 10px;">Gõ đúng Pinyin để bắn hạ từ trước khi nó chạm đất!</p>
+            
+            <!-- Khu vực từ rơi -->
+            <div id="fallingZone" class="falling-zone glass-panel"></div>
+            
+            <!-- Pháo Đài Nhập Liệu -->
+            <div class="shooter-console glass-panel">
+                <i class='bx bx-target-lock' style="font-size: 2rem; color: var(--color-pink);"></i>
+                <input type="text" id="shooterInput" class="shooter-input" placeholder="Gõ pinyin vào đây..." autocomplete="off" oninput="handleShooterInput()">
+            </div>
         </div>
     </div>
 
@@ -96,7 +137,7 @@
     <div class="app-layout">
         
         <!-- SIDEBAR -->
-        <aside class="sidebar">
+        <aside class="sidebar glass-panel">
             <div class="logo">
                 <div class="logo-mark">中</div>
                 <span>Bmo <small style="font-size:0.65rem; background:rgba(139,92,246,0.8); color:#fff; padding:2px 6px; border-radius:6px; font-weight:800;">AI</small></span>
@@ -115,15 +156,13 @@
             </nav>
 
             <div class="sidebar-footer">
-                <div class="pro-card glass-panel">
+                <div class="pro-card glass-panel" style="background: rgba(255,255,255,0.3);">
                     <div class="pro-header">
                         <div class="pro-icon"><i class='bx bx-line-chart'></i></div>
-                        <button class="btn-close-pro"><i class='bx bx-x'></i></button>
                     </div>
                     <h4>Mục tiêu HSK</h4>
                     <p class="muted" style="font-size:0.75rem; margin: 4px 0 10px;">Đã hoàn thành <strong id="sidebarProgressText">0%</strong> lộ trình.</p>
                     <div class="pro-bar"><div class="pro-bar-fill" id="sidebarProgressBar"></div></div>
-                    <button class="btn-upgrade" onclick="switchTab('practice-view')"><i class='bx bx-zap'></i> Luyện tập ngay</button>
                 </div>
             </div>
         </aside>
@@ -157,7 +196,6 @@
             <!-- 1. DASHBOARD VIEW -->
             <div id="dashboard-view" class="view-section active">
                 
-                <!-- Welcome Banner Glassmorphism -->
                 <div class="welcome-banner" id="dailyQuoteCard">
                     <div class="banner-text">
                         <h1 id="welcomeUserText">Welcome back, Learner! ✨</h1>
@@ -174,36 +212,38 @@
                     </div>
                 </div>
 
-                <!-- Bento Content Grid: 2 CỘT -->
                 <div class="dashboard-grid" style="grid-template-columns: 1fr 1.3fr; align-items: start;">
-                    
-                    <!-- ================= CỘT TRÁI ================= -->
+                    <!-- CỘT TRÁI -->
                     <div style="display: flex; flex-direction: column; gap: 24px;">
-                        
-                        <!-- 4 Thẻ chỉ số Glassy -->
                         <div class="stats-grid">
-                            <div class="stat-card pastel-purple">
+                            <div class="stat-card pastel-purple glass-panel">
                                 <div class="stat-top"><div class="stat-icon"><i class='bx bxs-hot'></i></div><span class="trend-badge positive">🔥 Daily</span></div>
                                 <div class="stat-info"><h3 id="streakCountUI">0</h3><p>Ngày liên tiếp</p></div>
                             </div>
-                            <div class="stat-card pastel-mint">
+                            <div class="stat-card pastel-mint glass-panel">
                                 <div class="stat-top"><div class="stat-icon"><i class='bx bx-target-lock'></i></div><span class="trend-badge positive" id="topProgressPercent">0%</span></div>
                                 <div class="stat-info"><h3 id="masteredWordsCount">0</h3><p>Từ đã thuộc</p></div>
                             </div>
-                            <div class="stat-card pastel-orange">
+                            <div class="stat-card pastel-orange glass-panel">
                                 <div class="stat-top"><div class="stat-icon"><i class='bx bx-book-reader'></i></div><span class="trend-badge neutral">📚 Cấp độ</span></div>
                                 <div class="stat-info"><h3 id="totalWordsTarget">0</h3><p>Tổng mục tiêu</p></div>
                             </div>
-                            <div class="stat-card pastel-blue">
+                            <div class="stat-card pastel-blue glass-panel">
                                 <div class="stat-top"><div class="stat-icon"><i class='bx bx-star'></i></div><span class="trend-badge positive">⭐ Rank</span></div>
                                 <div class="stat-info"><h3 id="totalXpUI">0 XP</h3><p>Điểm tích lũy</p></div>
                             </div>
                         </div>
 
-                       
+                        <div class="main-chart-card glass-panel">
+                            <div class="card-header" style="margin-bottom: 10px;">
+                                <h3 class="card-title"><i class='bx bx-pie-chart-alt-2'></i> Tiến độ học tập</h3>
+                            </div>
+                            <div style="width: 100%; max-width: 260px; margin: 0 auto;">
+                                <canvas id="hskPieChart"></canvas>
+                            </div>
+                        </div>
 
-                        <!-- Tính năng: Trang web hữu ích -->
-                        <div class="content-card" style="padding: 24px;">
+                        <div class="content-card glass-panel" style="padding: 24px;">
                             <h3 class="card-title" style="margin-bottom: 15px;"><i class='bx bx-link'></i> Web hữu ích</h3>
                             <p class="muted" style="margin-bottom: 15px;">Lưu các công cụ, từ điển truy cập nhanh.</p>
                             <div id="usefulLinksContainer"></div>
@@ -213,53 +253,44 @@
                                 <button class="btn-primary" onclick="addNewLink()" style="padding: 8px 14px;"><i class='bx bx-plus'></i></button>
                             </div>
                         </div>
-
                     </div>
-                    <!-- ================= HẾT CỘT TRÁI ================= -->
 
-                    <!-- ================= CỘT PHẢI ================= -->
-                    <div class="content-card" style="padding: 24px; display: flex; flex-direction: column; height: 100%; min-height: 500px;">
+                    <!-- CỘT PHẢI -->
+                    <div class="content-card glass-panel" style="padding: 24px; display: flex; flex-direction: column; height: 100%; min-height: 500px;">
                         <div class="card-header" style="margin-bottom: 20px; border-bottom: 1px solid var(--glass-border); padding-bottom: 15px; flex-wrap: wrap; gap: 15px;">
                             <div>
                                 <h3 class="card-title"><i class='bx bx-error-circle' style="color:var(--color-pink);"></i> Bảng từ vựng đã sai</h3>
-                                <p class="muted" style="margin-top: 5px;">Hệ thống tự ghi nhận để bạn ôn tập lại. Đầy đủ Nghĩa và Pinyin.</p>
+                                <p class="muted" style="margin-top: 5px;">Hệ thống tự ghi nhận để ôn tập. Đầy đủ Nghĩa và Pinyin.</p>
                             </div>
                             <button class="btn-primary" style="padding: 10px 20px; font-size: 0.95rem; border-radius: 100px;" onclick="startGlobalReviewMode()">
                                 <i class='bx bx-play-circle' style="font-size: 1.2rem;"></i> Ôn tập ngay
                             </button>
                         </div>
-                        
-                        <!-- Vùng chứa danh sách từ vựng sai dọc -->
                         <div id="globalMissedWordsContainer" style="flex: 1; overflow-y: auto; padding-right: 10px;"></div>
                     </div>
-                    <!-- ================= HẾT CỘT PHẢI ================= -->
-
                 </div>
             </div>
 
-            <!-- 1.5. LEARN VIEW (HỌC TỪ VỰNG TỔNG QUAN) -->
+            <!-- 1.5. LEARN VIEW (HỌC TỪ VỰNG DẠNG Ô VUÔNG GRID) -->
             <div id="learn-view" class="view-section">
-                <div class="content-card" style="padding: 30px; display: flex; flex-direction: column; height: calc(100vh - 100px);">
+                <div class="content-card glass-panel" style="padding: 30px; display: flex; flex-direction: column; height: calc(100vh - 100px);">
                     <div class="card-header" style="flex-direction: column; align-items: flex-start; gap: 10px; margin-bottom: 20px; flex-shrink: 0;">
-                        <h2 class="card-title" style="font-size: 1.8rem;"><i class='bx bx-book-reader' style="color:var(--color-purple);"></i> Từ vựng tổng quan</h2>
-                        <p class="muted">Chọn cấp độ để xem danh sách toàn bộ từ vựng, phiên âm và câu ví dụ đi kèm.</p>
+                        <h2 class="card-title" style="font-size: 1.8rem;"><i class='bx bx-book-reader' style="color:var(--color-purple);"></i> Học từ vựng tổng quan</h2>
+                        <p class="muted">Giao diện thẻ vuông giúp bạn xem bao quát số lượng lớn từ vựng cùng lúc.</p>
                     </div>
-                    
                     <div class="pill-group" id="learnLevelGroup" style="flex-shrink: 0; padding-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.4);"></div>
-
-                    <div id="learnContentArea" style="flex: 1; overflow-y: auto; padding-right: 10px; margin-top: 15px; display: flex; flex-direction: column; gap: 16px;"></div>
+                    <div id="learnContentArea" style="flex: 1; overflow-y: auto; padding-right: 10px; margin-top: 15px;"></div>
                 </div>
             </div>
 
             <!-- 2. PRACTICE VIEW -->
             <div id="practice-view" class="view-section">
-                <div class="content-card" style="max-width: 800px; margin: 0 auto; padding: 40px;">
+                <div class="content-card glass-panel" style="max-width: 800px; margin: 0 auto; padding: 40px;">
                     <div style="text-align: center; margin-bottom: 30px;">
                         <div style="font-size: 3.5rem; margin-bottom: 10px;">🚀</div>
                         <h2 style="font-weight: 800; color:#1E293B;">Thiết lập phiên luyện tập</h2>
                         <p class="muted">Tuỳ chỉnh nội dung và chế độ kiểm tra phù hợp với bạn.</p>
                     </div>
-                    
                     <h4 class="section-title"><i class='bx bx-layer'></i> 1. Chọn Cấp độ HSK</h4>
                     <div id="levelGrid" class="pill-group"></div>
                     
@@ -273,63 +304,95 @@
                         <button class="mode-btn" data-mode="CHỮ HÁN">✍️ Nhận diện Chữ Hán</button>
                         <button class="mode-btn" data-mode="GÕ PINYIN">⌨️ Luyện Gõ Pinyin</button>
                     </div>
-                    
                     <button id="btnStart" class="btn-primary" style="margin-top: 40px; width: 100%; font-size: 1.1rem; padding: 18px;">
                         BẮT ĐẦU CHIẾN NGAY <i class='bx bx-right-arrow-alt' style="font-size:1.4rem;"></i>
                     </button>
                 </div>
             </div>
 
-            <!-- 3. MINIGAME VIEW -->
+            <!-- 3. MINIGAME VIEW (HUB) -->
             <div id="minigame-view" class="view-section">
-                <div class="content-card" style="max-width: 600px; margin: 0 auto; text-align: center; padding: 40px;">
-                    <div style="font-size: 4rem; margin-bottom: 15px;">🧩</div>
-                    <h2 style="font-size: 1.8rem; font-weight: 800; color: var(--color-purple);">Mini Game: Ghép Từ Phản Xạ</h2>
-                    <p class="muted" style="margin-top: 10px;">Tìm và ghép chính xác bộ 3: Chữ Hán + Pinyin + Nghĩa tiếng Việt!</p>
+                <h2 style="font-weight: 800; margin-bottom: 20px; font-size: 2rem; color: #1E293B; text-align: center;"><i class='bx bx-joystick' style="color: var(--color-purple);"></i> Trạm Minigame Giải Trí</h2>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
                     
-                    <div style="margin: 30px 0; background: rgba(255,255,255,0.4); padding: 25px; border-radius: 16px; text-align: left; border: 1px solid var(--glass-border); backdrop-filter: blur(8px);">
-                        <h4 class="section-title" style="margin-bottom: 10px;">1. Chọn độ khó:</h4>
-                        <select id="miniGameDifficulty" class="select-input" style="width: 100%; margin-bottom: 20px;">
-                            <option value="easy" selected>🟢 Dễ (HSK 1 - 2)</option>
-                            <option value="medium">🟡 Trung Bình (HSK 3 - 4)</option>
-                            <option value="hard">🔴 Khó (HSK 5 - 6)</option>
+                    <!-- Game 1: Lật thẻ -->
+                    <div class="content-card glass-panel" style="text-align: center; padding: 30px;">
+                        <div style="font-size: 3.5rem; margin-bottom: 10px;">🎴</div>
+                        <h3 style="font-size: 1.4rem; font-weight: 800; color: var(--color-purple); margin-bottom: 5px;">Lật Thẻ 2 Cột</h3>
+                        <p class="muted" style="margin-bottom: 20px; font-size: 0.85rem;">Tìm và nối chính xác thẻ Hán và Nghĩa để xóa chúng khỏi bàn chơi.</p>
+                        <select id="flipGameDifficulty" class="select-input" style="width: 100%; margin-bottom: 10px;">
+                            <option value="easy">HSK 1 - 2</option>
+                            <option value="medium" selected>HSK 3 - 4</option>
+                            <option value="hard">HSK 5 - 6</option>
                         </select>
-                        <h4 class="section-title" style="margin-bottom: 10px;">2. Số lượng từ vựng mỗi ván:</h4>
-                        <select id="miniGameWordCount" class="select-input" style="width: 100%;">
-                            <option value="3">3 từ (Khởi động nhẹ nhàng)</option>
-                            <option value="5" selected>5 từ (Mức độ tiêu chuẩn)</option>
-                            <option value="10">10 từ (Thử thách cao thủ)</option>
+                        <select id="flipGameWordCount" class="select-input" style="width: 100%; margin-bottom: 20px;">
+                            <option value="4">4 cặp từ</option>
+                            <option value="6" selected>6 cặp từ</option>
+                            <option value="10">10 cặp từ (Khó)</option>
                         </select>
+                        <button class="btn-primary" onclick="startFlipGame()" style="width: 100%;">CHƠI NGAY</button>
                     </div>
-                    <button class="btn-primary" onclick="startMatchGame()" style="width: 100%; font-size: 1.1rem; padding: 18px; background: linear-gradient(135deg, #EC4899, #8B5CF6);">
-                        VAO BÀI CHƠI NGAY <i class='bx bx-joystick'></i>
-                    </button>
+
+                    <!-- Game 2: Bắn máy bay (Từ rơi) -->
+                    <div class="content-card glass-panel" style="text-align: center; padding: 30px;">
+                        <div style="font-size: 3.5rem; margin-bottom: 10px;">🚀</div>
+                        <h3 style="font-size: 1.4rem; font-weight: 800; color: var(--color-pink); margin-bottom: 5px;">Bắn Từ Rơi</h3>
+                        <p class="muted" style="margin-bottom: 20px; font-size: 0.85rem;">Gõ nhanh Pinyin của từ đang rơi. Chạm đất 10 lần là Game Over!</p>
+                        <select id="fallingGameDifficulty" class="select-input" style="width: 100%; margin-bottom: 10px;">
+                            <option value="easy">HSK 1 - 2</option>
+                            <option value="medium" selected>HSK 3 - 4</option>
+                            <option value="hard">HSK 5 - 6</option>
+                        </select>
+                        <select id="fallingGameSpeed" class="select-input" style="width: 100%; margin-bottom: 20px;">
+                            <option value="slow">Tốc độ: Rùa bò</option>
+                            <option value="normal" selected>Tốc độ: Phổ thông</option>
+                            <option value="fast">Tốc độ: Tên lửa</option>
+                        </select>
+                        <button class="btn-primary" onclick="startFallingGame()" style="width: 100%; background: linear-gradient(135deg, #EC4899, #F43F5E);">CHƠI NGAY</button>
+                    </div>
+
+                    <!-- Game 3: Ghép 3 yếu tố (Cũ) -->
+                    <div class="content-card glass-panel" style="text-align: center; padding: 30px;">
+                        <div style="font-size: 3.5rem; margin-bottom: 10px;">🧩</div>
+                        <h3 style="font-size: 1.4rem; font-weight: 800; color: var(--color-blue); margin-bottom: 5px;">Ghép 3 Yếu Tố</h3>
+                        <p class="muted" style="margin-bottom: 20px; font-size: 0.85rem;">Tìm và chọn đúng 3 bong bóng: Chữ Hán, Pinyin và Nghĩa.</p>
+                        <select id="miniGameDifficulty" class="select-input" style="width: 100%; margin-bottom: 10px;">
+                            <option value="easy" selected>HSK 1 - 2</option>
+                            <option value="medium">HSK 3 - 4</option>
+                            <option value="hard">HSK 5 - 6</option>
+                        </select>
+                        <select id="miniGameWordCount" class="select-input" style="width: 100%; margin-bottom: 20px;">
+                            <option value="3">3 từ vựng</option>
+                            <option value="5" selected>5 từ vựng</option>
+                            <option value="8">8 từ vựng</option>
+                        </select>
+                        <button class="btn-primary" onclick="startMatchGame()" style="width: 100%; background: linear-gradient(135deg, #0EA5E9, #3B82F6);">CHƠI NGAY</button>
+                    </div>
                 </div>
             </div>
 
             <!-- 4. GRAMMAR VIEW -->
             <div id="grammar-view" class="view-section">
-                <div class="content-card" style="max-width: 900px; margin: 0 auto; padding: 40px;">
+                <div class="content-card glass-panel" style="max-width: 900px; margin: 0 auto; padding: 40px;">
                     <div style="text-align: center; margin-bottom: 30px;">
                         <div style="font-size: 3.5rem; margin-bottom: 10px;">📖</div>
                         <h2 style="font-weight: 800; color:#1E293B;">Sổ tay Cấu trúc Ngữ pháp</h2>
                         <p class="muted">Tự động trích xuất và phân loại từ tệp grammar.csv của bạn</p>
                     </div>
-                    
                     <div class="pill-group" style="justify-content: center; margin-bottom: 30px;" id="grammarLevelGroup">
                         <button class="mode-btn active" onclick="changeGrammarLevel('1', this)">Quyển 1</button>
                         <button class="mode-btn" onclick="changeGrammarLevel('2', this)">Quyển 2</button>
                         <button class="mode-btn" onclick="changeGrammarLevel('3', this)">Quyển 3</button>
                         <button class="mode-btn" onclick="changeGrammarLevel('4', this)">Quyển 4</button>
                     </div>
-
                     <div id="grammarListContainer" style="display: flex; flex-direction: column; gap: 15px;"></div>
                 </div>
             </div>
 
             <!-- 5. SETTINGS VIEW -->
             <div id="settings-view" class="view-section">
-                <div class="content-card" style="max-width: 600px; margin: 0 auto; padding: 40px;">
+                <div class="content-card glass-panel" style="max-width: 600px; margin: 0 auto; padding: 40px;">
                     <div style="margin-bottom: 30px; display: flex; align-items: center; gap: 15px;">
                         <div style="width:45px; height:45px; border-radius:12px; background:rgba(255,255,255,0.6); border: 1px solid var(--glass-border); display:flex; align-items:center; justify-content:center; font-size:1.5rem; color:var(--color-purple);"><i class='bx bx-cog'></i></div>
                         <div>
@@ -337,28 +400,19 @@
                             <p class="muted">Tùy chỉnh hành vi ván chơi và dữ liệu</p>
                         </div>
                     </div>
-                    
                     <div style="display: flex; flex-direction: column; gap: 15px;">
-                        <div class="file-item" style="padding: 20px;">
-                            <div>
-                                <h4 style="font-size: 1rem; color:#1E293B; margin-bottom:4px;">👁️ Ẩn Pinyin trợ giúp</h4>
-                                <p class="muted" style="font-size: 0.85rem;">Giấu dòng phiên âm Pinyin bằng nút "Con mắt".</p>
-                            </div>
+                        <div class="file-item glass-panel" style="padding: 20px;">
+                            <div><h4 style="font-size: 1rem; color:#1E293B; margin-bottom:4px;">👁️ Ẩn Pinyin trợ giúp</h4><p class="muted" style="font-size: 0.85rem;">Giấu dòng phiên âm Pinyin bằng nút "Con mắt".</p></div>
                             <label class="tg-switch"><input type="checkbox" id="setHidePinyin"><span class="tg-slider"></span></label>
                         </div>
-                        <div class="file-item" style="padding: 20px;">
-                            <div>
-                                <h4 style="font-size: 1rem; color:#1E293B; margin-bottom:4px;">🔀 Xáo trộn câu hỏi</h4>
-                                <p class="muted" style="font-size: 0.85rem;">Hiển thị ngẫu nhiên khi bắt đầu.</p>
-                            </div>
+                        <div class="file-item glass-panel" style="padding: 20px;">
+                            <div><h4 style="font-size: 1rem; color:#1E293B; margin-bottom:4px;">🔀 Xáo trộn câu hỏi</h4><p class="muted" style="font-size: 0.85rem;">Hiển thị ngẫu nhiên khi bắt đầu.</p></div>
                             <label class="tg-switch"><input type="checkbox" id="setShuffle" checked><span class="tg-slider"></span></label>
                         </div>
                     </div>
                     <button class="btn-primary" onclick="saveSettings()" style="width: 100%; margin-top: 25px;">Lưu Cài Đặt</button>
-                    
                     <div style="margin-top: 40px; padding-top: 25px; border-top: 1px solid rgba(0,0,0,0.1); text-align: center;">
                         <h4 style="color: #EF4444; margin-bottom: 8px; font-size: 1.05rem;"><i class='bx bx-error-circle'></i> Vùng nguy hiểm</h4>
-                        <p class="muted" style="margin-bottom: 20px; font-size: 0.85rem;">Khôi phục cài đặt gốc, xóa toàn bộ tiến trình học.</p>
                         <button class="btn-primary" onclick="resetAllData()" style="background: rgba(254,226,226,0.8); color: #EF4444; border: 1px solid rgba(254,202,202,0.8); width: 100%; box-shadow: none;">Xóa Toàn Bộ Dữ Liệu</button>
                     </div>
                 </div>
@@ -366,7 +420,7 @@
 
             <!-- 6. PERSONAL FILE VIEW -->
             <div id="personal-view" class="view-section">
-                <div class="content-card" style="padding: 40px;">
+                <div class="content-card glass-panel" style="padding: 40px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap:wrap; gap:15px;">
                         <div style="display: flex; align-items: center; gap: 15px;">
                             <div style="width:45px; height:45px; border-radius:12px; background:rgba(224,242,254,0.6); border: 1px solid rgba(255,255,255,0.8); display:flex; align-items:center; justify-content:center; font-size:1.5rem; color:#0284C7;"><i class='bx bx-folder-open'></i></div>
@@ -380,12 +434,10 @@
                             <input type="file" id="fileUpload" accept=".csv" style="display: none;">
                         </label>
                     </div>
-                    
                     <div class="info-box">
                         <p style="margin-bottom: 4px; color: #92400E;"><i class='bx bx-bulb'></i> <strong>Quy tắc cột trong file CSV:</strong></p>
-                        <p style="font-size:0.85rem; color:#B45309;"><em>Cột 1: Chữ Hán | Cột 2: Pinyin | Cột 3: Loại từ | Cột 4: Nghĩa | Cột 5: Câu Hán | Cột 6: Câu Pinyin | Cột 7: Câu Nghĩa</em></p>
+                        <p style="font-size:0.85rem; color:#B45309;"><em>Cột 1: Hán | Cột 2: Pinyin | Cột 3: Loại từ | Cột 4: Nghĩa | Cột 5: Câu Hán | Cột 6: Câu Pinyin | Cột 7: Câu Nghĩa</em></p>
                     </div>
-                    
                     <div id="personalFilesList" style="display: flex; flex-direction: column; gap: 10px;"></div>
                 </div>
             </div>
